@@ -99,7 +99,7 @@ if (access_token && (state == null || state !== storedState)) {
     var state = generateRandomString(16);
 
     localStorage.setItem(stateKey, state);
-    var scope = 'user-read-private user-read-email';
+    var scope = 'user-read-private user-read-email user-library-read';
 
     var url = 'https://accounts.spotify.com/authorize';
     url += '?response_type=token';
@@ -109,5 +109,20 @@ if (access_token && (state == null || state !== storedState)) {
     url += '&state=' + encodeURIComponent(state);
 
     window.location = url;
+  }, false);
+
+
+  document.getElementById('sync-button').addEventListener('click', function() {
+
+    $.ajax({
+      url: 'https://api.spotify.com/v1/me/tracks',
+      headers: {
+        'Authorization': 'Bearer ' + access_token
+      },
+      success: function(response) {
+        console.log(response);
+      }
+    });
+
   }, false);
 }
