@@ -10,7 +10,7 @@ const Button = ({id, label, handleClick}) => (
 );
 
 Button.propTypes = {
-  id: PropTypes.string.isRequired,
+  id: PropTypes.string,
   label: PropTypes.string.isRequired,
   handleClick: PropTypes.func.isRequired
 };

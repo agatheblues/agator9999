@@ -1,0 +1,15 @@
+@import "variable";
+
+.profileContainer {
+  display: inline-block;
+}
+
+.profilePicture {
+  float: left;
+  width: 50px;
+  height: auto;
+}
+
+.profileId {
+  float: right;
+}

@@ -1,13 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Button from '../Button/Button';
+import ProfileCard from '../ProfileCard/ProfileCard';
 import axios from 'axios';
 
 class SpotifyLogin extends React.Component {
 
   constructor(props) {
     super(props);
-    console.log('COUCOU');
+
     // Constants
     this.stateKey = 'spotify_auth_state';
     this.client_id = '349fcdbe411c472eac393c9fdcc73b13'; // Your client id
@@ -27,6 +28,13 @@ class SpotifyLogin extends React.Component {
       timeout: 1000,
       headers: {'Authorization': 'Bearer ' + this.access_token}
     });
+
+    // set local state
+    this.state = {
+      hasProfileData: false,
+      userId: '',
+      imgUrl: ''
+    };
 
     this.handleClick = this.handleClick.bind(this);
   }
@@ -83,28 +91,38 @@ class SpotifyLogin extends React.Component {
       alert('There was an error during the authentication');
     } else {
       localStorage.removeItem(this.stateKey);
+
       if (this.access_token) {
         this.instance.get('/me')
-          .then(function (response) {
+          .then((response) => {
             console.log(response);
+            this.setState({
+              hasProfileData: true,
+              userId: response.data.id,
+              imgUrl: response.data.images[0].url
+            });
           })
-          .catch(function (error) {
+          .catch((error) => {
             console.log(error);
           });
-      } else {
-        // $('#login').show();
-        // $('#loggedin').hide();
-      }
+      } 
     }
   }
 
   render() {
+    console.log(this.state);
     return (
-      <Button
-        id={'Matthias'}
-        label={'Log in with Spotify'}
-        handleClick={this.handleClick}
-      />
+      <div>
+        {this.state.hasProfileData &&
+          <ProfileCard id={this.state.userId} imgUrl={this.state.imgUrl} />
+        }
+        {!this.state.hasProfileData &&
+          <Button
+            label={'Log in with Spotify'}
+            handleClick={this.handleClick}
+          />
+        }
+      </div>
     );
   }
 }
