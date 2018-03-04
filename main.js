@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Button from './components/Button/Button';
+import SpotifyLogin from './components/SpotifyLogin/SpotifyLogin';
 
 class App extends React.Component {
 
@@ -9,20 +9,13 @@ class App extends React.Component {
 
     // makes this refer to this component
     super(props);
-    this.handleClick = this.handleClick.bind(this);
-  }
-
-  handleClick() {
-    console.log('Click happened');
   }
 
   render() {
     return (
-      <Button
-        id={'Matthias'}
-        label={'Matthias fdp'}
-        handleClick={this.handleClick}
-      />
+      <div>
+        <SpotifyLogin />
+      </div>
     );
   }
 }
