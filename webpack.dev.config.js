@@ -35,7 +35,6 @@ module.exports = {
     ]
   },
   plugins: [
-    new ExtractTextPlugin('style.css'),
-    new webpack.HotModuleReplacementPlugin()
+    new ExtractTextPlugin('style.css')
   ]
 };
