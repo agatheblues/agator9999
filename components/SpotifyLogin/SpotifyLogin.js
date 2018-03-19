@@ -3,11 +3,12 @@ import PropTypes from 'prop-types';
 import Button from '../Button/Button';
 import ProfileCard from '../ProfileCard/ProfileCard';
 import * as api from '../../DataWrapper/SpotifyDataWrapper.js';
+import * as fb from '../../DataWrapper/FirebaseDataWrapper.js';
 
 class SpotifyLogin extends React.Component {
 
   constructor(props) {
-    super(props);
+    super();
 
     this.storedState = api.getStateKey();
 
@@ -27,6 +28,7 @@ class SpotifyLogin extends React.Component {
     };
 
     this.handleClick = this.handleClick.bind(this);
+    this.handleUpload = this.handleUpload.bind(this);
   }
 
 
@@ -62,6 +64,23 @@ class SpotifyLogin extends React.Component {
 
   handleUpload() {
     console.log('handle upload');
+    if (this.accessToken) {
+
+      this.instance.get('/me/albums', {
+        params: {
+          limit: 50,
+          offset: 0
+        }
+      })
+        .then((response) => {
+          var db = this.props.db.database();
+          fb.pushAlbums(response.data.items, db);
+          fb.pushArtists(response.data.items, db);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
   }
 
   render() {
@@ -86,5 +105,10 @@ class SpotifyLogin extends React.Component {
     );
   }
 }
+
+SpotifyLogin.propTypes = {
+  db: PropTypes.object.isRequired
+};
+
 
 export default SpotifyLogin;
