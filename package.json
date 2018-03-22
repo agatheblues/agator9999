@@ -28,6 +28,7 @@
   },
   "dependencies": {
     "axios": "^0.16.2",
+    "classnames": "^2.2.5",
     "express": "^4.16.2",
     "firebase": "^4.11.0",
     "node-sass": "^4.5.3",
