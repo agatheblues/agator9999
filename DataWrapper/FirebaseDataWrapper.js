@@ -10,10 +10,12 @@ let albumStructure = (
     }
   }) => (
   {
-    added_at,
     id,
-    name,
-    spotify
+    album: {
+      added_at,
+      name,
+      spotify
+    }
   });
 
 let artistStructure = (
@@ -24,23 +26,77 @@ let artistStructure = (
   }) => (
   {
     id,
-    name,
-    spotify
+    artist: {
+      name,
+      spotify
+    }
   });
 
+
 export function pushAlbums(items, db) {
-  let albums = items.map(item => convertToAlbumFromSpotify(item));
-  let ref = db.ref('albums');
-  ref.push(albums);
+
+  // Flatten the array of albums
+  const albums = items.map(item => convertToAlbumFromSpotify(item));
+  // Create /albums ref
+  const ref = db.ref('albums');
+
+  // Get album Ids already in the db
+  const albumIdsAlreadyInDb = getAllKeys(ref);
+
+  // Compare albums to those in the DB, extract only ids that are not there yet
+  const newAlbums = albums.filter(album => !isInArray(albumIdsAlreadyInDb, album.id));
+
+  // Push new albums to DB
+  newAlbums.forEach(album => ref.child(album.id).set(album.album));
 
 }
 
 export function pushArtists(items, db) {
-  let artists = flatten(items.map(item => item.album.artists.map(artist => convertToArtistFromSpotify(artist))));
-  let ref = db.ref('artists');
-  ref.push(artists);
+
+  // Flatten the array of artists
+  const artists = flatten(items.map(item => item.album.artists.map(artist => convertToArtistFromSpotify(artist))));
+
+  // Create /artist ref
+  const ref = db.ref('artists');
+
+  // Get artists Ids already in the db
+  const artistIdsAlreadyInDb = getAllKeys(ref);
+
+  // Compare artists to those in the DB, extract only ids that are not there yet
+  const newArtists = artists.filter(artist => !isInArray(artistIdsAlreadyInDb, artist.id));
+
+  // Push new artists to DB
+  newArtists.forEach(artist => ref.child(artist.id).set(artist.artist));
 }
 
+
+/**
+ * Get all key names of first level of data
+ * @param  {ref} ref Reference to a db path
+ * @return {array}     array of keys
+ */
+function getAllKeys(ref) {
+  var keys = [];
+
+  ref.on('value', function(snapshot) {
+    snapshot.forEach(function(key) {
+      keys.push(key.key);
+    });
+  });
+
+  return keys;
+}
+
+
+/**
+ * CHeck if an item is in an array
+ * @param  {array}  arr  Array to check
+ * @param  {}  item Item to check if it belongs to array
+ * @return {Boolean}      Return true if item is in array
+ */
+function isInArray(arr, item) {
+  return (arr.indexOf(item) >= 0);
+}
 
 /**
  * Convert an album object returned by spotify to a simpler album object
@@ -91,13 +147,3 @@ function flatten(arr) {
     return flat.concat(Array.isArray(toFlatten) ? flatten(toFlatten) : toFlatten);
   }, []);
 }
-
-// ref.once('value', gotData, errData);
-//
-// function errData(err) {
-//   console.log(err);
-// }
-//
-// function gotData(data) {
-//   console.log(data.val().name);
-// }
