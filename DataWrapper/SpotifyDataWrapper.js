@@ -1,5 +1,4 @@
 import axios from 'axios';
-import * as fb from './FirebaseDataWrapper.js';
 
 // Constants
 const SPOTIFY_LOGIN_URL = 'https://accounts.spotify.com/authorize';
@@ -67,12 +66,18 @@ export function getHashParams() {
 export function handleErrorMessage(error) {
   let message;
 
-  if (error.response.status === 400) {
-    message = 'Bad request, often due to missing a required parameter.';
-  } else if (error.response.status === 401) {
-    message = 'No valid API key provided.';
-  } else if (error.response.status === 404) {
-    message = 'The requested resource doesn\'t exist.';
+  if (typeof error.response === 'undefined') {
+    message = error.message;
+  } else {
+    if (error.response.status === 400) {
+      message = 'Bad request, often due to missing a required parameter.';
+    } else if (error.response.status === 401) {
+      message = 'No valid API key provided.';
+    } else if (error.response.status === 404) {
+      message = 'The requested resource doesn\'t exist.';
+    } else {
+      message = 'Unknown error: ' + error.message;
+    }
   }
 
   return message;
