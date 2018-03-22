@@ -64,29 +64,21 @@ export function getHashParams() {
   return hashParams;
 }
 
+export function handleErrorMessage(error) {
+  let message;
 
+  if (error.response.status === 400) {
+    message = 'Bad request, often due to missing a required parameter.';
+  } else if (error.response.status === 401) {
+    message = 'No valid API key provided.';
+  } else if (error.response.status === 404) {
+    message = 'The requested resource doesn\'t exist.';
+  }
 
-export function setAlbumsAndArtists(instance, offset, limit, db) {
-  instance.get('/me/albums', {
-    params: {
-      limit: limit,
-      offset: offset
-    }
-  })
-    .then((response) => {
-      fb.pushAlbums(response.data.items, db);
-      fb.pushArtists(response.data.items, db);
-    })
-    .catch((error) => {
-      if (error.status === 400) {
-        console.log('Bad request, often due to missing a required parameter.');
-      } else if (error.status === 401) {
-        console.log('No valid API key provided.');
-      } else if (error.status === 404) {
-        console.log('The requested resource doesn\'t exist.');
-      }
-    });
+  return message;
 }
+
+
 
 
 /**
