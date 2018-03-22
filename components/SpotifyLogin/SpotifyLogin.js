@@ -2,8 +2,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Button from '../Button/Button';
 import ProfileCard from '../ProfileCard/ProfileCard';
-import ErrorMessage from '../ErrorMessage/ErrorMessage.js';
+import Message from '../Message/Message.js';
 import * as api from '../../DataWrapper/SpotifyDataWrapper.js';
+import * as fb from '../../DataWrapper/FirebaseDataWrapper.js';
 
 
 class SpotifyLogin extends React.Component {
@@ -27,7 +28,7 @@ class SpotifyLogin extends React.Component {
       userId: '',
       imgUrl: '',
       error: false,
-      errorMessage: ''
+      message: null
     };
 
     this.handleClick = this.handleClick.bind(this);
@@ -63,7 +64,7 @@ class SpotifyLogin extends React.Component {
 
             this.setState({
               'error': true,
-              'errorMessage': message
+              'message': message
             });
           });
       }
@@ -77,7 +78,7 @@ class SpotifyLogin extends React.Component {
   }
 
   setAlbumsAndArtists(instance, offset, limit, db) {
-    instance.get('/me/albms', {
+    instance.get('/me/albums', {
       params: {
         limit: limit,
         offset: offset
@@ -86,13 +87,16 @@ class SpotifyLogin extends React.Component {
       .then((response) => {
         fb.pushAlbums(response.data.items, db);
         fb.pushArtists(response.data.items, db);
+        this.setState({
+          'error': false,
+          'message': 'Upload successful!'
+        });
       })
       .catch((error) => {
         let message = api.handleErrorMessage(error);
-
         this.setState({
           'error': true,
-          'errorMessage': message
+          'message': message
         });
       });
 
@@ -100,9 +104,10 @@ class SpotifyLogin extends React.Component {
 
 
   render() {
+    console.log(this.state);
     return (
       <div>
-        {this.state.error && <ErrorMessage message={this.state.errorMessage}/>}
+        {this.state.message && <Message message={this.state.message} error={this.state.error}/>}
         {this.state.hasProfileData &&
           <div>
             <ProfileCard id={this.state.userId} imgUrl={this.state.imgUrl} />

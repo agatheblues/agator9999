@@ -1,0 +1,9 @@
+@import "variables";
+
+.msg--success {
+  background-color: $msgGreen;
+}
+
+.msg--error {
+  background-color: $msgRed;
+}
