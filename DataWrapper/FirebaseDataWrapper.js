@@ -37,6 +37,7 @@ export function pushAlbums(items, db) {
 
   // Flatten the array of albums
   const albums = items.map(item => convertToAlbumFromSpotify(item));
+
   // Create /albums ref
   const ref = db.ref('albums');
 
