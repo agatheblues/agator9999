@@ -33,6 +33,9 @@ class SpotifyLogin extends React.Component {
 
     this.handleClick = this.handleClick.bind(this);
     this.handleUpload = this.handleUpload.bind(this);
+    this.handleSyncSuccess = this.handleSyncSuccess.bind(this);
+    this.handleProfileSuccess = this.handleProfileSuccess.bind(this);
+    this.handleError = this.handleError.bind(this);
   }
 
 
@@ -43,6 +46,28 @@ class SpotifyLogin extends React.Component {
     window.location = api.getLoginUrl();
   }
 
+  handleSyncSuccess() {
+    this.setState({
+      'error': false,
+      'message': 'Upload successful!'
+    });
+  }
+
+  handleProfileSuccess(id, url) {
+    this.setState({
+      hasProfileData: true,
+      userId: id,
+      imgUrl:url
+    });
+  }
+
+  handleError(message) {
+    this.setState({
+      'error': true,
+      'message': message
+    });
+  }
+
   componentDidMount() {
     if (this.accessToken && (this.urlState == null || this.urlState !== this.storedState)) {
       alert('There was an error during the authentication');
@@ -50,57 +75,18 @@ class SpotifyLogin extends React.Component {
       localStorage.removeItem(this.stateKey);
 
       if (this.accessToken) {
-
-        this.instance.get('/me')
-          .then((response) => {
-            this.setState({
-              hasProfileData: true,
-              userId: response.data.id,
-              imgUrl: response.data.images[0].url
-            });
-          })
-          .catch((error) => {
-            let message = api.handleErrorMessage(error);
-
-            this.setState({
-              'error': true,
-              'message': message
-            });
-          });
+        api.getProfile(this.instance, this.handleProfileSuccess, this.handleError);
       }
     }
   }
 
   handleUpload() {
     if (this.accessToken) {
-      this.setAlbumsAndArtists(this.instance, 0, 50, this.props.db);
+      api.setAlbumsAndArtists(this.instance, 0, 50, this.props.db, this.handleSyncSuccess, this.handleError);
     }
   }
 
-  setAlbumsAndArtists(instance, offset, limit, db) {
-    instance.get('/me/albums', {
-      params: {
-        limit: limit,
-        offset: offset
-      }
-    })
-      .then((response) => {
-        fb.pushAlbums(response.data.items, db);
-        fb.pushArtists(response.data.items, db);
-        this.setState({
-          'error': false,
-          'message': 'Upload successful!'
-        });
-      })
-      .catch((error) => {
-        let message = api.handleErrorMessage(error);
-        this.setState({
-          'error': true,
-          'message': message
-        });
-      });
 
-  }
 
 
   render() {

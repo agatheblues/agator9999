@@ -1,4 +1,5 @@
 import axios from 'axios';
+import * as fb from './FirebaseDataWrapper.js';
 
 // Constants
 const SPOTIFY_LOGIN_URL = 'https://accounts.spotify.com/authorize';
@@ -83,8 +84,45 @@ export function handleErrorMessage(error) {
   return message;
 }
 
+/**
+ * Get album and artists data, then set it in firbase
+ * @param {object} instance  Spotify axios instance
+ * @param {integer} offset   Pagination offset
+ * @param {integer} limit    Pagination limit
+ * @param {object} db        Firebase connection
+ * @param {function} onSuccess Success callback
+ * @param {function} onError   Error callback
+ */
+export function setAlbumsAndArtists(instance, offset, limit, db, onSuccess, onError) {
+  instance.get('/me/albums', {
+    params: {
+      limit: limit,
+      offset: offset
+    }
+  })
+    .then((response) => {
+      fb.pushAlbums(response.data.items, db);
+      fb.pushArtists(response.data.items, db);
+      onSuccess();
+    })
+    .catch((error) => {
+      let message = handleErrorMessage(error);
+      onError(message);
+    });
+
+}
 
 
+export function getProfile(instance, onSuccess, onError) {
+  instance.get('/me')
+    .then((response) => {
+      onSuccess(response.data.id,  response.data.images[0].url);
+    })
+    .catch((error) => {
+      let message = handleErrorMessage(error);
+      onError(message);
+    });
+}
 
 /**
  * Generates a random string containing numbers and letters
