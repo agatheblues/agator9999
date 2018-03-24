@@ -104,7 +104,6 @@ class SpotifyLogin extends React.Component {
 
 
   render() {
-    console.log(this.state);
     return (
       <div>
         {this.state.message && <Message message={this.state.message} error={this.state.error}/>}
