@@ -112,7 +112,7 @@ class SpotifyLogin extends React.Component {
           <div>
             <ProfileCard id={this.state.userId} imgUrl={this.state.imgUrl} />
             <Button
-              label={'Upload your Spotify music'}
+              label={'Sync your Spotify music'}
               handleClick={this.handleUpload}
             />
           </div>
