@@ -4,7 +4,6 @@ import Button from '../Button/Button';
 import ProfileCard from '../ProfileCard/ProfileCard';
 import Message from '../Message/Message.js';
 import * as api from '../../DataWrapper/SpotifyDataWrapper.js';
-import * as fb from '../../DataWrapper/FirebaseDataWrapper.js';
 
 
 class SpotifyLogin extends React.Component {
@@ -85,9 +84,6 @@ class SpotifyLogin extends React.Component {
       api.setAlbumsAndArtists(this.instance, 0, 50, this.props.db, this.handleSyncSuccess, this.handleError);
     }
   }
-
-
-
 
   render() {
     return (
