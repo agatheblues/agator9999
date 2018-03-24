@@ -11,7 +11,7 @@ const Card = ({name, imgUrl}) => (
 
 Card.propTypes = {
   name: PropTypes.string.isRequired,
-  imgUrl: PropTypes.string.isRequired
+  imgUrl: PropTypes.string
 };
 
 export default Card;

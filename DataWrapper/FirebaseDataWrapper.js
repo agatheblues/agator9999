@@ -71,6 +71,24 @@ export function pushArtists(items, db) {
 }
 
 
+export function getArtists(db, onSuccess) {
+  // Create /artist ref
+  const ref = db.ref('artists');
+
+  let artists = [];
+
+  ref.on('value', function(data) {
+    data.forEach(function(item) {
+      artists.push(item.val());
+    });
+
+    onSuccess(artists);
+  }, function (errorObject) {
+    console.log('The read failed: ' + errorObject.code);
+  });
+
+}
+
 /**
  * Get all key names of first level of data
  * @param  {ref} ref Reference to a db path
@@ -79,7 +97,7 @@ export function pushArtists(items, db) {
 function getAllKeys(ref) {
   var keys = [];
 
-  ref.on('value', function(snapshot) {
+  ref.once('value', function(snapshot) {
     snapshot.forEach(function(key) {
       keys.push(key.key);
     });

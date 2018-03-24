@@ -73,7 +73,7 @@ class SpotifyLogin extends React.Component {
 
   handleUpload() {
     if (this.accessToken) {
-      this.setAlbumsAndArtists(this.instance, 0, 50, this.props.db.database());
+      this.setAlbumsAndArtists(this.instance, 0, 50, this.props.db);
     }
   }
 
