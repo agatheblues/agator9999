@@ -52,6 +52,9 @@ export function pushAlbums(items, db) {
 
 }
 
+
+
+
 export function pushArtists(items, db) {
 
   // Flatten the array of artists
@@ -66,9 +69,15 @@ export function pushArtists(items, db) {
   // Compare artists to those in the DB, extract only ids that are not there yet
   const newArtists = artists.filter(artist => !isInArray(artistIdsAlreadyInDb, artist.id));
 
+  if (newArtists.length == 0) {
+    return;
+  }
+
   // Push new artists to DB
   newArtists.forEach(artist => ref.child(artist.id).set(artist.artist));
+
 }
+
 
 
 export function getArtists(db, onSuccess) {
@@ -94,7 +103,7 @@ export function getArtists(db, onSuccess) {
  * @param  {ref} ref Reference to a db path
  * @return {array}     array of keys
  */
-function getAllKeys(ref) {
+export function getAllKeys(ref) {
   var keys = [];
 
   ref.once('value', function(snapshot) {

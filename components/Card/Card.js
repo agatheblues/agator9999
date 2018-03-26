@@ -4,8 +4,10 @@ require('./Card.scss');
 
 const Card = ({name, imgUrl}) => (
   <div className='card-container'>
-    <img src={imgUrl}/>
-    <p>{name}</p>
+    <div className='card-wrapper'>
+      <img src={imgUrl} className='card-image'/>
+      <p>{name}</p>
+    </div>
   </div>
 );
 

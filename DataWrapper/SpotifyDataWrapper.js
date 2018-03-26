@@ -112,7 +112,12 @@ export function setAlbumsAndArtists(instance, offset, limit, db, onSuccess, onEr
 
 }
 
-
+/**
+ * Get Spotify user profile
+ * @param {object} instance  Spotify axios instance
+ * @param {function} onSuccess Success callback
+ * @param {function} onError   Error callback
+ */
 export function getProfile(instance, onSuccess, onError) {
   instance.get('/me')
     .then((response) => {
@@ -123,6 +128,37 @@ export function getProfile(instance, onSuccess, onError) {
       onError(message);
     });
 }
+
+
+// const images = getArtistImages(newArtists.map(artist => artist.id), instance, onError);
+export function getArtistImages(instance, db, onError) {
+  // Create /artist ref
+  const ref = db.ref('artists');
+
+  // Get artists Ids already in the db
+  const artistIds = fb.getAllKeys(ref);
+
+  // console.log(artistIds);
+  instance.get('/artists', {
+    params: {
+      ids: artistIds.join(',')
+    }
+  })
+    .then((response) => {
+      response.data.artists.map(function(artist) {
+        var updates = {};
+        updates['/' + artist.id + '/imgUrl'] = artist.images[0].url;
+
+        ref.update(updates);
+      });
+    })
+    .catch((error) => {
+      let message = handleErrorMessage(error);
+      onError(message);
+    });
+}
+
+
 
 /**
  * Generates a random string containing numbers and letters

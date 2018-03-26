@@ -50,6 +50,8 @@ class SpotifyLogin extends React.Component {
       'error': false,
       'message': 'Upload successful!'
     });
+
+    api.getArtistImages(this.instance, this.props.db, this.handleError);
   }
 
   handleProfileSuccess(id, url) {
