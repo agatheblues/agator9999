@@ -47,6 +47,10 @@ export function pushAlbums(items, db) {
   // Compare albums to those in the DB, extract only ids that are not there yet
   const newAlbums = albums.filter(album => !isInArray(albumIdsAlreadyInDb, album.id));
 
+  if (newAlbums.length == 0) {
+    return;
+  }
+
   // Push new albums to DB
   newAlbums.forEach(album => ref.child(album.id).set(album.album));
 
@@ -79,7 +83,7 @@ export function pushArtists(items, db) {
 }
 
 
-
+// TODO: Add onError
 export function getArtists(db, onSuccess) {
   // Create /artist ref
   const ref = db.ref('artists');
@@ -106,7 +110,7 @@ export function getArtists(db, onSuccess) {
 export function getAllKeys(ref) {
   var keys = [];
 
-  ref.once('value', function(snapshot) {
+  ref.on('value', function(snapshot) {
     snapshot.forEach(function(key) {
       keys.push(key.key);
     });

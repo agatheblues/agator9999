@@ -64,6 +64,11 @@ export function getHashParams() {
   return hashParams;
 }
 
+/**
+ * For a given error, return a dedicated error message
+ * @param  {object} error Error object
+ * @return {string}       Error message
+ */
 export function handleErrorMessage(error) {
   let message;
 
@@ -94,6 +99,7 @@ export function handleErrorMessage(error) {
  * @param {function} onError   Error callback
  */
 export function setAlbumsAndArtists(instance, offset, limit, db, onSuccess, onError) {
+
   instance.get('/me/albums', {
     params: {
       limit: limit,
@@ -103,7 +109,8 @@ export function setAlbumsAndArtists(instance, offset, limit, db, onSuccess, onEr
     .then((response) => {
       fb.pushAlbums(response.data.items, db);
       fb.pushArtists(response.data.items, db);
-      onSuccess();
+
+      onSuccess(response.data.next, response.data.total, offset);
     })
     .catch((error) => {
       let message = handleErrorMessage(error);
@@ -130,34 +137,77 @@ export function getProfile(instance, onSuccess, onError) {
 }
 
 
-// const images = getArtistImages(newArtists.map(artist => artist.id), instance, onError);
-export function getArtistImages(instance, db, onError) {
+/**
+ * Get artist images from the artists stored in firebase
+ * @param {object} instance  Spotify axios instance
+ * @param {object} db        Firebase connection
+ * @param {function} onSuccess Success callback
+ * @param {function} onError   Error callback
+ */
+export function getArtistImages(instance, db, onSuccess, onError) {
+
   // Create /artist ref
   const ref = db.ref('artists');
 
   // Get artists Ids already in the db
   const artistIds = fb.getAllKeys(ref);
 
-  // console.log(artistIds);
+  // Create batches of 50 ids
+  const artistIdsChunk = splitArrayInChunks(artistIds, 50);
+  const total = artistIdsChunk.length;
+
+  // For each batch, load images
+  artistIdsChunk.forEach((chunk, index) => setImages(ref, instance, chunk, index, total, onSuccess, onError));
+
+}
+
+
+/**
+ * Fetch artists images for a chunk of artist Ids
+ * @param {object} ref         firebase reference to /artists
+ * @param {object} instance  Spotify axios instance
+ * @param {array} artistIds   array of artist Ids
+ * @param {int} chunkId     index of the artist ids chunk
+ * @param {int} totalChunks total number of chunks for which we want to fetch images
+ * @param {function} onSuccess Success callback
+ * @param {function} onError   Error callback
+ */
+function setImages(ref, instance, artistIds, chunkId, totalChunks, onSuccess, onError) {
+
   instance.get('/artists', {
     params: {
       ids: artistIds.join(',')
     }
   })
     .then((response) => {
-      response.data.artists.map(function(artist) {
-        var updates = {};
-        updates['/' + artist.id + '/imgUrl'] = artist.images[0].url;
 
+      // Update image url value of artist
+      response.data.artists.forEach(function(artist) {
+
+        var updates = {};
+        let url = '';
+
+        if (artist.hasOwnProperty('images') && (artist.images.length > 0)) {
+          url = artist.images[0].url;
+        } else {
+          url = '/static/images/missing.jpg';
+        }
+
+        updates['/' + artist.id + '/imgUrl'] = url;
         ref.update(updates);
       });
+
+      // If last chunk, call success callback
+      if (chunkId == totalChunks - 1) {
+        onSuccess();
+      }
     })
     .catch((error) => {
       let message = handleErrorMessage(error);
       onError(message);
     });
-}
 
+}
 
 
 /**
@@ -174,3 +224,21 @@ function generateRandomString(length) {
   }
   return text;
 };
+
+
+/**
+ * Split a given array into chunks of a given length
+ * @param  {array} arr   Array to split
+ * @param  {int} chunkLength Length of a chunk
+ * @return {array[array]}       array of array chunks
+ */
+function splitArrayInChunks(arr, chunkLength) {
+  let i, j;
+  let result = [];
+
+  for (i = 0, j = arr.length; i < j; i+=chunkLength) {
+    result.push(arr.slice(i, i + chunkLength));
+  }
+
+  return result;
+}

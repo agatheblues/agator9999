@@ -18,6 +18,7 @@ class App extends React.Component {
     };
 
     this.handleGetArtists = this.handleGetArtists.bind(this);
+    this.handleSyncSuccess = this.handleSyncSuccess.bind(this);
   }
 
   handleGetArtists(artists) {
@@ -26,14 +27,14 @@ class App extends React.Component {
     });
   }
 
-  componentDidMount() {
+  handleSyncSuccess() {
     fb.getArtists(this.db, this.handleGetArtists);
   }
 
   render() {
     return (
       <div>
-        <SpotifyLogin db={this.db} />
+        <SpotifyLogin db={this.db} onSyncSuccess={this.handleSyncSuccess}/>
         <CardGrid cards={this.state.artists}/>
       </div>
     );

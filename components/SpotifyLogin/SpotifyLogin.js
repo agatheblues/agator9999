@@ -11,6 +11,9 @@ class SpotifyLogin extends React.Component {
   constructor(props) {
     super();
 
+    // Pagination limit
+    this.limit = 50;
+
     this.storedState = api.getStateKey();
 
     // URL dependencies
@@ -33,8 +36,10 @@ class SpotifyLogin extends React.Component {
     this.handleClick = this.handleClick.bind(this);
     this.handleUpload = this.handleUpload.bind(this);
     this.handleSyncSuccess = this.handleSyncSuccess.bind(this);
+    this.handleSyncImageSuccess = this.handleSyncImageSuccess.bind(this);
     this.handleProfileSuccess = this.handleProfileSuccess.bind(this);
     this.handleError = this.handleError.bind(this);
+    this.getImages = this.getImages.bind(this);
   }
 
 
@@ -45,20 +50,48 @@ class SpotifyLogin extends React.Component {
     window.location = api.getLoginUrl();
   }
 
-  handleSyncSuccess() {
+  handleSyncSuccess(hasNextPage, totalItems, offset) {
+
+    if (this.accessToken) {
+
+      if (offset + this.limit < totalItems) {
+        const upperLimit = ((offset + 2*this.limit) >= totalItems) ? totalItems : (offset + 2*this.limit);
+
+        this.setState({
+          'error': false,
+          'message': 'Loading albums ' + (offset + this.limit) + ' - ' + upperLimit + ' of ' + totalItems
+        });
+
+        api.setAlbumsAndArtists(this.instance, offset + this.limit, this.limit, this.props.db, this.handleSyncSuccess, this.handleError);
+      } else {
+        api.setAlbumsAndArtists(this.instance, offset + this.limit, this.limit, this.props.db, this.getImages, this.handleError);
+      }
+    }
+  }
+
+  getImages() {
     this.setState({
       'error': false,
-      'message': 'Upload successful!'
+      'message': 'Loading artist images...'
     });
 
-    api.getArtistImages(this.instance, this.props.db, this.handleError);
+    api.getArtistImages(this.instance, this.props.db, this.handleSyncImageSuccess, this.handleError);
+  }
+
+  handleSyncImageSuccess() {
+    this.setState({
+      'error': false,
+      'message': 'Loaded artist images! Spotify sync is complete.'
+    });
+
+    this.props.onSyncSuccess();
   }
 
   handleProfileSuccess(id, url) {
     this.setState({
       hasProfileData: true,
       userId: id,
-      imgUrl:url
+      imgUrl: url
     });
   }
 
@@ -83,7 +116,11 @@ class SpotifyLogin extends React.Component {
 
   handleUpload() {
     if (this.accessToken) {
-      api.setAlbumsAndArtists(this.instance, 0, 50, this.props.db, this.handleSyncSuccess, this.handleError);
+      this.setState({
+        'error': false,
+        'message': 'Loading albums 0 - ' + this.limit
+      });
+      api.setAlbumsAndArtists(this.instance, 0, this.limit, this.props.db, this.handleSyncSuccess, this.handleError);
     }
   }
 
@@ -112,7 +149,8 @@ class SpotifyLogin extends React.Component {
 }
 
 SpotifyLogin.propTypes = {
-  db: PropTypes.object.isRequired
+  db: PropTypes.object.isRequired,
+  onSyncSuccess: PropTypes.func.isRequired
 };
 
 

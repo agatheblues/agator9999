@@ -7,12 +7,8 @@ class CardGrid extends React.Component {
 
   constructor(props) {
     super();
-
-    this.state = {
-      cardPerRows: 6
-    };
   }
-  
+
   renderCards() {
     return this.props.cards.map((card, index) => {
       return(
