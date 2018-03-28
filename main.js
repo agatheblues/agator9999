@@ -14,7 +14,8 @@ class App extends React.Component {
     this.db = firebase.database();
 
     this.state = {
-      artists: []
+      artists: [],
+      loadedArtists: false
     };
 
     this.handleGetArtists = this.handleGetArtists.bind(this);
@@ -23,8 +24,13 @@ class App extends React.Component {
 
   handleGetArtists(artists) {
     this.setState({
-      artists: artists
+      artists: artists,
+      loadedArtists: true
     });
+  }
+
+  componentDidMount() {
+    fb.getArtists(this.db, this.handleGetArtists);
   }
 
   handleSyncSuccess() {
@@ -35,7 +41,7 @@ class App extends React.Component {
     return (
       <div>
         <SpotifyLogin db={this.db} onSyncSuccess={this.handleSyncSuccess}/>
-        <CardGrid cards={this.state.artists}/>
+        <CardGrid cards={this.state.artists} loaded={this.state.loadedArtists}/>
       </div>
     );
   }

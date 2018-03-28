@@ -10,24 +10,37 @@ class CardGrid extends React.Component {
   }
 
   renderCards() {
-    return this.props.cards.map((card, index) => {
-      return(
-        <Card key={index} name={card.name} imgUrl={card.imgUrl} />
+    if ((this.props.cards.length != 0) && this.props.loaded) {
+      return (
+        <div className='grid-container'>
+          {
+            this.props.cards.map((card, index) => {
+              return(
+                <Card key={index} name={card.name} imgUrl={card.imgUrl} />
+              );
+            })
+          }
+        </div>
       );
-    });
+    }
+
+    if ((this.props.cards.length == 0) && this.props.loaded) {
+      return (<p>Oops! You have nothing in your library.</p>);
+    }
+
+    if (!this.props.loaded) {
+      return (<p>Loading your library...</p>);
+    }
   }
 
   render() {
-    return (
-      <div className='grid-container'>
-        {this.renderCards()}
-      </div>
-    );
+    return this.renderCards();
   }
 };
 
 CardGrid.propTypes = {
-  cards: PropTypes.array.isRequired
+  cards: PropTypes.array.isRequired,
+  loaded: PropTypes.bool.isRequired
 };
 
 export default CardGrid;
