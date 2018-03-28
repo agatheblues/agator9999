@@ -62,7 +62,7 @@ export function pushAlbums(items, db) {
 export function pushArtists(items, db) {
 
   // Flatten the array of artists
-  const artists = flatten(items.map(item => item.album.artists.map(artist => convertToArtistFromSpotify(artist))));
+  const artists = flatten(items.map(item => item.album.artists.map(artist => convertToArtistFromSpotify(artist, item.album.tracks.total))));
 
   // Create /artist ref
   const ref = db.ref('artists');
@@ -73,6 +73,7 @@ export function pushArtists(items, db) {
   // Compare artists to those in the DB, extract only ids that are not there yet
   const newArtists = artists.filter(artist => !isInArray(artistIdsAlreadyInDb, artist.id));
 
+  // TODO : Sum up number of tracks
   if (newArtists.length == 0) {
     return;
   }
@@ -137,7 +138,8 @@ function isInArray(arr, item) {
  */
 function convertToAlbumFromSpotify(item) {
   let album = albumStructure(item);
-  return renameSpotifyKeyToUrl(album);
+  album['album'] = renameSpotifyKeyToUrl(album['album']);
+  return album;
 }
 
 
@@ -146,9 +148,11 @@ function convertToAlbumFromSpotify(item) {
  * @param  {object} item artist object from spotify
  * @return {object}      artist object for DB
  */
-function convertToArtistFromSpotify(item) {
+function convertToArtistFromSpotify(item, totalTracks) {
   let artist = artistStructure(item);
-  return renameSpotifyKeyToUrl(artist);
+  artist['artist']['totalTracks'] = totalTracks;
+  artist['artist'] = renameSpotifyKeyToUrl(artist['artist']);
+  return artist;
 }
 
 

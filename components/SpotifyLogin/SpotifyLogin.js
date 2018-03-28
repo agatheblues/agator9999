@@ -54,7 +54,7 @@ class SpotifyLogin extends React.Component {
 
     if (this.accessToken) {
 
-      if (offset + this.limit < totalItems) {
+      if (offset + this.limit < 50) { // TODO set back to totalItems
         const upperLimit = ((offset + 2*this.limit) >= totalItems) ? totalItems : (offset + 2*this.limit);
 
         this.setState({
@@ -75,7 +75,7 @@ class SpotifyLogin extends React.Component {
       'message': 'Loading artist images...'
     });
 
-    api.getArtistImages(this.instance, this.props.db, this.handleSyncImageSuccess, this.handleError);
+    // api.getArtistImages(this.instance, this.props.db, this.handleSyncImageSuccess, this.handleError);
   }
 
   handleSyncImageSuccess() {

@@ -148,7 +148,7 @@ export function getArtistImages(instance, db, onSuccess, onError) {
 
   // Create /artist ref
   const ref = db.ref('artists');
-
+  //TODO Only get keys without imgUrl key
   // Get artists Ids already in the db
   const artistIds = fb.getAllKeys(ref);
 
