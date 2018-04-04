@@ -62,25 +62,25 @@ export function pushAlbums(items, db) {
 export function pushArtists(items, db) {
 
   // Flatten the array of artists
-  const artists = flatten(items.map(item => item.album.artists.map(artist => convertToArtistFromSpotify(artist, item.album.tracks.total))));
+  const artists = flatten(items.map(item => item.album.artists.map(artist => convertToArtistFromSpotify(artist, item.album.id, item.album.tracks.total))));
 
   // Create /artist ref
   const ref = db.ref('artists');
 
   // Get artists Ids already in the db
-  const artistIdsAlreadyInDb = getAllKeys(ref);
+  const artistIdsInDb = getAllKeys(ref);
 
   // Compare artists to those in the DB, extract only ids that are not there yet
-  const newArtists = artists.filter(artist => !isInArray(artistIdsAlreadyInDb, artist.id));
-
-  // TODO : Sum up number of tracks
-  if (newArtists.length == 0) {
-    return;
-  }
+  const newArtists = artists.filter(artist => !isInArray(artistIdsInDb, artist.id));
 
   // Push new artists to DB
   newArtists.forEach(artist => ref.child(artist.id).set(artist.artist));
 
+  // Get artists in the DB and add the album
+  const updateArtists = artists.filter(artist => isInArray(artistIdsInDb, artist.id));
+
+  // Update albums of artist
+  updateArtists.forEach(artist => addAlbumToArtist(ref, artist));
 }
 
 
@@ -148,9 +148,14 @@ function convertToAlbumFromSpotify(item) {
  * @param  {object} item artist object from spotify
  * @return {object}      artist object for DB
  */
-function convertToArtistFromSpotify(item, totalTracks) {
+function convertToArtistFromSpotify(item, albumId, totalTracks) {
   let artist = artistStructure(item);
-  artist['artist']['totalTracks'] = totalTracks;
+
+  // Add album list key
+  let album = {};
+  album[albumId] = { 'totalTracks': totalTracks };
+  artist['artist']['albums'] = album;
+
   artist['artist'] = renameSpotifyKeyToUrl(artist['artist']);
   return artist;
 }
@@ -172,6 +177,20 @@ function renameSpotifyKeyToUrl(item) {
   return mapped;
 }
 
+
+function addAlbumToArtist(ref, artist) {
+  var updates = {};
+  let albumId, totalTracks;
+  console.log(artist);
+
+  if (artist.hasOwnProperty('artist') && artist.artist.hasOwnProperty('albums') &&  Object.keys(artist.artist.albums).length != 0) {
+    albumId = Object.keys(artist.artist.albums)[0];
+    totalTracks = artist.artist.albums[albumId];
+  }
+
+  updates['/' + artist.id + '/albums/' + albumId] = totalTracks;
+  ref.update(updates);
+}
 
 /**
  * Flattens an array
