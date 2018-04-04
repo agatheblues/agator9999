@@ -79,7 +79,7 @@ export function pushArtists(items, db) {
   // Get artists in the DB and add the album
   const updateArtists = artists.filter(artist => isInArray(artistIdsInDb, artist.id));
 
-  // Update albums of artist
+  // Update albums of artist which are already in the DB
   updateArtists.forEach(artist => addAlbumToArtist(ref, artist));
 }
 
@@ -151,7 +151,7 @@ function convertToAlbumFromSpotify(item) {
 function convertToArtistFromSpotify(item, albumId, totalTracks) {
   let artist = artistStructure(item);
 
-  // Add album list key
+  // Add album key
   let album = {};
   album[albumId] = { 'totalTracks': totalTracks };
   artist['artistData']['albums'] = album;
@@ -186,7 +186,6 @@ function renameSpotifyKeyToUrl(item) {
 function addAlbumToArtist(ref, artist) {
   var updates = {};
   let albumId, totalTracks;
-  console.log(artist);
 
   if (artist.hasOwnProperty('artistData') && artist.artistData.hasOwnProperty('albums') &&  Object.keys(artist.artistData.albums).length != 0) {
     albumId = Object.keys(artist.artistData.albums)[0];

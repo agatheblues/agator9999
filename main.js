@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import SpotifyLogin from './components/SpotifyLogin/SpotifyLogin';
 import CardGrid from './components/CardGrid/CardGrid.js';
+import Button from './components/Button/Button';
 import firebase from 'firebase';
 import config from './config.json';
 import * as fb from './DataWrapper/FirebaseDataWrapper.js';
@@ -15,11 +16,13 @@ class App extends React.Component {
 
     this.state = {
       artists: [],
-      loadedArtists: false
+      loadedArtists: false,
+      tempRoutingSolution: false // TODO
     };
 
     this.handleGetArtists = this.handleGetArtists.bind(this);
     this.handleSyncSuccess = this.handleSyncSuccess.bind(this);
+    this.handleClick = this.handleClick.bind(this);
   }
 
   handleGetArtists(artists) {
@@ -37,11 +40,28 @@ class App extends React.Component {
     fb.getArtists(this.db, this.handleGetArtists);
   }
 
+  // TODO:
+  handleClick() {
+    this.setState({
+      tempRoutingSolution: true
+    });
+  }
+
   render() {
     return (
       <div>
-        <SpotifyLogin db={this.db} onSyncSuccess={this.handleSyncSuccess}/>
-        <CardGrid cards={this.state.artists} loaded={this.state.loadedArtists}/>
+        {!this.state.tempRoutingSolution &&
+          <div>
+            <Button
+              label={'Synchronize Data'}
+              handleClick={this.handleClick}
+            />
+            <CardGrid cards={this.state.artists} loaded={this.state.loadedArtists}/>
+          </div>
+        }
+        {this.state.tempRoutingSolution &&
+          <SpotifyLogin db={this.db} onSyncSuccess={this.handleSyncSuccess}/>
+        }
       </div>
     );
   }
