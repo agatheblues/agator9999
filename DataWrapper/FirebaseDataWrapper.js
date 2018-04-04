@@ -11,7 +11,7 @@ let albumStructure = (
   }) => (
   {
     id,
-    album: {
+    albumData: {
       added_at,
       name,
       spotify
@@ -26,7 +26,7 @@ let artistStructure = (
   }) => (
   {
     id,
-    artist: {
+    artistData: {
       name,
       spotify
     }
@@ -52,7 +52,7 @@ export function pushAlbums(items, db) {
   }
 
   // Push new albums to DB
-  newAlbums.forEach(album => ref.child(album.id).set(album.album));
+  newAlbums.forEach(album => ref.child(album.id).set(album.albumData));
 
 }
 
@@ -74,7 +74,7 @@ export function pushArtists(items, db) {
   const newArtists = artists.filter(artist => !isInArray(artistIdsInDb, artist.id));
 
   // Push new artists to DB
-  newArtists.forEach(artist => ref.child(artist.id).set(artist.artist));
+  newArtists.forEach(artist => ref.child(artist.id).set(artist.artistData));
 
   // Get artists in the DB and add the album
   const updateArtists = artists.filter(artist => isInArray(artistIdsInDb, artist.id));
@@ -138,7 +138,7 @@ function isInArray(arr, item) {
  */
 function convertToAlbumFromSpotify(item) {
   let album = albumStructure(item);
-  album['album'] = renameSpotifyKeyToUrl(album['album']);
+  album['albumData'] = renameSpotifyKeyToUrl(album['albumData']);
   return album;
 }
 
@@ -154,9 +154,9 @@ function convertToArtistFromSpotify(item, albumId, totalTracks) {
   // Add album list key
   let album = {};
   album[albumId] = { 'totalTracks': totalTracks };
-  artist['artist']['albums'] = album;
+  artist['artistData']['albums'] = album;
 
-  artist['artist'] = renameSpotifyKeyToUrl(artist['artist']);
+  artist['artistData'] = renameSpotifyKeyToUrl(artist['artistData']);
   return artist;
 }
 
@@ -178,14 +178,19 @@ function renameSpotifyKeyToUrl(item) {
 }
 
 
+/**
+ * Add an album to the list of albums of an artist
+ * @param {object} ref    firebase db ref to artist node
+ * @param {object} artist artist object containing the albums
+ */
 function addAlbumToArtist(ref, artist) {
   var updates = {};
   let albumId, totalTracks;
   console.log(artist);
 
-  if (artist.hasOwnProperty('artist') && artist.artist.hasOwnProperty('albums') &&  Object.keys(artist.artist.albums).length != 0) {
-    albumId = Object.keys(artist.artist.albums)[0];
-    totalTracks = artist.artist.albums[albumId];
+  if (artist.hasOwnProperty('artistData') && artist.artistData.hasOwnProperty('albums') &&  Object.keys(artist.artistData.albums).length != 0) {
+    albumId = Object.keys(artist.artistData.albums)[0];
+    totalTracks = artist.artistData.albums[albumId];
   }
 
   updates['/' + artist.id + '/albums/' + albumId] = totalTracks;
