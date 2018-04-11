@@ -1,4 +1,6 @@
 import axios from 'axios';
+import firebase from 'firebase';
+import config from '../config.json';
 
 let albumStructure = (
   {
@@ -31,6 +33,27 @@ let artistStructure = (
       spotify
     }
   });
+
+
+/**
+ * Initialize Firebase app
+ */
+function init() {
+  if (firebase.apps.length) {
+    return;
+  }
+  firebase.initializeApp(config);
+}
+
+
+/**
+ * Get firebase database reference
+ * @return {Object} FB database ref
+ */
+export function getFbDb() {
+  init();
+  return firebase.database();
+}
 
 
 export function pushAlbums(items, db) {
