@@ -1,28 +1,23 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { HashRouter, Route, Switch, Link } from 'react-router-dom';
 import SpotifyLogin from './components/SpotifyLogin/SpotifyLogin';
 import CardGrid from './components/CardGrid/CardGrid.js';
 import Button from './components/Button/Button';
-import firebase from 'firebase';
-import config from './config.json';
 import * as fb from './DataWrapper/FirebaseDataWrapper.js';
 
 class App extends React.Component {
   constructor(props){
     super(props);
 
-    firebase.initializeApp(config);
-    this.db = firebase.database();
+    this.db = fb.getFbDb();
 
     this.state = {
       artists: [],
-      loadedArtists: false,
-      tempRoutingSolution: false // TODO
+      loadedArtists: false
     };
 
     this.handleGetArtists = this.handleGetArtists.bind(this);
-    this.handleSyncSuccess = this.handleSyncSuccess.bind(this);
-    this.handleClick = this.handleClick.bind(this);
   }
 
   handleGetArtists(artists) {
@@ -36,38 +31,22 @@ class App extends React.Component {
     fb.getArtists(this.db, this.handleGetArtists);
   }
 
-  handleSyncSuccess() {
-    fb.getArtists(this.db, this.handleGetArtists);
-  }
-
-  // TODO:
-  handleClick() {
-    this.setState({
-      tempRoutingSolution: true
-    });
-  }
-
   render() {
     return (
       <div>
-        {!this.state.tempRoutingSolution &&
-          <div>
-            <Button
-              label={'Synchronize Data'}
-              handleClick={this.handleClick}
-            />
-            <CardGrid cards={this.state.artists} loaded={this.state.loadedArtists}/>
-          </div>
-        }
-        {this.state.tempRoutingSolution &&
-          <SpotifyLogin db={this.db} onSyncSuccess={this.handleSyncSuccess}/>
-        }
+        <Link to='/spotify-sync'>Synchronize Spotify Data</Link>
+        <CardGrid cards={this.state.artists} loaded={this.state.loadedArtists}/>
       </div>
     );
   }
 }
 
 ReactDOM.render(
-  <App />,
+  <HashRouter>
+    <Switch>
+      <Route exact path="/" component={App} />
+      <Route exact path="/spotify-sync" component={SpotifyLogin} />
+    </Switch>
+  </HashRouter>,
   document.getElementById('root')
 );

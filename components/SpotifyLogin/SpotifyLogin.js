@@ -3,13 +3,17 @@ import PropTypes from 'prop-types';
 import Button from '../Button/Button';
 import ProfileCard from '../ProfileCard/ProfileCard';
 import Message from '../Message/Message.js';
+import config from '../../config.json';
 import * as api from '../../DataWrapper/SpotifyDataWrapper.js';
+import {getFbDb} from '../../DataWrapper/FirebaseDataWrapper.js';
 
 
 class SpotifyLogin extends React.Component {
 
   constructor(props) {
     super();
+
+    this.db = getFbDb();
 
     // Pagination limit
     this.limit = 50;
@@ -62,9 +66,9 @@ class SpotifyLogin extends React.Component {
           'message': 'Loading albums ' + (offset + this.limit) + ' - ' + upperLimit + ' of ' + totalItems
         });
 
-        api.setAlbumsAndArtists(this.instance, offset + this.limit, this.limit, this.props.db, this.handleSyncSuccess, this.handleError);
+        api.setAlbumsAndArtists(this.instance, offset + this.limit, this.limit, this.db, this.handleSyncSuccess, this.handleError);
       } else {
-        api.setAlbumsAndArtists(this.instance, offset + this.limit, this.limit, this.props.db, this.getImages, this.handleError);
+        api.setAlbumsAndArtists(this.instance, offset + this.limit, this.limit, this.db, this.getImages, this.handleError);
       }
     }
   }
@@ -75,7 +79,7 @@ class SpotifyLogin extends React.Component {
       'message': 'Loading artist images...'
     });
 
-    api.getArtistImages(this.instance, this.props.db, this.handleSyncImageSuccess, this.handleError);
+    api.getArtistImages(this.instance, this.db, this.handleSyncImageSuccess, this.handleError);
   }
 
   handleSyncImageSuccess() {
@@ -84,7 +88,7 @@ class SpotifyLogin extends React.Component {
       'message': 'Loaded artist images! Spotify sync is complete.'
     });
 
-    this.props.onSyncSuccess();
+    // this.props.onSyncSuccess();
   }
 
   handleProfileSuccess(id, url) {
@@ -120,7 +124,7 @@ class SpotifyLogin extends React.Component {
         'error': false,
         'message': 'Loading albums 0 - ' + this.limit
       });
-      api.setAlbumsAndArtists(this.instance, 0, this.limit, this.props.db, this.handleSyncSuccess, this.handleError);
+      api.setAlbumsAndArtists(this.instance, 0, this.limit, this.db, this.handleSyncSuccess, this.handleError);
     }
   }
 
@@ -147,11 +151,6 @@ class SpotifyLogin extends React.Component {
     );
   }
 }
-
-SpotifyLogin.propTypes = {
-  db: PropTypes.object.isRequired,
-  onSyncSuccess: PropTypes.func.isRequired
-};
 
 
 export default SpotifyLogin;
