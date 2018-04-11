@@ -5,7 +5,7 @@ import * as fb from './FirebaseDataWrapper.js';
 const SPOTIFY_LOGIN_URL = 'https://accounts.spotify.com/authorize';
 const STATE_KEY = 'spotify_auth_state';
 const CLIENT_ID = '349fcdbe411c472eac393c9fdcc73b13';
-const REDIRECT_URI = 'http://localhost:8888';
+const REDIRECT_URI = 'http://localhost:8888/#/callback';
 const SCOPE = 'user-read-private user-read-email user-library-read';
 
 /**
@@ -57,7 +57,7 @@ export function getStateKey() {
 export function getHashParams() {
   let hashParams = {};
   let e, r = /([^&;=]+)=?([^&;]*)/g,
-    q = window.location.hash.substring(1);
+    q = window.location.hash.substring(2);
   while ( e = r.exec(q)) {
     hashParams[e[1]] = decodeURIComponent(e[2]);
   }

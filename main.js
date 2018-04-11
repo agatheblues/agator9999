@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { HashRouter, Route, Switch, Link } from 'react-router-dom';
+import { HashRouter, Route, Switch, Link, Redirect } from 'react-router-dom';
 import SpotifyLogin from './components/SpotifyLogin/SpotifyLogin';
 import CardGrid from './components/CardGrid/CardGrid.js';
 import Button from './components/Button/Button';
@@ -41,11 +41,13 @@ class App extends React.Component {
   }
 }
 
+// render={() => (<Redirect to="/spotify-sync" />)}
 ReactDOM.render(
   <HashRouter>
     <Switch>
       <Route exact path="/" component={App} />
       <Route exact path="/spotify-sync" component={SpotifyLogin} />
+      <Route path="/:access_token(access_token=.*)" component={SpotifyLogin} />
     </Switch>
   </HashRouter>,
   document.getElementById('root')

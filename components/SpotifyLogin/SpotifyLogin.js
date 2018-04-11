@@ -87,8 +87,6 @@ class SpotifyLogin extends React.Component {
       'error': false,
       'message': 'Loaded artist images! Spotify sync is complete.'
     });
-
-    // this.props.onSyncSuccess();
   }
 
   handleProfileSuccess(id, url) {
