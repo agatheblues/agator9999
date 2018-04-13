@@ -2,23 +2,29 @@ import React from 'react';
 import PropTypes from 'prop-types';
 require('./ArtistSummary.scss');
 
-class ArtistSummary extends React.Component {
+// Total tracks reducer
+const reducer = (totalTracks, album) => totalTracks + album.totalTracks;
 
-  constructor(props) {
-    super();
-  }
+const ArtistSummary = function({artist}) {
 
-  render() {
-    return <p>Coucou {this.props.match.params.id}</p>;
-  }
+  // Get artist total amount of tracks
+  let totalTracks = artist.albums.reduce(reducer, 0);
+
+  return (
+    <div className='card-container'>
+      <div className='card-wrapper'>
+        <img src={artist.imgUrl} className='card-image'/>
+        <p>{artist.name}</p>
+        <p>{artist.source}</p>
+        <p>{Object.keys(artist.albums).length} albums</p>
+        <p>{totalTracks}</p>
+      </div>
+    </div>
+  );
 };
 
 ArtistSummary.propTypes = {
-  match: PropTypes.shape({
-    params: PropTypes.shape({
-      id: PropTypes.node,
-    }).isRequired,
-  }).isRequired
+  artist: PropTypes.object.isRequired
 };
 
 export default ArtistSummary;
