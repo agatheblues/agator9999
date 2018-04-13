@@ -4,6 +4,7 @@ import { HashRouter, Route, Switch, Link, Redirect } from 'react-router-dom';
 import SpotifyLogin from './components/SpotifyLogin/SpotifyLogin';
 import CardGrid from './components/CardGrid/CardGrid.js';
 import Button from './components/Button/Button';
+import ArtistSummary from './components/ArtistSummary/ArtistSummary';
 import * as fb from './DataWrapper/FirebaseDataWrapper.js';
 
 class App extends React.Component {
@@ -41,13 +42,13 @@ class App extends React.Component {
   }
 }
 
-// render={() => (<Redirect to="/spotify-sync" />)}
 ReactDOM.render(
   <HashRouter>
     <Switch>
       <Route exact path="/" component={App} />
       <Route exact path="/spotify-sync" component={SpotifyLogin} />
       <Route path="/:access_token(access_token=.*)" component={SpotifyLogin} />
+      <Route exact path="/artist/:id" component={ArtistSummary} />
     </Switch>
   </HashRouter>,
   document.getElementById('root')
