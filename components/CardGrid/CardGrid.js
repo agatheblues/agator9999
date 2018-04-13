@@ -17,7 +17,7 @@ class CardGrid extends React.Component {
             this.props.cards.map((card, index) => {
               return(
                 <div key={index} >
-                  <Card name={card.name} imgUrl={card.imgUrl} />
+                  <Card id={card.id} name={card.name} imgUrl={card.imgUrl} />
                   <p>{Object.keys(card.albums).length} albums</p>
                 </div>
               );
