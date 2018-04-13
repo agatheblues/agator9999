@@ -128,6 +128,25 @@ export function getArtists(db, onSuccess) {
 
 }
 
+
+
+export function getArtist(id, db, onSuccess, onError) {
+  // Create /artist ref
+  const ref = db.ref('artists/' + id);
+
+  ref.once('value').then(function(snapshot) {
+    let artist = snapshot.val();
+
+    // Update albums structure in artist object
+    artist.albums = objectToArray(artist.albums);
+
+    onSuccess(artist);
+  }, function (errorObject) {
+    onError('Something went wrong! ' + errorObject.code);
+  });
+
+}
+
 /**
  * Get all key names of first level of data
  * @param  {ref} ref Reference to a db path
@@ -229,5 +248,13 @@ function addAlbumToArtist(ref, artist) {
 function flatten(arr) {
   return arr.reduce(function (flat, toFlatten) {
     return flat.concat(Array.isArray(toFlatten) ? flatten(toFlatten) : toFlatten);
+  }, []);
+}
+
+
+function objectToArray(item) {
+  return Object.keys(item).reduce((acc, key) => {
+    acc.push(Object.assign({id: key}, item[key]));
+    return acc;
   }, []);
 }
