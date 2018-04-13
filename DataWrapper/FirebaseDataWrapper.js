@@ -116,7 +116,9 @@ export function getArtists(db, onSuccess) {
 
   ref.on('value', function(data) {
     data.forEach(function(item) {
-      artists.push(item.val());
+      let artist = item.val();
+      artist['id'] = item.key;
+      artists.push(artist);
     });
 
     onSuccess(artists);
