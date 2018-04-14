@@ -1,0 +1,19 @@
+@import url('https://fonts.googleapis.com/css?family=IBM+Plex+Mono|Source+Sans+Pro');
+@import "variables";
+
+body {
+  font-family: 'Source Sans Pro', sans-serif;
+}
+
+h1 {
+  font-family: 'IBM Plex Mono', monospace;
+  color: $white;
+  font-size: 48px;
+  margin: 20px 0 20px 0;
+}
+
+
+.content-container {
+  width: 70%;
+  margin: auto;
+}
