@@ -9,7 +9,8 @@ let albumStructure = (
       id,
       name,
       external_urls:  {spotify},
-      images
+      images,
+      release_date
     }
   }) => (
   {
@@ -18,7 +19,8 @@ let albumStructure = (
       added_at,
       name,
       spotify,
-      images
+      images,
+      release_date
     }
   });
 
