@@ -6,6 +6,7 @@ import CardGrid from './components/CardGrid/CardGrid.js';
 import Button from './components/Button/Button';
 import ArtistOverview from './components/ArtistOverview/ArtistOverview';
 import * as fb from './DataWrapper/FirebaseDataWrapper.js';
+require('./main.scss');
 
 class App extends React.Component {
   constructor(props){
@@ -34,7 +35,7 @@ class App extends React.Component {
 
   render() {
     return (
-      <div>
+      <div className='content-container'>
         <Link to='/spotify-sync'>Synchronize Spotify Data</Link>
         <CardGrid cards={this.state.artists} loaded={this.state.loadedArtists}/>
       </div>

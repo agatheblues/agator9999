@@ -54,7 +54,7 @@ class AlbumOverview extends React.Component {
 
   render() {
     return (
-      <div className='album-container'>
+      <div className='content-container'>
         <div className='album-title'>
           <p>{this.state.albumData.name}</p>
         </div>
