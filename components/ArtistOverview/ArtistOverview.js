@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Message from '../Message/Message.js';
 import ArtistSummary from '../ArtistSummary/ArtistSummary.js';
+import AlbumOverview from '../AlbumOverview/AlbumOverview.js';
 import {getArtist, getFbDb} from '../../DataWrapper/FirebaseDataWrapper.js';
 require('./ArtistOverview.scss');
 
@@ -16,7 +17,8 @@ class ArtistOverview extends React.Component {
       error: false,
       message: null,
       hasArtistData: false,
-      artistData: {}
+      artistData: {},
+      albumIds: []
     };
 
     this.handleGetArtistSuccess = this.handleGetArtistSuccess.bind(this);
@@ -24,9 +26,12 @@ class ArtistOverview extends React.Component {
   }
 
   handleGetArtistSuccess(artist) {
+    let ids = artist.albums.map((album) => album.id);
+
     this.setState({
       hasArtistData: true,
-      artistData: artist
+      artistData: artist,
+      albumIds: ids
     });
   }
 
@@ -35,6 +40,22 @@ class ArtistOverview extends React.Component {
       'error': true,
       'message': message
     });
+  }
+
+  renderAlbumOverviews() {
+    return (
+      <div>
+        {
+          this.state.albumIds.map((id, index) => {
+            return(
+              <div key={index} >
+                <AlbumOverview id={id} />
+              </div>
+            );
+          })
+        }
+      </div>
+    );
   }
 
   componentDidMount() {
@@ -46,7 +67,11 @@ class ArtistOverview extends React.Component {
     return (
       <div>
         {this.state.message && <Message message={this.state.message} error={this.state.error}/>}
-        {this.state.hasArtistData && <ArtistSummary artist={this.state.artistData} />}
+        {this.state.hasArtistData &&
+            <div>
+              <ArtistSummary artist={this.state.artistData} />
+              {this.renderAlbumOverviews()}
+            </div>}
         {!this.state.hasArtistData && <p>Loading...</p>}
       </div>
     );
