@@ -49,18 +49,26 @@ class AlbumOverview extends React.Component {
       src = this.state.albumData.images[0].url;
     }
 
-    return <img src={src} alt={'Album Cover'}/>;
+    return <img src={src} alt={'Album Cover'} className='album-cover'/>;
   }
 
   render() {
     return (
-      <div className='card-container'>
-        <div className='card-wrapper'>
+      <div className='album-container'>
+        <div className='album-title'>
           <p>{this.state.albumData.name}</p>
-          {this.renderAlbumCover()}
-          <p>{this.state.albumData.added_at}</p>
-          <p>{this.state.albumData.source}</p>
-          <p>{this.state.albumData.url}</p>
+        </div>
+        <div className='album-wrapper'>
+          <div>
+            {this.renderAlbumCover()}
+          </div>
+          <div>
+            <p>{this.state.albumData.added_at}</p>
+            <p>{this.state.albumData.source}</p>
+            <p>{this.state.albumData.url}</p>
+            <p>{this.state.albumData.release_date}</p>
+            <p>{this.props.totalTracks} tracks</p>
+          </div>
         </div>
       </div>
     );
@@ -68,7 +76,8 @@ class AlbumOverview extends React.Component {
 };
 
 AlbumOverview.propTypes = {
-  id: PropTypes.string.isRequired
+  id: PropTypes.string.isRequired,
+  totalTracks: PropTypes.number.isRequired
 };
 
 export default AlbumOverview;

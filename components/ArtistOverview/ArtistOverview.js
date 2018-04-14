@@ -17,8 +17,7 @@ class ArtistOverview extends React.Component {
       error: false,
       message: null,
       hasArtistData: false,
-      artistData: {},
-      albumIds: []
+      artistData: {}
     };
 
     this.handleGetArtistSuccess = this.handleGetArtistSuccess.bind(this);
@@ -26,12 +25,10 @@ class ArtistOverview extends React.Component {
   }
 
   handleGetArtistSuccess(artist) {
-    let ids = artist.albums.map((album) => album.id);
 
     this.setState({
       hasArtistData: true,
-      artistData: artist,
-      albumIds: ids
+      artistData: artist
     });
   }
 
@@ -46,10 +43,10 @@ class ArtistOverview extends React.Component {
     return (
       <div>
         {
-          this.state.albumIds.map((id, index) => {
+          this.state.artistData.albums.map((album, index) => {
             return(
               <div key={index} >
-                <AlbumOverview id={id} />
+                <AlbumOverview id={album.id} totalTracks={album.totalTracks}/>
               </div>
             );
           })
