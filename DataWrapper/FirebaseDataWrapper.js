@@ -8,7 +8,8 @@ let albumStructure = (
     album: {
       id,
       name,
-      external_urls:  {spotify}
+      external_urls:  {spotify},
+      images
     }
   }) => (
   {
@@ -16,7 +17,8 @@ let albumStructure = (
     albumData: {
       added_at,
       name,
-      spotify
+      spotify,
+      images
     }
   });
 
