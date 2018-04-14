@@ -11,13 +11,20 @@ const ArtistSummary = function({artist}) {
   let totalTracks = artist.albums.reduce(reducer, 0);
 
   return (
-    <div className='card-container'>
-      <div className='card-wrapper'>
-        <img src={artist.imgUrl} className='card-image'/>
-        <p>{artist.name}</p>
-        <p>{artist.source}</p>
-        <p>{Object.keys(artist.albums).length} albums</p>
-        <p>{totalTracks}</p>
+    <div className='artist-banner-container'>
+      <div className='artist-banner-wrapper'>
+
+        <div className='artist-banner-image' style={{ 'backgroundImage': `url(${artist.imgUrl})`}}>
+        </div>
+
+        <div className='artist-banner-content-wrapper'>
+          <div className='artist-banner-content content-container'>
+            <h1>{artist.name}</h1>
+            <p>{`${Object.keys(artist.albums).length} albums, ${totalTracks} tracks`}</p>
+            <p><a href={artist.url}>{`Listen on ${artist.source}`}</a></p>
+          </div>
+        </div>
+
       </div>
     </div>
   );

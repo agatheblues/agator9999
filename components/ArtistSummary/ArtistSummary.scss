@@ -1,0 +1,26 @@
+.artist-banner-wrapper {
+  position: relative;
+}
+
+.artist-banner-wrapper p {
+  color: white;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 14px;
+}
+
+.artist-banner-content-wrapper {
+  width: 100%;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+}
+
+.artist-banner-content {
+  padding-bottom: 30px;
+}
+
+.artist-banner-image {
+  height: 300px;
+  background-position: top;
+  background-size: cover;
+}
