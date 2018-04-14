@@ -142,6 +142,21 @@ export function getArtist(id, db, onSuccess, onError) {
 
     onSuccess(artist);
   }, function (errorObject) {
+    onError('Something went wrong while getting artist data! ' + errorObject.code);
+  });
+
+}
+
+
+export function getAlbum(id, db, onSuccess, onError) {
+  // Create /album ref
+  const ref = db.ref('albums/' + id);
+
+  ref.once('value').then(function(snapshot) {
+    let album = snapshot.val();
+
+    onSuccess(album);
+  }, function (errorObject) {
     onError('Something went wrong! ' + errorObject.code);
   });
 

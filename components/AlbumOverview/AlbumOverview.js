@@ -15,7 +15,7 @@ class AlbumOverview extends React.Component {
       error: false,
       message: null,
       hasAlbumData: false,
-      albumtData: {}
+      albumData: {}
     };
 
     this.handleGetAlbumSuccess = this.handleGetAlbumSuccess.bind(this);
@@ -42,9 +42,15 @@ class AlbumOverview extends React.Component {
 
 
   render() {
+    console.log(this.state);
     return (
-      <div>
-        <p>Yo</p>
+      <div className='card-container'>
+        <div className='card-wrapper'>
+          <p>{this.state.albumData.name}</p>
+          <p>{this.state.albumData.added_at}</p>
+          <p>{this.state.albumData.source}</p>
+          <p>{this.state.albumData.url}</p>
+        </div>
       </div>
     );
   }
