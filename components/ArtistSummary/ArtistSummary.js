@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { Link } from 'react-router-dom';
 require('./ArtistSummary.scss');
 
 // Total tracks reducer
@@ -18,11 +19,17 @@ const ArtistSummary = function({artist}) {
           <div className='artist-banner-image--overlay'/>
         </div>
 
+        <div className='artist-banner-back-wrapper'>
+          <div className='artist-banner-back content-container'>
+            <Link to='/'>&#9839; Back to library</Link>
+          </div>
+        </div>
+
         <div className='artist-banner-content-wrapper'>
           <div className='artist-banner-content content-container'>
             <h1>{artist.name}</h1>
             <p>{`${Object.keys(artist.albums).length} albums, ${totalTracks} tracks`}</p>
-            <p><a href={artist.url}>{`Listen on ${artist.source}`}</a></p>
+            <p><a href={artist.url}>&#9836; {`Listen on ${artist.source}`}</a></p>
           </div>
         </div>
 

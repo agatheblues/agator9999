@@ -14,8 +14,19 @@
   left: 0;
 }
 
+.artist-banner-back-wrapper {
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
 .artist-banner-content {
   padding-bottom: 30px;
+}
+
+.artist-banner-back {
+  padding-top: 30px;
 }
 
 .artist-banner-image {
