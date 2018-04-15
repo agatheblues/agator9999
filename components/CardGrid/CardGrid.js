@@ -17,8 +17,7 @@ class CardGrid extends React.Component {
             this.props.cards.map((card, index) => {
               return(
                 <div key={index} >
-                  <Card id={card.id} name={card.name} imgUrl={card.imgUrl} />
-                  <p>{Object.keys(card.albums).length} albums</p>
+                  <Card id={card.id} name={card.name} imgUrl={card.imgUrl} totalAlbums={Object.keys(card.albums).length}/>
                 </div>
               );
             })
@@ -37,7 +36,12 @@ class CardGrid extends React.Component {
   }
 
   render() {
-    return this.renderCards();
+    return (
+      <div>
+        <h1 className='cardgrid-title'>Artists</h1>
+        {this.renderCards()}
+      </div>
+    );
   }
 };
 

@@ -1,12 +1,20 @@
+
 .card-container {
   margin: 20px;
-  width: 100px;
+  width: 150px;
 }
 
 .card-wrapper {
   text-align: center;
 }
 
+
 .card-image {
-  width: 100px;
+  height: 150px;
+  background-position: top;
+  background-size: cover;
+}
+
+.card-details {
+  margin: 10px 0 20px 0;
 }

@@ -37,7 +37,7 @@ class App extends React.Component {
     return (
       <div className='content-container'>
         <Link to='/spotify-sync'>Synchronize Spotify Data</Link>
-        <CardGrid cards={this.state.artists} loaded={this.state.loadedArtists}/>
+        <CardGrid cards={this.state.artists} loaded={this.state.loadedArtists} title='Artists'/>
       </div>
     );
   }

@@ -3,20 +3,28 @@ import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 require('./Card.scss');
 
-const Card = ({id, name, imgUrl}) => (
-  <div className='card-container'>
-    <Link to={'/artist/' + id}>
-      <div className='card-wrapper'>
-        <img src={imgUrl} className='card-image'/>
-        <p>{name}</p>
-      </div>
-    </Link>
-  </div>
-);
+const Card = function({id, name, imgUrl, totalAlbums}) {
+  let albums = (totalAlbums > 1) ? totalAlbums + ' albums' : totalAlbums + ' album';
+  return (
+    <div className='card-container'>
+      <Link to={'/artist/' + id}>
+        <div className='card-wrapper'>
+          <div className='card-image' style={{ 'backgroundImage': `url(${imgUrl})`}}>
+          </div>
+          <div className='card-details'>
+            <p>{name}</p>
+            <p>{albums}</p>
+          </div>
+        </div>
+      </Link>
+    </div>
+  );
+};
 
 Card.propTypes = {
   id: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
+  totalAlbums: PropTypes.number,
   imgUrl: PropTypes.string
 };
 
