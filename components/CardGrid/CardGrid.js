@@ -38,7 +38,7 @@ class CardGrid extends React.Component {
   render() {
     return (
       <div>
-        <h1 className='title'>Artists</h1>
+        <h1 className='title title--marginlr'>Artists</h1>
         {this.renderCards()}
       </div>
     );
