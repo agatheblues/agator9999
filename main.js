@@ -2,10 +2,10 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { HashRouter, Route, Switch, Link, Redirect } from 'react-router-dom';
 import SpotifyLogin from './components/SpotifyLogin/SpotifyLogin';
-import CardGrid from './components/CardGrid/CardGrid.js';
+import CardGrid from './components/CardGrid/CardGrid';
 import CreateAlbum from './components/CreateAlbum/CreateAlbum';
 import Artist from './components/Artist/Artist';
-import * as fb from './DataWrapper/FirebaseDataWrapper.js';
+import * as fb from './DataWrapper/FirebaseDataWrapper';
 require('./main.scss');
 
 class App extends React.Component {
