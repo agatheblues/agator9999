@@ -45,3 +45,37 @@ a:hover {
 .title--marginlr {
   margin: 40px 20px 20px 20px;
 }
+
+
+.back-to-library {
+  padding: 30px 0 30px 0;
+}
+
+
+nav {
+  display: flex;
+}
+
+ul {
+  display: flex;
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+li {
+  padding: 10px;
+  cursor: pointer;
+  border-top: solid 2px $bg-grey;
+}
+
+li.active {
+  border-top: solid 2px $orange;
+  background-color: $white;
+}
+
+.input-error {
+  font-size: 12px;
+  color: $orange;
+}

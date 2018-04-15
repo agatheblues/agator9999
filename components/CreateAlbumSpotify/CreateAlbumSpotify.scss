@@ -1,0 +1,39 @@
+@import 'variables';
+
+.input-container {
+  display: flex;
+  flex-wrap: wrap;
+
+  input {
+    display: inline-block; // for safari
+    flex: 1;
+
+    background: none;
+    line-height: 1.8;
+    border: none;
+    border-bottom: solid 1px $orange;
+    font-family: inherit;
+
+    &:focus {
+      outline: none;
+    }
+  }
+
+  label {
+    padding-right: 10px;
+    line-height: 1.8;
+  }
+}
+
+.input-error-container {
+  text-align: right;
+}
+
+.submit-container {
+  text-align: right;
+
+  button {
+    margin: 10px 0 0 0;
+    width: 100px;
+  }
+}
