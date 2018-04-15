@@ -4,7 +4,7 @@
 body {
   font-family: 'IBM Plex Mono', monospace;
   font-size: 14px;
-  background: #EEEEEE;
+  background: $bg-grey;
 }
 
 h1 {
@@ -24,4 +24,12 @@ h2 {
 .content-container {
   width: 70%;
   margin: auto;
+}
+
+a {
+  color: $orange;
+}
+
+a:hover {
+  color: $orange;
 }

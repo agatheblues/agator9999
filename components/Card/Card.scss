@@ -1,3 +1,4 @@
+@import "variables";
 
 .card-container {
   margin: 20px;
@@ -6,8 +7,12 @@
 
 .card-wrapper {
   text-align: center;
+  border-bottom: solid 1px $bg-grey;
 }
 
+.card-wrapper:hover {
+  border-bottom: solid 1px $orange;
+}
 
 .card-image {
   height: 150px;
@@ -16,5 +21,13 @@
 }
 
 .card-details {
-  margin: 10px 0 20px 0;
+  margin: 10px 0 10px 0;
+}
+.card-link {
+  color: $black;
+}
+
+.card-link:hover {
+  color: $orange;
+  text-decoration: none;
 }

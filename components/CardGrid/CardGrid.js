@@ -27,11 +27,11 @@ class CardGrid extends React.Component {
     }
 
     if ((this.props.cards.length == 0) && this.props.loaded) {
-      return (<p>Oops! You have nothing in your library.</p>);
+      return (<p className='cardgrid-message'>Oops! You have nothing in your library.</p>);
     }
 
     if (!this.props.loaded) {
-      return (<p>Loading your library...</p>);
+      return (<p className='cardgrid-message'>Loading your library...</p>);
     }
   }
 

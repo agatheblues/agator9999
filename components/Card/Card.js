@@ -7,7 +7,7 @@ const Card = function({id, name, imgUrl, totalAlbums}) {
   let albums = (totalAlbums > 1) ? totalAlbums + ' albums' : totalAlbums + ' album';
   return (
     <div className='card-container'>
-      <Link to={'/artist/' + id}>
+      <Link to={'/artist/' + id} className='card-link'>
         <div className='card-wrapper'>
           <div className='card-image' style={{ 'backgroundImage': `url(${imgUrl})`}}>
           </div>
