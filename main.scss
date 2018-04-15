@@ -33,3 +33,11 @@ a {
 a:hover {
   color: $orange;
 }
+
+
+.title {
+  color: $black;
+  margin: 40px 20px 20px 20px;
+  padding-bottom: 20px;
+  border-bottom: solid 1px $orange;
+}
