@@ -2,11 +2,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Message from '../Message/Message.js';
 import ArtistSummary from '../ArtistSummary/ArtistSummary.js';
-import AlbumOverview from '../AlbumOverview/AlbumOverview.js';
+import Album from '../Album/Album.js';
 import {getArtist, getFbDb} from '../../DataWrapper/FirebaseDataWrapper.js';
-require('./ArtistOverview.scss');
+require('./Artist.scss');
 
-class ArtistOverview extends React.Component {
+class Artist extends React.Component {
 
   constructor(props) {
     super();
@@ -39,14 +39,14 @@ class ArtistOverview extends React.Component {
     });
   }
 
-  renderAlbumOverviews() {
+  renderAlbums() {
     return (
       <div>
         {
           this.state.artistData.albums.map((album, index) => {
             return(
               <div key={index} >
-                <AlbumOverview id={album.id} totalTracks={album.totalTracks}/>
+                <Album id={album.id} totalTracks={album.totalTracks}/>
               </div>
             );
           })
@@ -67,7 +67,7 @@ class ArtistOverview extends React.Component {
         {this.state.hasArtistData &&
             <div>
               <ArtistSummary artist={this.state.artistData} />
-              {this.renderAlbumOverviews()}
+              {this.renderAlbums()}
             </div>}
         {!this.state.hasArtistData && <p>Loading...</p>}
       </div>
@@ -75,7 +75,7 @@ class ArtistOverview extends React.Component {
   }
 };
 
-ArtistOverview.propTypes = {
+Artist.propTypes = {
   match: PropTypes.shape({
     params: PropTypes.shape({
       id: PropTypes.node,
@@ -83,4 +83,4 @@ ArtistOverview.propTypes = {
   }).isRequired
 };
 
-export default ArtistOverview;
+export default Artist;

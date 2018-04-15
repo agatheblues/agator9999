@@ -2,9 +2,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Message from '../Message/Message.js';
 import {getAlbum, getFbDb} from '../../DataWrapper/FirebaseDataWrapper.js';
-require('./AlbumOverview.scss');
+require('./Album.scss');
 
-class AlbumOverview extends React.Component {
+class Album extends React.Component {
 
   constructor(props) {
     super();
@@ -91,9 +91,9 @@ class AlbumOverview extends React.Component {
   }
 };
 
-AlbumOverview.propTypes = {
+Album.propTypes = {
   id: PropTypes.string.isRequired,
   totalTracks: PropTypes.number.isRequired
 };
 
-export default AlbumOverview;
+export default Album;
