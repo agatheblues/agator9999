@@ -1,6 +1,61 @@
-
-
 .album-wrapper {
   display: flex;
   flex-wrap: wrap;
+  margin: 50px 0 50px 0;
+}
+
+
+.album-cover-container {
+  width: 100%;
+  margin-bottom: 50px;
+}
+
+.album-detail-container {
+  width: 100%;
+}
+
+.album-cover {
+  width: 80%;
+  height: auto;
+  margin: auto;
+}
+
+.album-main-details {
+    margin: 20px 0 20px 0;
+}
+
+.album-main-details p {
+  font-size: 16px;
+}
+
+
+/* iPads (portrait and landscape) ----------- */
+@media only screen and (min-width : 480px) {
+  .album-cover-container {
+    width: 50%;
+  }
+
+  .album-detail-container {
+    width: 50%;
+  }
+
+}
+
+/* iPads (portrait and landscape) ----------- */
+@media only screen and (min-width : 768px) {
+  .album-cover-container {
+    width: 40%;
+  }
+
+  .album-detail-container {
+    width: 60%;
+  }
+
+}
+
+/* Desktops and laptops ----------- */
+@media only screen  and (min-width : 1224px) {
+  .album-cover-container {
+    width: 30%;
+  }
 }
