@@ -26,8 +26,8 @@ export function getInstance(access_token) {
  * Build URL to login authentication
  * @return {string} URL
  */
-export function getLoginUrl() {
-  const urlState = generateRandomString(16);
+export function getLoginUrl(redirectTo) {
+  const urlState = redirectTo;
 
   localStorage.setItem(STATE_KEY, urlState);
   let url = SPOTIFY_LOGIN_URL;
@@ -48,6 +48,31 @@ export function getLoginUrl() {
  */
 export function getStateKey() {
   return localStorage.getItem(STATE_KEY);
+}
+
+
+/**
+ * Get value of state in local storage
+ * @return {string} Value of state
+ */
+export function removeStateKey() {
+  return localStorage.removeItem(STATE_KEY);
+}
+
+/**
+ * Set value of token in local storage
+ */
+export function setAccessToken(token) {
+  return localStorage.setItem('ACCESS_TOKEN', token);
+}
+
+
+/**
+ * Get value of token in local storage
+ * @return {string} Value of token
+ */
+export function getAccessToken() {
+  return localStorage.getItem('ACCESS_TOKEN');
 }
 
 /**

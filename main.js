@@ -1,7 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { HashRouter, Route, Switch, Link, Redirect } from 'react-router-dom';
+import SpotifySync from './components/SpotifySync/SpotifySync';
 import SpotifyLogin from './components/SpotifyLogin/SpotifyLogin';
+import SpotifyProfile from './components/SpotifyProfile/SpotifyProfile';
 import CardGrid from './components/CardGrid/CardGrid';
 import CreateAlbum from './components/CreateAlbum/CreateAlbum';
 import Artist from './components/Artist/Artist';
@@ -36,8 +38,9 @@ class App extends React.Component {
   render() {
     return (
       <div className='content-container'>
-        <Link to='/spotify-sync'>Synchronize Spotify Data</Link>
+        <Link to='/spotify/sync'>Synchronize Spotify Data</Link>
         <Link to='/album/create'>Add album</Link>
+        <SpotifyProfile />
         <CardGrid cards={this.state.artists} loaded={this.state.loadedArtists} title='Artists'/>
       </div>
     );
@@ -48,7 +51,8 @@ ReactDOM.render(
   <HashRouter>
     <Switch>
       <Route exact path="/" component={App} />
-      <Route exact path="/spotify-sync" component={SpotifyLogin} />
+      <Route exact path="/spotify/sync" component={SpotifySync} />
+      <Route exact path="/spotify/login" component={SpotifyLogin} />
       <Route path="/:access_token(access_token=.*)" component={SpotifyLogin} />
       <Route exact path="/album/create" component={CreateAlbum} />
       <Route exact path="/artist/:id" component={Artist} />

@@ -4,8 +4,11 @@ require('../ProfileCard/ProfileCard.scss');
 
 const ProfileCard = ({id, imgUrl}) => (
   <div className='profileContainer'>
-    <p className='profileId'>{id}</p>
     <img alt='profile picture' src={imgUrl} className='profilePicture'/>
+    <div className='profileId'>
+      <p>Logged in as:</p>
+      <p>{id}</p>
+    </div>
   </div>
 );
 
