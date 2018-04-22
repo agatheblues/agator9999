@@ -9,8 +9,6 @@ class Album extends React.Component {
   constructor(props) {
     super();
 
-    this.db = getFbDb();
-
     this.months = [
       'January', 'February', 'March', 'April', 'May', 'June',
       'July', 'August', 'September', 'October', 'November', 'December'
@@ -53,7 +51,7 @@ class Album extends React.Component {
   }
 
   componentDidMount() {
-    getAlbum(this.props.id, this.db, this.handleGetAlbumSuccess, this.handleGetAlbumError);
+    getAlbum(this.props.id, this.handleGetAlbumSuccess, this.handleGetAlbumError);
   }
 
   renderAlbumCover() {

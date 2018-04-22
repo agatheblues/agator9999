@@ -14,8 +14,6 @@ class App extends React.Component {
   constructor(props){
     super(props);
 
-    this.db = fb.getFbDb();
-
     this.state = {
       artists: [],
       loadedArtists: false
@@ -32,7 +30,7 @@ class App extends React.Component {
   }
 
   componentDidMount() {
-    fb.getArtists(this.db, this.handleGetArtists);
+    fb.getArtists(this.handleGetArtists);
   }
 
   render() {

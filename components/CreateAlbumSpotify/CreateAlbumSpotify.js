@@ -47,10 +47,10 @@ class CreateAlbumSpotify extends React.Component {
     });
   }
 
-  handleSuccess() {
+  handleSuccess(message) {
     this.setState({
       'error': false,
-      'message': 'Album has been successfully fetched'
+      'message': message
     });
   }
 
@@ -66,12 +66,11 @@ class CreateAlbumSpotify extends React.Component {
         messageForm: ''
       });
 
-      api.getAlbum(this.accessToken, this.getSpotifyId(this.state.value), this.handleSuccess, this.handleError);
+      api.createAlbum(this.accessToken, this.getSpotifyId(this.state.value), this.handleSuccess, this.handleError);
     }
   }
 
   render() {
-    console.log(this.state);
     return (
       <div>
         {!this.accessToken &&

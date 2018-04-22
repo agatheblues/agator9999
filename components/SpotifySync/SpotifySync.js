@@ -6,15 +6,12 @@ import SpotifyLogin from '../SpotifyLogin/SpotifyLogin.js';
 import SpotifyProfile from '../SpotifyProfile/SpotifyProfile';
 import { Link } from 'react-router-dom';
 import * as api from '../../DataWrapper/SpotifyDataWrapper.js';
-import {getFbDb} from '../../DataWrapper/FirebaseDataWrapper.js';
 
 
 class SpotifySync extends React.Component {
 
   constructor(props) {
     super();
-
-    this.db = getFbDb();
 
     // Pagination limit
     this.limit = 50;
@@ -39,7 +36,7 @@ class SpotifySync extends React.Component {
 
     if (this.accessToken) {
 
-      if (offset + this.limit < totalItems) {
+      if (offset < totalItems) {
         const upperLimit = ((offset + 2*this.limit) >= totalItems) ? totalItems : (offset + 2*this.limit);
 
         this.setState({
@@ -47,9 +44,10 @@ class SpotifySync extends React.Component {
           'message': 'Loading albums ' + (offset + this.limit) + ' - ' + upperLimit + ' of ' + totalItems
         });
 
-        api.setAlbumsAndArtists(this.accessToken, offset + this.limit, this.limit, this.db, this.handleSyncSuccess, this.handleError);
+        console.log(offset, this.limit, totalItems);
+        api.setAlbumsAndArtists(this.accessToken, offset + this.limit, this.limit, this.handleSyncSuccess, this.handleError);
       } else {
-        api.setAlbumsAndArtists(this.accessToken, offset + this.limit, this.limit, this.db, this.getImages, this.handleError);
+        this.getImages();
       }
     }
   }
@@ -60,7 +58,7 @@ class SpotifySync extends React.Component {
       'message': 'Loading artist images...'
     });
 
-    api.getArtistImages(this.accessToken, this.db, this.handleSyncImageSuccess, this.handleError);
+    api.getArtistImages(this.accessToken, this.handleSyncImageSuccess, this.handleError);
   }
 
   handleSyncImageSuccess() {
@@ -82,7 +80,8 @@ class SpotifySync extends React.Component {
       'error': false,
       'message': 'Loading albums 0 - ' + this.limit
     });
-    api.setAlbumsAndArtists(this.accessToken, 0, this.limit, this.db, this.handleSyncSuccess, this.handleError);
+
+    api.setAlbumsAndArtists(this.accessToken, 0, this.limit, this.handleSyncSuccess, this.handleError);
   }
 
   render() {

@@ -11,8 +11,6 @@ class Artist extends React.Component {
   constructor(props) {
     super();
 
-    this.db = getFbDb();
-
     this.state = {
       error: false,
       message: null,
@@ -56,7 +54,7 @@ class Artist extends React.Component {
   }
 
   componentDidMount() {
-    getArtist(this.props.match.params.id, this.db, this.handleGetArtistSuccess, this.handleGetArtistError);
+    getArtist(this.props.match.params.id, this.handleGetArtistSuccess, this.handleGetArtistError);
   }
 
 

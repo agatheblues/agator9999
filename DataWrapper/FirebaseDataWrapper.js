@@ -2,7 +2,7 @@ import axios from 'axios';
 import firebase from 'firebase';
 import config from '../config.json';
 
-let albumStructure = (
+let albumsStructure = (
   {
     added_at,
     album: {
@@ -17,6 +17,24 @@ let albumStructure = (
     id,
     albumData: {
       added_at,
+      name,
+      spotify,
+      images,
+      release_date
+    }
+  });
+
+let albumStructure = (
+  {
+    id,
+    name,
+    external_urls:  {spotify},
+    images,
+    release_date
+  }) => (
+  {
+    id,
+    albumData: {
       name,
       spotify,
       images,
@@ -60,59 +78,111 @@ export function getFbDb() {
 }
 
 
-export function pushAlbums(items, db) {
+export function pushAlbums(items) {
+
+  // Get db
+  const db = getFbDb();
 
   // Flatten the array of albums
-  const albums = items.map(item => convertToAlbumFromSpotify(item));
+  const albums = items.map(item => convertToAlbumsFromSpotify(item));
 
   // Create /albums ref
   const ref = db.ref('albums');
 
   // Get album Ids already in the db
-  const albumIdsAlreadyInDb = getAllKeys(ref);
+  getAllKeysThen(ref, (keys) => {
+    // Compare albums to those in the DB, extract only ids that are not there yet
+    const newAlbums = albums.filter(album => !isInArray(keys, album.id));
 
-  // Compare albums to those in the DB, extract only ids that are not there yet
-  const newAlbums = albums.filter(album => !isInArray(albumIdsAlreadyInDb, album.id));
-
-  if (newAlbums.length == 0) {
-    return;
-  }
-
-  // Push new albums to DB
-  newAlbums.forEach(album => ref.child(album.id).set(album.albumData));
+    // Push new albums to DB
+    newAlbums.forEach(album => ref.child(album.id).set(album.albumData));
+  });
 
 }
 
 
 
+export function pushAlbum(item, onError) {
 
-export function pushArtists(items, db) {
+  // Get db
+  const db = getFbDb();
 
-  // Flatten the array of artists
-  const artists = flatten(items.map(item => item.album.artists.map(artist => convertToArtistFromSpotify(artist, item.album.id, item.album.tracks.total))));
+  // Flatten the array of albums
+  const album = convertToAlbumFromSpotify(item);
+
+  // Create /albums ref
+  const ref = db.ref('albums');
+
+  // Get album Ids already in the db
+  getAllKeysThen(ref, (keys) => {
+
+    // Compare albums to those in the DB, extract only ids that are not there yet
+    if (isInArray(keys, album.id)) {
+
+      onError('Oops ! Album is already in your library.');
+
+    } else {
+
+      // Save album in DB
+      ref.child(album.id).set(album.albumData);
+
+      // Flatten the array of artists
+      const artists = flatten(item.artists.map(artist => convertToArtistFromSpotify(artist, item.id, item.tracks.total)));
+
+      // Push artists for real
+      pushArtists(artists);
+    }
+  });
+}
+
+
+/**
+ * Format the array of array of artists send back by /me/albums
+ * @param  {array} items Array of albums
+ * @return {array}       Array of artists
+ */
+export function formatArtists(items) {
+  return flatten(items.map(item => item.album.artists.map(artist => convertToArtistFromSpotify(artist, item.album.id, item.album.tracks.total))));
+}
+
+
+/**
+ * Save artists to firebase
+ * @param  {array} artists Array of artists
+ * @return
+ */
+export function pushArtists(artists) {
+
+  // Get db
+  const db = getFbDb();
 
   // Create /artist ref
   const ref = db.ref('artists');
 
   // Get artists Ids already in the db
-  const artistIdsInDb = getAllKeys(ref);
+  getAllKeysThen(ref, (keys) => {
 
-  // Compare artists to those in the DB, extract only ids that are not there yet
-  const newArtists = artists.filter(artist => !isInArray(artistIdsInDb, artist.id));
+    // Compare artists to those in the DB, extract only ids that are not there yet
+    const newArtists = artists.filter(artist => !isInArray(keys, artist.id));
 
-  // Push new artists to DB
-  newArtists.forEach(artist => ref.child(artist.id).set(artist.artistData));
+    // Push new artists to DB
+    newArtists.forEach(artist => ref.child(artist.id).set(artist.artistData));
 
-  // Get artists in the DB and add the album
-  const updateArtists = artists.filter(artist => isInArray(artistIdsInDb, artist.id));
+    // Get artists in the DB and add the album
+    const updateArtists = artists.filter(artist => isInArray(keys, artist.id));
 
-  // Update albums of artist which are already in the DB
-  updateArtists.forEach(artist => addAlbumToArtist(ref, artist));
+    // Update albums of artist which are already in the DB
+    updateArtists.forEach(artist => addAlbumToArtist(ref, artist));
+  });
 }
 
 
 // TODO: Add onError
-export function getArtists(db, onSuccess) {
+export function getArtists(onSuccess) {
+
+  // Get db
+  const db = getFbDb();
+
   // Create /artist ref
   const ref = db.ref('artists');
 
@@ -133,8 +203,18 @@ export function getArtists(db, onSuccess) {
 }
 
 
+/**
+ * Get artist from FB
+ * @param  {string} id        Artist id
+ * @param  {func} onSuccess   Success callback
+ * @param  {func} onError     Error callback
+ * @return
+ */
+export function getArtist(id, onSuccess, onError) {
 
-export function getArtist(id, db, onSuccess, onError) {
+  // Get db
+  const db = getFbDb();
+
   // Create /artist ref
   const ref = db.ref('artists/' + id);
 
@@ -152,7 +232,18 @@ export function getArtist(id, db, onSuccess, onError) {
 }
 
 
-export function getAlbum(id, db, onSuccess, onError) {
+/**
+ * Get album from FB
+ * @param  {string} id        Album id
+ * @param  {func} onSuccess   Success callback
+ * @param  {func} onError     Error callback
+ * @return
+ */
+export function getAlbum(id, onSuccess, onError) {
+
+  // Get db
+  const db = getFbDb();
+
   // Create /album ref
   const ref = db.ref('albums/' + id);
 
@@ -171,16 +262,15 @@ export function getAlbum(id, db, onSuccess, onError) {
  * @param  {ref} ref Reference to a db path
  * @return {array}     array of keys
  */
-export function getAllKeys(ref) {
-  var keys = [];
+export function getAllKeysThen(ref, doThis) {
 
-  ref.on('value', function(snapshot) {
+  ref.once('value', function(snapshot) {
+    let keys = [];
     snapshot.forEach(function(key) {
       keys.push(key.key);
     });
+    doThis(keys);
   });
-
-  return keys;
 }
 
 
@@ -199,9 +289,21 @@ function isInArray(arr, item) {
  * @param  {object} item album object from spotify
  * @return {object}      album object for DB
  */
+function convertToAlbumsFromSpotify(item) {
+  let album = albumsStructure(item);
+  album['albumData'] = renameSpotifyKeyToUrl(album['albumData']);
+  return album;
+}
+
+/**
+ * Convert an album object returned by spotify to a simpler album object
+ * @param  {object} item album object from spotify
+ * @return {object}      album object for DB
+ */
 function convertToAlbumFromSpotify(item) {
   let album = albumStructure(item);
   album['albumData'] = renameSpotifyKeyToUrl(album['albumData']);
+  album['albumData']['added_at'] = Date.now();
   return album;
 }
 
