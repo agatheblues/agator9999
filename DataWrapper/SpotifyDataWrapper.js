@@ -13,7 +13,7 @@ const SCOPE = 'user-read-private user-read-email user-library-read';
  * @param  {string} access_token Spotify API Access token retrieved after login
  * @return {func}              Axios instance
  */
-export function getInstance(access_token) {
+function getInstance(access_token) {
   return axios.create({
     baseURL: 'https://api.spotify.com/v1/',
     timeout: 1000,
@@ -85,7 +85,6 @@ export function getAccessToken() {
   const tokenDate = parseInt(localStorage.getItem('token_end_date'));
   const now = Date.now();
 
-  console.log(now, tokenDate);
   if ((now > tokenDate)) {
     removeAccessToken();
     return null;
@@ -161,14 +160,15 @@ export function handleErrorMessage(error) {
  * @param {function} onSuccess Success callback
  * @param {function} onError   Error callback
  */
-export function setAlbumsAndArtists(instance, offset, limit, db, onSuccess, onError) {
+export function setAlbumsAndArtists(token, offset, limit, db, onSuccess, onError) {
 
-  instance.get('/me/albums', {
-    params: {
-      limit: limit,
-      offset: offset
-    }
-  })
+  getInstance(token)
+    .get('/me/albums', {
+      params: {
+        limit: limit,
+        offset: offset
+      }
+    })
     .then((response) => {
       fb.pushAlbums(response.data.items, db);
       fb.pushArtists(response.data.items, db);
@@ -188,8 +188,9 @@ export function setAlbumsAndArtists(instance, offset, limit, db, onSuccess, onEr
  * @param {function} onSuccess Success callback
  * @param {function} onError   Error callback
  */
-export function getProfile(instance, onSuccess, onError) {
-  instance.get('/me')
+export function getProfile(token, onSuccess, onError) {
+  getInstance(token)
+    .get('/me')
     .then((response) => {
       onSuccess(response.data.id,  response.data.images[0].url);
     })
@@ -207,7 +208,7 @@ export function getProfile(instance, onSuccess, onError) {
  * @param {function} onSuccess Success callback
  * @param {function} onError   Error callback
  */
-export function getArtistImages(instance, db, onSuccess, onError) {
+export function getArtistImages(token, db, onSuccess, onError) {
 
   // Create /artist ref
   const ref = db.ref('artists');
@@ -220,7 +221,7 @@ export function getArtistImages(instance, db, onSuccess, onError) {
   const total = artistIdsChunk.length;
 
   // For each batch, load images
-  artistIdsChunk.forEach((chunk, index) => setImages(ref, instance, chunk, index, total, onSuccess, onError));
+  artistIdsChunk.forEach((chunk, index) => setImages(ref, token, chunk, index, total, onSuccess, onError));
 
 }
 
@@ -235,13 +236,14 @@ export function getArtistImages(instance, db, onSuccess, onError) {
  * @param {function} onSuccess Success callback
  * @param {function} onError   Error callback
  */
-function setImages(ref, instance, artistIds, chunkId, totalChunks, onSuccess, onError) {
+function setImages(ref, token, artistIds, chunkId, totalChunks, onSuccess, onError) {
 
-  instance.get('/artists', {
-    params: {
-      ids: artistIds.join(',')
-    }
-  })
+  getInstance(token)
+    .get('/artists', {
+      params: {
+        ids: artistIds.join(',')
+      }
+    })
     .then((response) => {
 
       // Update image url value of artist
@@ -274,9 +276,10 @@ function setImages(ref, instance, artistIds, chunkId, totalChunks, onSuccess, on
 
 
 
-export function getAlbum(instance, albumId, onSuccess, onError) {
+export function getAlbum(token, albumId, onSuccess, onError) {
 
-  instance.get('/albums/' + albumId)
+  getInstance(token)
+    .get('/albums/' + albumId)
     .then((response) => {
       console.log(response);
     })

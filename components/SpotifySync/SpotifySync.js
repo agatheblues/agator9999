@@ -22,14 +22,10 @@ class SpotifySync extends React.Component {
     // Get accessToken
     this.accessToken = api.getAccessToken();
 
-    // Axios instance
-    this.instance = api.getInstance(this.accessToken);
-
     // set local state
     this.state = {
       error: false,
-      message: null,
-      accessToken: this.accessToken
+      message: null
     };
 
     this.handleClick = this.handleClick.bind(this);
@@ -41,7 +37,7 @@ class SpotifySync extends React.Component {
 
   handleSyncSuccess(hasNextPage, totalItems, offset) {
 
-    if (this.state.accessToken) {
+    if (this.accessToken) {
 
       if (offset + this.limit < totalItems) {
         const upperLimit = ((offset + 2*this.limit) >= totalItems) ? totalItems : (offset + 2*this.limit);
@@ -51,9 +47,9 @@ class SpotifySync extends React.Component {
           'message': 'Loading albums ' + (offset + this.limit) + ' - ' + upperLimit + ' of ' + totalItems
         });
 
-        api.setAlbumsAndArtists(this.instance, offset + this.limit, this.limit, this.db, this.handleSyncSuccess, this.handleError);
+        api.setAlbumsAndArtists(this.accessToken, offset + this.limit, this.limit, this.db, this.handleSyncSuccess, this.handleError);
       } else {
-        api.setAlbumsAndArtists(this.instance, offset + this.limit, this.limit, this.db, this.getImages, this.handleError);
+        api.setAlbumsAndArtists(this.accessToken, offset + this.limit, this.limit, this.db, this.getImages, this.handleError);
       }
     }
   }
@@ -64,7 +60,7 @@ class SpotifySync extends React.Component {
       'message': 'Loading artist images...'
     });
 
-    api.getArtistImages(this.instance, this.db, this.handleSyncImageSuccess, this.handleError);
+    api.getArtistImages(this.accessToken, this.db, this.handleSyncImageSuccess, this.handleError);
   }
 
   handleSyncImageSuccess() {
@@ -86,7 +82,7 @@ class SpotifySync extends React.Component {
       'error': false,
       'message': 'Loading albums 0 - ' + this.limit
     });
-    api.setAlbumsAndArtists(this.instance, 0, this.limit, this.db, this.handleSyncSuccess, this.handleError);
+    api.setAlbumsAndArtists(this.accessToken, 0, this.limit, this.db, this.handleSyncSuccess, this.handleError);
   }
 
   render() {
@@ -96,7 +92,7 @@ class SpotifySync extends React.Component {
         <div className='back-to-library'>
           <Link to='/'>&#9839; Back to library</Link>
         </div>
-        {this.state.accessToken &&
+        {this.accessToken &&
           <div>
             <SpotifyProfile />
             <Button
@@ -105,7 +101,7 @@ class SpotifySync extends React.Component {
             />
           </div>
         }
-        {!this.state.accessToken &&
+        {!this.accessToken &&
           <SpotifyLogin redirect='spotify/sync'/>
         }
       </div>

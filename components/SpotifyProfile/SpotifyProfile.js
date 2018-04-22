@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import ProfileCard from '../ProfileCard/ProfileCard';
 import Message from '../Message/Message.js';
 import * as api from '../../DataWrapper/SpotifyDataWrapper.js';
-require('./SpotifyProfile.scss');
 
 
 class SpotifyProfile extends React.Component {
@@ -13,9 +12,6 @@ class SpotifyProfile extends React.Component {
 
     // Get accessToken
     this.accessToken = api.getAccessToken();
-
-    // Axios instance
-    this.instance = api.getInstance(this.accessToken);
 
     // set local state
     this.state = {
@@ -48,7 +44,7 @@ class SpotifyProfile extends React.Component {
 
   componentDidMount() {
     if (this.accessToken) {
-      api.getProfile(this.instance, this.handleProfileSuccess, this.handleError);
+      api.getProfile(this.accessToken, this.handleProfileSuccess, this.handleError);
     }
   }
 

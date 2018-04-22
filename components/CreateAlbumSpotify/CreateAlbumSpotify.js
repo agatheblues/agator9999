@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Button from '../Button/Button';
 import SpotifyLogin from '../SpotifyLogin/SpotifyLogin';
+import Message from '../Message/Message';
 import * as api from '../../DataWrapper/SpotifyDataWrapper.js';
 require('./CreateAlbumSpotify.scss');
 
@@ -12,19 +13,19 @@ class CreateAlbumSpotify extends React.Component {
     // Get accessToken
     this.accessToken = api.getAccessToken();
 
-    // Axios instance
-    this.instance = api.getInstance(this.accessToken);
-
     // set local state
     this.state = {
       value: '',
       error: false,
+      messageForm: null,
       message: null,
       accessToken: this.accessToken
     };
 
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleSuccess = this.handleSuccess.bind(this);
+    this.handleError = this.handleError.bind(this);
   }
 
   handleChange(event) {
@@ -35,21 +36,42 @@ class CreateAlbumSpotify extends React.Component {
     return s.indexOf('spotify:album:') == 0;
   }
 
+  getSpotifyId(s) {
+    return s.substring(14);
+  }
+
+  handleError(message) {
+    this.setState({
+      'error': true,
+      'message': message
+    });
+  }
+
+  handleSuccess() {
+    this.setState({
+      'error': false,
+      'message': 'Album has been successfully fetched'
+    });
+  }
+
   handleSubmit(event) {
     event.preventDefault();
 
     if (!this.checkSpotifyUri(this.state.value)) {
       this.setState({
-        message: 'URI be should formed as spotify:album:...'
+        messageForm: 'URI should be formed as spotify:album:...'
       });
     } else {
       this.setState({
-        message: 'Getting album !'
+        messageForm: ''
       });
+
+      api.getAlbum(this.accessToken, this.getSpotifyId(this.state.value), this.handleSuccess, this.handleError);
     }
   }
 
   render() {
+    console.log(this.state);
     return (
       <div>
         {!this.accessToken &&
@@ -75,8 +97,11 @@ class CreateAlbumSpotify extends React.Component {
               </div>
 
               {this.state.message &&
+                <Message message={this.state.message} error={this.state.error}/>
+              }
+              {this.state.messageForm &&
                 <div className='input-error-container'>
-                  <p className='input-error'>{this.state.message}</p>
+                  <p className='input-error'>{this.state.messageForm}</p>
                 </div>
               }
               <div className='submit-container'>
