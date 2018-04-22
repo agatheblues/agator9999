@@ -46,7 +46,7 @@ export function getLoginUrl(redirectTo) {
  * Get value of state in local storage
  * @return {string} Value of state
  */
-export function getStateKey() {
+function getStateKey() {
   return localStorage.getItem(STATE_KEY);
 }
 
@@ -55,24 +55,62 @@ export function getStateKey() {
  * Get value of state in local storage
  * @return {string} Value of state
  */
-export function removeStateKey() {
-  return localStorage.removeItem(STATE_KEY);
+function removeStateKey() {
+  localStorage.removeItem(STATE_KEY);
 }
 
 /**
  * Set value of token in local storage
  */
-export function setAccessToken(token) {
-  return localStorage.setItem('ACCESS_TOKEN', token);
+function setAccessToken(token, expiresIn) {
+  localStorage.setItem('token_end_date', Date.now() + parseInt(expiresIn));
+  localStorage.setItem('access_token', token);
 }
 
+/**
+ * remove values related to token from local storage
+ * @return {string} Value of token
+ */
+function removeAccessToken() {
+  localStorage.removeItem('access_token');
+  localStorage.removeItem('token_end_date');
+}
 
 /**
  * Get value of token in local storage
  * @return {string} Value of token
  */
 export function getAccessToken() {
-  return localStorage.getItem('ACCESS_TOKEN');
+  const token = localStorage.getItem('access_token');
+  const tokenDate = parseInt(localStorage.getItem('token_end_date'));
+  const now = Date.now();
+
+  console.log(now, tokenDate);
+  if ((now > tokenDate)) {
+    removeAccessToken();
+    return null;
+  }
+
+  return token;
+}
+
+export function authenticate(onError) {
+  const storedState = getStateKey();
+
+  // URL dependencies
+  const params = getHashParams();
+  const accessToken = params.access_token;
+  const urlState = params.state;
+  const expiresIn = params.expires_in * 1000; //ms
+
+  if (accessToken && (urlState == null || urlState !== storedState)) {
+    onError('There was an error during the authentication');
+  } else if (accessToken && expiresIn && storedState) {
+    setAccessToken(accessToken, expiresIn);
+    window.location = '/#/' + storedState;
+  }
+
+  removeStateKey();
 }
 
 /**
@@ -226,6 +264,21 @@ function setImages(ref, instance, artistIds, chunkId, totalChunks, onSuccess, on
       if (chunkId == totalChunks - 1) {
         onSuccess();
       }
+    })
+    .catch((error) => {
+      let message = handleErrorMessage(error);
+      onError(message);
+    });
+
+}
+
+
+
+export function getAlbum(instance, albumId, onSuccess, onError) {
+
+  instance.get('/albums/' + albumId)
+    .then((response) => {
+      console.log(response);
     })
     .catch((error) => {
       let message = handleErrorMessage(error);

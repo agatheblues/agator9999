@@ -11,16 +11,6 @@ class SpotifyLogin extends React.Component {
   constructor(props) {
     super();
 
-    this.storedState = api.getStateKey();
-
-    // URL dependencies
-    this.params = api.getHashParams();
-    this.accessToken = this.params.access_token;
-    this.urlState = this.params.state;
-
-    // Axios instance
-    this.instance = api.getInstance(this.accessToken);
-
     // set local state
     this.state = {
       error: false,
@@ -47,19 +37,7 @@ class SpotifyLogin extends React.Component {
   }
 
   componentDidMount() {
-    if (this.accessToken && (this.urlState == null || this.urlState !== this.storedState)) {
-
-      this.handleError('There was an error during the authentication');
-
-    } else {
-
-      if (this.accessToken && this.storedState) {
-        api.setAccessToken(this.accessToken);
-        window.location = '/#/' + this.storedState;
-        api.removeStateKey();
-      }
-
-    }
+    api.authenticate(this.handleError);
   }
 
   render() {
