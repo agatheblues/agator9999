@@ -160,7 +160,7 @@ export function handleErrorMessage(error) {
  * @param {function} onSuccess Success callback
  * @param {function} onError   Error callback
  */
-export function setAlbumsAndArtists(token, offset, limit, onSuccess, onError) {
+export function setAlbums(token, offset, limit, onSuccess, onError) {
 
   getInstance(token)
     .get('/me/albums', {
@@ -170,12 +170,10 @@ export function setAlbumsAndArtists(token, offset, limit, onSuccess, onError) {
       }
     })
     .then((response) => {
-      fb.pushAlbums(response.data.items);
-      fb.pushArtists(fb.formatArtists(response.data.items));
-
-      onSuccess(response.data.next, response.data.total, offset);
+      fb.pushAlbums(response.data.items, onSuccess, onError, response.data.next, response.data.total, offset);
     })
     .catch((error) => {
+      console.log(error);
       let message = handleErrorMessage(error);
       onError(message);
     });
@@ -215,6 +213,7 @@ export function getArtistImages(token, onSuccess, onError) {
   const ref = db.ref('artists');
 
   //TODO Only get keys without imgUrl key
+
   // Get artists Ids already in the db
   fb.getAllKeysThen(ref, (keys) => {
     // Create batches of 50 ids
@@ -222,7 +221,7 @@ export function getArtistImages(token, onSuccess, onError) {
     const total = artistIdsChunk.length;
 
     // For each batch, load images
-    artistIdsChunk.forEach((chunk, index) => setImages(ref, token, chunk, index, total, onSuccess, onError));
+    artistIdsChunk.forEach((chunk, index) => setImageChunk(ref, token, chunk, index, total, onSuccess, onError));
   });
 }
 
@@ -237,7 +236,7 @@ export function getArtistImages(token, onSuccess, onError) {
  * @param {function} onSuccess Success callback
  * @param {function} onError   Error callback
  */
-function setImages(ref, token, artistIds, chunkId, totalChunks, onSuccess, onError) {
+function setImageChunk(ref, token, artistIds, chunkId, totalChunks, onSuccess, onError) {
 
   getInstance(token)
     .get('/artists', {
@@ -277,14 +276,29 @@ function setImages(ref, token, artistIds, chunkId, totalChunks, onSuccess, onErr
 
 
 
+export function getArtistImage(token, id) {
+
+  getInstance(token)
+    .get('/artists/' + id)
+    .then((response) => {
+      console.log(response);
+    })
+    .catch((error) => {
+      let message = handleErrorMessage(error);
+      onError(message);
+    });
+
+}
+
+
+
 export function createAlbum(token, albumId, onSuccess, onError) {
   const db = fb.getFbDb();
 
   getInstance(token)
     .get('/albums/' + albumId)
     .then((response) => {
-      fb.pushAlbum(response.data, db, onError);
-      onSuccess('Album successfully added...');
+      fb.pushAlbum(response.data, db, onSuccess, onError);
     })
     .catch((error) => {
       let message = handleErrorMessage(error);

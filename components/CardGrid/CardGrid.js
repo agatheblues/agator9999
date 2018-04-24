@@ -15,6 +15,7 @@ class CardGrid extends React.Component {
         <div className='grid-container'>
           {
             this.props.cards.map((card, index) => {
+              console.log(card);
               return(
                 <div key={index} >
                   <Card id={card.id} name={card.name} imgUrl={card.imgUrl} totalAlbums={Object.keys(card.albums).length}/>
@@ -27,7 +28,7 @@ class CardGrid extends React.Component {
     }
 
     if ((this.props.cards.length == 0) && this.props.loaded) {
-      return (<p className='cardgrid-message'>Oops! You have nothing in your library.</p>);
+      return (<p className='cardgrid-message'>Oops! There is 0 artist in your library.</p>);
     }
 
     if (!this.props.loaded) {

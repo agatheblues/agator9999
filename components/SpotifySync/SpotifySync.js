@@ -26,28 +26,31 @@ class SpotifySync extends React.Component {
     };
 
     this.handleClick = this.handleClick.bind(this);
-    this.handleSyncSuccess = this.handleSyncSuccess.bind(this);
+    this.handleAlbumSyncSuccess = this.handleAlbumSyncSuccess.bind(this);
     this.handleSyncImageSuccess = this.handleSyncImageSuccess.bind(this);
     this.handleError = this.handleError.bind(this);
     this.getImages = this.getImages.bind(this);
   }
 
-  handleSyncSuccess(hasNextPage, totalItems, offset) {
+  handleAlbumSyncSuccess(hasNextPage, totalItems, offset) {
 
     if (this.accessToken) {
 
       if (offset < totalItems) {
         const upperLimit = ((offset + 2*this.limit) >= totalItems) ? totalItems : (offset + 2*this.limit);
-
+        console.log('kiki');
         this.setState({
           'error': false,
           'message': 'Loading albums ' + (offset + this.limit) + ' - ' + upperLimit + ' of ' + totalItems
         });
 
-        console.log(offset, this.limit, totalItems);
-        api.setAlbumsAndArtists(this.accessToken, offset + this.limit, this.limit, this.handleSyncSuccess, this.handleError);
+        api.setAlbums(this.accessToken, offset + this.limit, this.limit, this.handleAlbumSyncSuccess, this.handleError);
       } else {
-        this.getImages();
+        console.log('caca');
+        this.setState({
+          'error': false,
+          'message': 'Loading albums successful!'
+        });
       }
     }
   }
@@ -81,7 +84,7 @@ class SpotifySync extends React.Component {
       'message': 'Loading albums 0 - ' + this.limit
     });
 
-    api.setAlbumsAndArtists(this.accessToken, 0, this.limit, this.handleSyncSuccess, this.handleError);
+    api.setAlbums(this.accessToken, 0, this.limit, this.handleAlbumSyncSuccess, this.handleError);
   }
 
   render() {

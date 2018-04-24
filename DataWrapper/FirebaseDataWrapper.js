@@ -14,15 +14,15 @@ let albumsStructure = (
     }
   }) => (
   {
-    id,
-    albumData: {
+    [id]: {
       added_at,
       name,
       spotify,
       images,
       release_date
     }
-  });
+  }
+);
 
 let albumStructure = (
   {
@@ -50,10 +50,8 @@ let artistStructure = (
   }) => (
   {
     id,
-    artistData: {
-      name,
-      spotify
-    }
+    name,
+    spotify
   });
 
 
@@ -78,31 +76,37 @@ export function getFbDb() {
 }
 
 
-export function pushAlbums(items) {
+export function pushAlbums(items, onSuccess, onError, hasNextPage, totalItems, offset) {
 
   // Get db
   const db = getFbDb();
 
-  // Flatten the array of albums
-  const albums = items.map(item => convertToAlbumsFromSpotify(item));
+  // Flatten the array of albums, and convert to expected structure
+  const albums = flatten(items.map(item => convertToAlbumsFromSpotify(item)));
+
+  // Transform array to object with key = album id
+  const albumsList = albums.reduce((obj, item) => Object.assign({}, obj, item), {});
 
   // Create /albums ref
   const ref = db.ref('albums');
 
-  // Get album Ids already in the db
-  getAllKeysThen(ref, (keys) => {
-    // Compare albums to those in the DB, extract only ids that are not there yet
-    const newAlbums = albums.filter(album => !isInArray(keys, album.id));
+  // Push new albums to DB
+  ref
+    .update(albumsList)
+    .then(() => {
+      // onSuccess(hasNextPage, totalItems, offset);
 
-    // Push new albums to DB
-    newAlbums.forEach(album => ref.child(album.id).set(album.albumData));
-  });
-
+      pushArtists(items, onSuccess, onError, hasNextPage, totalItems, offset);
+    })
+    .catch((error) => {
+      console.log(error);
+      onError('Oops ! Something went wrong while pushing Albums to Firebase. ' + error.code);
+    });
 }
 
 
 
-export function pushAlbum(item, onError) {
+export function pushAlbum(item, onSuccess, onError) {
 
   // Get db
   const db = getFbDb();
@@ -130,7 +134,7 @@ export function pushAlbum(item, onError) {
       const artists = flatten(item.artists.map(artist => convertToArtistFromSpotify(artist, item.id, item.tracks.total)));
 
       // Push artists for real
-      pushArtists(artists);
+      pushArtists(artists, onSuccess);
     }
   });
 }
@@ -141,7 +145,7 @@ export function pushAlbum(item, onError) {
  * @param  {array} items Array of albums
  * @return {array}       Array of artists
  */
-export function formatArtists(items) {
+function formatArtists(items) {
   return flatten(items.map(item => item.album.artists.map(artist => convertToArtistFromSpotify(artist, item.album.id, item.album.tracks.total))));
 }
 
@@ -151,7 +155,7 @@ export function formatArtists(items) {
  * @param  {array} artists Array of artists
  * @return
  */
-export function pushArtists(artists) {
+function pushArtists(items, onSuccess, onError, hasNextPage, totalItems, offset) {
 
   // Get db
   const db = getFbDb();
@@ -159,21 +163,37 @@ export function pushArtists(artists) {
   // Create /artist ref
   const ref = db.ref('artists');
 
-  // Get artists Ids already in the db
-  getAllKeysThen(ref, (keys) => {
+  // Transform array to object with key = artist id
+  const artistsList = formatArtists(items).reduce((obj, item) => Object.assign({}, obj, item), {});
 
-    // Compare artists to those in the DB, extract only ids that are not there yet
-    const newArtists = artists.filter(artist => !isInArray(keys, artist.id));
+  const albumList = flatten(items.map(item => item.album.artists.map(artist => getAlbumFromArtist(artist.id, item.album.id, item.album.tracks.total))))
+    .reduce((obj, item) => Object.assign({}, obj, item), {});
 
-    // Push new artists to DB
-    newArtists.forEach(artist => ref.child(artist.id).set(artist.artistData));
+  // Push new albums to DB
+  ref.update(artistsList)
+    .then(() => ref.update(albumList))
+    .then(() => {
+      onSuccess(hasNextPage, totalItems, offset);
+    })
+    .catch((error) => {
+      onError('Oops ! Something went wrong while adding artists to Firebase.');
+    });
 
-    // Get artists in the DB and add the album
-    const updateArtists = artists.filter(artist => isInArray(keys, artist.id));
-
-    // Update albums of artist which are already in the DB
-    updateArtists.forEach(artist => addAlbumToArtist(ref, artist));
-  });
+  // // Get artists Ids already in the db
+  // getAllKeysThen(ref, (keys) => {
+  //
+  //   // Compare artists to those in the DB, extract only ids that are not there yet
+  //   const newArtists = artists.filter(artist => !isInArray(keys, artist.id));
+  //
+  //   // Push new artists to DB
+  //   newArtists.forEach(artist => ref.child(artist.id).set(artist.artistData));
+  //
+  //   // Get artists in the DB and add the album
+  //   const updateArtists = artists.filter(artist => isInArray(keys, artist.id));
+  //
+  //   // Update albums of artist which are already in the DB
+  //   updateArtists.forEach(artist => addAlbumToArtist(ref, artist));
+  // });
 }
 
 
@@ -290,9 +310,7 @@ function isInArray(arr, item) {
  * @return {object}      album object for DB
  */
 function convertToAlbumsFromSpotify(item) {
-  let album = albumsStructure(item);
-  album['albumData'] = renameSpotifyKeyToUrl(album['albumData']);
-  return album;
+  return renameSpotifyKeyToUrl(albumsStructure(item));
 }
 
 /**
@@ -309,21 +327,34 @@ function convertToAlbumFromSpotify(item) {
 
 
 /**
- * Convert an artist object returned by spotify to a simpler artist object
+ * Convert an artist object returned by spotify to the firebase expected artist object
  * @param  {object} item artist object from spotify
- * @return {object}      artist object for DB
+ * @return {object}      artist object for DB: { id: {}}
  */
-function convertToArtistFromSpotify(item, albumId, totalTracks) {
+function convertToArtistFromSpotify(item) {
+  // Extract interesting fields from Spotify response
   let artist = artistStructure(item);
 
-  // Add album key
-  let album = {};
-  album[albumId] = { 'totalTracks': totalTracks };
-  artist['artistData']['albums'] = album;
+  let formatted = Object.keys(artist).reduce((acc, key) => {
+    // Rename spotify key
+    let accKey = (key == 'spotify') ? 'url' : key;
 
-  artist['artistData'] = renameSpotifyKeyToUrl(artist['artistData']);
-  return artist;
+    // Skip id key, else assign key
+    if (key != 'id') { acc[accKey] = artist[key]; }
+    return acc;
+  }, {});
+
+  // Add source and albums
+  formatted['source'] = 'spotify';
+  // formatted['albums/' + albumId] = { 'totalTracks': totalTracks };
+  return { [artist.id]: formatted};
 }
+
+
+function getAlbumFromArtist(artistId, albumId, totalTracks) {
+  return { ['/' + artistId + '/albums/' + albumId]: { 'totalTracks': totalTracks }};
+}
+
 
 
 /**
@@ -332,14 +363,18 @@ function convertToArtistFromSpotify(item, albumId, totalTracks) {
  * @return {object}      album or artist object with renamed and additionnal keys
  */
 function renameSpotifyKeyToUrl(item) {
-  let mapped = Object.keys(item).reduce((acc, key) => {
-    let accKey = (key == 'spotify') ? 'url' : key;
-    acc[accKey] = item[key];
-    return acc;
-  }, {});
+  const ids = Object.keys(item);
 
-  mapped['source'] = 'spotify';
-  return mapped;
+  return ids.map(id => {
+    let renamed = Object.keys(item[id]).reduce((acc, key) => {
+      let accKey = (key == 'spotify') ? 'url' : key;
+      acc[accKey] = item[id][key];
+      return acc;
+    }, {});
+    renamed['source'] = 'spotify';
+    return { [id]: renamed};
+  });
+
 }
 
 
