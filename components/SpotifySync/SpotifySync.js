@@ -29,63 +29,72 @@ class SpotifySync extends React.Component {
     this.handleAlbumSyncSuccess = this.handleAlbumSyncSuccess.bind(this);
     this.handleSyncImageSuccess = this.handleSyncImageSuccess.bind(this);
     this.handleError = this.handleError.bind(this);
-    this.getImages = this.getImages.bind(this);
   }
 
-  handleAlbumSyncSuccess(hasNextPage, totalItems, offset) {
+  /**
+   * Update the Message component props
+   * @param  {Boolean} error   Has error
+   * @param  {String} message  Message to display
+   */
+  updateMessage(error, message) {
+    this.setState({
+      error: error,
+      message: message
+    });
+  }
+
+  /**
+   * Start fetching first batch of albums
+   */
+  handleClick() {
+    this.updateMessage(false, 'Loading albums 0 - ' + this.limit);
+    api.setAlbumsThenArtists(this.accessToken, 0, this.limit, this.handleAlbumSyncSuccess, this.handleError);
+  }
+
+
+  /**
+   * On success of fetching a batch of albums, fetch the next one
+   * Else, start getting artist images
+   * @param  {int} totalAlbums  Total number of albums to fetch
+   * @param  {int} offset      Current pagination offset
+   */
+  handleAlbumSyncSuccess(totalAlbums, offset) {
 
     if (this.accessToken) {
+      if (offset < totalAlbums) {
 
-      if (offset < totalItems) {
-        const upperLimit = ((offset + 2*this.limit) >= totalItems) ? totalItems : (offset + 2*this.limit);
-        console.log('kiki');
-        this.setState({
-          'error': false,
-          'message': 'Loading albums ' + (offset + this.limit) + ' - ' + upperLimit + ' of ' + totalItems
-        });
+        // Update message
+        const upperLimit = ((offset + 2*this.limit) >= totalAlbums) ? totalAlbums : (offset + 2*this.limit);
+        this.updateMessage(false, 'Loading albums ' + (offset + this.limit) + ' - ' + upperLimit + ' of ' + totalAlbums);
 
-        api.setAlbums(this.accessToken, offset + this.limit, this.limit, this.handleAlbumSyncSuccess, this.handleError);
+        // Load next batch of albums
+        api.setAlbumsThenArtists(this.accessToken, offset + this.limit, this.limit, this.handleAlbumSyncSuccess, this.handleError);
+
       } else {
-        console.log('caca');
-        this.setState({
-          'error': false,
-          'message': 'Loading albums successful!'
-        });
+        
+        // Start fetching artist images
+        this.updateMessage(false, 'Loading albums and artists successful! Loading artist images...');
+        api.getThenSetArtistImages(this.accessToken, this.handleSyncImageSuccess, this.handleError);
+
       }
     }
   }
 
-  getImages() {
-    this.setState({
-      'error': false,
-      'message': 'Loading artist images...'
-    });
-
-    api.getArtistImages(this.accessToken, this.handleSyncImageSuccess, this.handleError);
-  }
-
+  /**
+   * Display success message when all artist images have been fetched
+   */
   handleSyncImageSuccess() {
-    this.setState({
-      'error': false,
-      'message': 'Loaded artist images! Spotify sync is complete.'
-    });
+    this.updateMessage(false, 'Loaded artist images! Spotify sync is complete.');
   }
 
+  /**
+   * Display error message when a problem occured
+   * @param  {String} message Error message
+   */
   handleError(message) {
-    this.setState({
-      'error': true,
-      'message': message
-    });
+    this.updateMessage(true, message);
   }
 
-  handleClick() {
-    this.setState({
-      'error': false,
-      'message': 'Loading albums 0 - ' + this.limit
-    });
-
-    api.setAlbums(this.accessToken, 0, this.limit, this.handleAlbumSyncSuccess, this.handleError);
-  }
 
   render() {
     return (

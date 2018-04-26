@@ -8,6 +8,34 @@ const CLIENT_ID = '349fcdbe411c472eac393c9fdcc73b13';
 const REDIRECT_URI = 'http://localhost:8888/#/callback';
 const SCOPE = 'user-read-private user-read-email user-library-read';
 
+
+/***** UTILS *****/
+
+/**
+ * For a given error, return a dedicated error message
+ * @param  {object} error Error object
+ * @return {string}       Error message
+ */
+function handleErrorMessage(error) {
+  let message;
+
+  if (typeof error.response === 'undefined') {
+    message = error.message;
+  } else {
+    if (error.response.status === 400) {
+      message = 'Bad request, often due to missing a required parameter.';
+    } else if (error.response.status === 401) {
+      message = 'No valid API key provided.';
+    } else if (error.response.status === 404) {
+      message = 'The requested resource doesn\'t exist.';
+    } else {
+      message = 'Unknown error: ' + error.message;
+    }
+  }
+
+  return message;
+}
+
 /**
  * Create axios instance for Spotify API requests
  * @param  {string} access_token Spotify API Access token retrieved after login
@@ -21,26 +49,26 @@ function getInstance(access_token) {
   });
 }
 
-
 /**
- * Build URL to login authentication
- * @return {string} URL
+ * Split a given array into chunks of a given length
+ * @param  {array} arr   Array to split
+ * @param  {int} chunkLength Length of a chunk
+ * @return {array[array]}       array of array chunks
  */
-export function getLoginUrl(redirectTo) {
-  const urlState = redirectTo;
+function splitArrayInChunks(arr, chunkLength) {
+  let i, j;
+  let result = [];
 
-  localStorage.setItem(STATE_KEY, urlState);
-  let url = SPOTIFY_LOGIN_URL;
+  for (i = 0, j = arr.length; i < j; i+=chunkLength) {
+    result.push(arr.slice(i, i + chunkLength));
+  }
 
-  url += '?response_type=token';
-  url += '&client_id=' + encodeURIComponent(CLIENT_ID);
-  url += '&scope=' + encodeURIComponent(SCOPE);
-  url += '&redirect_uri=' + encodeURIComponent(REDIRECT_URI);
-  url += '&state=' + encodeURIComponent(urlState);
-
-  return url;
+  return result;
 }
 
+
+
+/***** AUTHENTICATION *****/
 
 /**
  * Get value of state in local storage
@@ -76,6 +104,21 @@ function removeAccessToken() {
   localStorage.removeItem('token_end_date');
 }
 
+
+/**
+ * Obtains parameters from the hash of the URL
+ * @return Object
+ */
+function getHashParams() {
+  let hashParams = {};
+  let e, r = /([^&;=]+)=?([^&;]*)/g,
+    q = window.location.hash.substring(2);
+  while ( e = r.exec(q)) {
+    hashParams[e[1]] = decodeURIComponent(e[2]);
+  }
+  return hashParams;
+}
+
 /**
  * Get value of token in local storage
  * @return {string} Value of token
@@ -93,6 +136,30 @@ export function getAccessToken() {
   return token;
 }
 
+/**
+ * Build URL to login authentication
+ * @return {string} URL
+ */
+export function getLoginUrl(redirectTo) {
+  const urlState = redirectTo;
+
+  localStorage.setItem(STATE_KEY, urlState);
+  let url = SPOTIFY_LOGIN_URL;
+
+  url += '?response_type=token';
+  url += '&client_id=' + encodeURIComponent(CLIENT_ID);
+  url += '&scope=' + encodeURIComponent(SCOPE);
+  url += '&redirect_uri=' + encodeURIComponent(REDIRECT_URI);
+  url += '&state=' + encodeURIComponent(urlState);
+
+  return url;
+}
+
+
+/**
+ * Authentication flow
+ * @param  {function} onError handles error
+ */
 export function authenticate(onError) {
   const storedState = getStateKey();
 
@@ -105,62 +172,31 @@ export function authenticate(onError) {
   if (accessToken && (urlState == null || urlState !== storedState)) {
     onError('There was an error during the authentication');
   } else if (accessToken && expiresIn && storedState) {
+
+    // Save access token and expiration date in local storage
     setAccessToken(accessToken, expiresIn);
+
+    // Redirect to component route stored in state
     window.location = '/#/' + storedState;
   }
 
+  // Remove state key from storage to prevent side effects
   removeStateKey();
 }
 
-/**
- * Obtains parameters from the hash of the URL
- * @return Object
- */
-export function getHashParams() {
-  let hashParams = {};
-  let e, r = /([^&;=]+)=?([^&;]*)/g,
-    q = window.location.hash.substring(2);
-  while ( e = r.exec(q)) {
-    hashParams[e[1]] = decodeURIComponent(e[2]);
-  }
-  return hashParams;
-}
+
+
+/***** FETCH USER ALBUMS AND ARTISTS *****/
 
 /**
- * For a given error, return a dedicated error message
- * @param  {object} error Error object
- * @return {string}       Error message
- */
-export function handleErrorMessage(error) {
-  let message;
-
-  if (typeof error.response === 'undefined') {
-    message = error.message;
-  } else {
-    if (error.response.status === 400) {
-      message = 'Bad request, often due to missing a required parameter.';
-    } else if (error.response.status === 401) {
-      message = 'No valid API key provided.';
-    } else if (error.response.status === 404) {
-      message = 'The requested resource doesn\'t exist.';
-    } else {
-      message = 'Unknown error: ' + error.message;
-    }
-  }
-
-  return message;
-}
-
-/**
- * Get album and artists data, then set it in firbase
- * @param {object} instance  Spotify axios instance
+ * Get albums saved by user (batch of 50), then save it in firebase
+ * @param {String} token     Access token
  * @param {integer} offset   Pagination offset
  * @param {integer} limit    Pagination limit
- * @param {object} db        Firebase connection
  * @param {function} onSuccess Success callback
  * @param {function} onError   Error callback
  */
-export function setAlbums(token, offset, limit, onSuccess, onError) {
+export function setAlbumsThenArtists(token, offset, limit, onSuccess, onError) {
 
   getInstance(token)
     .get('/me/albums', {
@@ -170,10 +206,9 @@ export function setAlbums(token, offset, limit, onSuccess, onError) {
       }
     })
     .then((response) => {
-      fb.pushAlbums(response.data.items, onSuccess, onError, response.data.next, response.data.total, offset);
+      fb.pushAlbums(response.data.items, onSuccess, onError, response.data.total, offset);
     })
     .catch((error) => {
-      console.log(error);
       let message = handleErrorMessage(error);
       onError(message);
     });
@@ -182,11 +217,12 @@ export function setAlbums(token, offset, limit, onSuccess, onError) {
 
 /**
  * Get Spotify user profile
- * @param {object} instance  Spotify axios instance
+ * @param {String} token     Access token
  * @param {function} onSuccess Success callback
  * @param {function} onError   Error callback
  */
 export function getProfile(token, onSuccess, onError) {
+
   getInstance(token)
     .get('/me')
     .then((response) => {
@@ -196,32 +232,31 @@ export function getProfile(token, onSuccess, onError) {
       let message = handleErrorMessage(error);
       onError(message);
     });
+
 }
 
 
 /**
- * Get artist images from the artists stored in firebase
- * @param {object} instance  Spotify axios instance
- * @param {object} db        Firebase connection
+ * Get artist Ids from Firebase, then fetch their image in Spotify
+ * and update the artist in Firebase
+ * @param {String} token     Access token
  * @param {function} onSuccess Success callback
  * @param {function} onError   Error callback
  */
-export function getArtistImages(token, onSuccess, onError) {
-  const db = fb.getFbDb();
+export function getThenSetArtistImages(token, onSuccess, onError) {
 
   // Create /artist ref
+  const db = fb.getFbDb();
   const ref = db.ref('artists');
 
-  //TODO Only get keys without imgUrl key
-
-  // Get artists Ids already in the db
+  // Get artists ids stored in Firebase
   fb.getAllKeysThen(ref, (keys) => {
-    // Create batches of 50 ids
-    const artistIdsChunk = splitArrayInChunks(keys, 50);
-    const total = artistIdsChunk.length;
 
-    // For each batch, load images
-    artistIdsChunk.forEach((chunk, index) => setImageChunk(ref, token, chunk, index, total, onSuccess, onError));
+    // Create batches of 50 ids
+    const artistIdsChunks = splitArrayInChunks(keys, 50);
+
+    // Load first batch of images
+    setImageChunk(ref, token, artistIdsChunks, 0, onSuccess, onError);
   });
 }
 
@@ -229,68 +264,72 @@ export function getArtistImages(token, onSuccess, onError) {
 /**
  * Fetch artists images for a chunk of artist Ids
  * @param {object} ref         firebase reference to /artists
- * @param {object} instance  Spotify axios instance
- * @param {array} artistIds   array of artist Ids
+ * @param {String} token     Access token
+ * @param {array} artistIdsChunks   array of array of artist Ids
  * @param {int} chunkId     index of the artist ids chunk
- * @param {int} totalChunks total number of chunks for which we want to fetch images
  * @param {function} onSuccess Success callback
  * @param {function} onError   Error callback
  */
-function setImageChunk(ref, token, artistIds, chunkId, totalChunks, onSuccess, onError) {
+function setImageChunk(ref, token, artistIdsChunks, chunkId, onSuccess, onError) {
 
   getInstance(token)
     .get('/artists', {
       params: {
-        ids: artistIds.join(',')
+        ids: artistIdsChunks[chunkId].join(',')
       }
     })
     .then((response) => {
 
-      // Update image url value of artist
+      // Get total number of chunks
+      const totalChunks = artistIdsChunks.length;
+
+      // Prepare updates object
+      let updates = {};
+
+      // Update image url value of artist and store in updates
       response.data.artists.forEach(function(artist) {
-
-        var updates = {};
-        let url = '';
-
-        if (artist.hasOwnProperty('images') && (artist.images.length > 0)) {
-          url = artist.images[0].url;
-        } else {
-          url = '/static/images/missing.jpg';
-        }
-
-        updates['/' + artist.id + '/imgUrl'] = url;
-        ref.update(updates);
+        updates['/' + artist.id + '/imgUrl'] = getArtistImageUrl(artist);
       });
 
-      // If last chunk, call success callback
-      if (chunkId == totalChunks - 1) {
-        onSuccess();
-      }
+      // Update artist image url in Firebase
+      ref.update(updates)
+        .then(() => {
+
+          // If last chunk, call success callback, else, load next batch
+          if (chunkId == totalChunks - 1) {
+            onSuccess();
+          } else {
+            setImageChunk(ref, token, artistIdsChunks, chunkId + 1, onSuccess, onError);
+          }
+        });
+
     })
     .catch((error) => {
-      let message = handleErrorMessage(error);
-      onError(message);
+      onError('Something went wrong while pushing artist images.');
     });
 
 }
 
+/**
+ * For a given artist object, return its first image url or returned
+ * default image
+ * @param  {object} artist Spotify Artist
+ * @return {String}        Image url
+ */
+function getArtistImageUrl(artist) {
+  let url = '';
 
+  if (artist.hasOwnProperty('images') && (artist.images.length > 0)) {
+    url = artist.images[0].url;
+  } else {
+    url = '/static/images/missing.jpg';
+  }
 
-export function getArtistImage(token, id) {
-
-  getInstance(token)
-    .get('/artists/' + id)
-    .then((response) => {
-      console.log(response);
-    })
-    .catch((error) => {
-      let message = handleErrorMessage(error);
-      onError(message);
-    });
-
+  return url;
 }
 
 
+/****** CREATE ALBUM AND ARTISTS ******/
 
 export function createAlbum(token, albumId, onSuccess, onError) {
   const db = fb.getFbDb();
@@ -305,38 +344,4 @@ export function createAlbum(token, albumId, onSuccess, onError) {
       onError(message);
     });
 
-}
-
-
-/**
- * Generates a random string containing numbers and letters
- * @param  {number} length The length of the string
- * @return {string} The generated string
- */
-function generateRandomString(length) {
-  let text = '';
-  const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-
-  for (var i = 0; i < length; i++) {
-    text += possible.charAt(Math.floor(Math.random() * possible.length));
-  }
-  return text;
-};
-
-
-/**
- * Split a given array into chunks of a given length
- * @param  {array} arr   Array to split
- * @param  {int} chunkLength Length of a chunk
- * @return {array[array]}       array of array chunks
- */
-function splitArrayInChunks(arr, chunkLength) {
-  let i, j;
-  let result = [];
-
-  for (i = 0, j = arr.length; i < j; i+=chunkLength) {
-    result.push(arr.slice(i, i + chunkLength));
-  }
-
-  return result;
 }

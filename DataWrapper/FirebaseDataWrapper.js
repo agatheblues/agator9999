@@ -54,6 +54,7 @@ let artistStructure = (
     spotify
   });
 
+/******* FIREBASE UTILS *******/
 
 /**
  * Initialize Firebase app
@@ -76,7 +77,7 @@ export function getFbDb() {
 }
 
 
-export function pushAlbums(items, onSuccess, onError, hasNextPage, totalItems, offset) {
+export function pushAlbums(items, onSuccess, onError, totalItems, offset) {
 
   // Get db
   const db = getFbDb();
@@ -94,13 +95,12 @@ export function pushAlbums(items, onSuccess, onError, hasNextPage, totalItems, o
   ref
     .update(albumsList)
     .then(() => {
-      // onSuccess(hasNextPage, totalItems, offset);
-
-      pushArtists(items, onSuccess, onError, hasNextPage, totalItems, offset);
+      console.log('push artists');
+      pushArtists(items, onSuccess, onError, totalItems, offset);
     })
     .catch((error) => {
       console.log(error);
-      onError('Oops ! Something went wrong while pushing Albums to Firebase. ' + error.code);
+      onError('Oops ! Something went wrong while pushing Albums to Firebase. ');
     });
 }
 
@@ -155,7 +155,7 @@ function formatArtists(items) {
  * @param  {array} artists Array of artists
  * @return
  */
-function pushArtists(items, onSuccess, onError, hasNextPage, totalItems, offset) {
+function pushArtists(items, onSuccess, onError, totalItems, offset) {
 
   // Get db
   const db = getFbDb();
@@ -166,6 +166,7 @@ function pushArtists(items, onSuccess, onError, hasNextPage, totalItems, offset)
   // Transform array to object with key = artist id
   const artistsList = formatArtists(items).reduce((obj, item) => Object.assign({}, obj, item), {});
 
+  // Prepare album list to update already existing + new artists
   const albumList = flatten(items.map(item => item.album.artists.map(artist => getAlbumFromArtist(artist.id, item.album.id, item.album.tracks.total))))
     .reduce((obj, item) => Object.assign({}, obj, item), {});
 
@@ -173,27 +174,12 @@ function pushArtists(items, onSuccess, onError, hasNextPage, totalItems, offset)
   ref.update(artistsList)
     .then(() => ref.update(albumList))
     .then(() => {
-      onSuccess(hasNextPage, totalItems, offset);
+      console.log('callback', totalItems, offset);
+      onSuccess(totalItems, offset);
     })
     .catch((error) => {
       onError('Oops ! Something went wrong while adding artists to Firebase.');
     });
-
-  // // Get artists Ids already in the db
-  // getAllKeysThen(ref, (keys) => {
-  //
-  //   // Compare artists to those in the DB, extract only ids that are not there yet
-  //   const newArtists = artists.filter(artist => !isInArray(keys, artist.id));
-  //
-  //   // Push new artists to DB
-  //   newArtists.forEach(artist => ref.child(artist.id).set(artist.artistData));
-  //
-  //   // Get artists in the DB and add the album
-  //   const updateArtists = artists.filter(artist => isInArray(keys, artist.id));
-  //
-  //   // Update albums of artist which are already in the DB
-  //   updateArtists.forEach(artist => addAlbumToArtist(ref, artist));
-  // });
 }
 
 
