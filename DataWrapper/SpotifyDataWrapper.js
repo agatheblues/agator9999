@@ -331,13 +331,12 @@ function getArtistImageUrl(artist) {
 
 /****** CREATE ALBUM AND ARTISTS ******/
 
-export function createAlbum(token, albumId, onSuccess, onError) {
-  const db = fb.getFbDb();
+export function getThenSetAlbum(token, albumId, onSuccess, onError) {
 
   getInstance(token)
     .get('/albums/' + albumId)
     .then((response) => {
-      fb.pushAlbum(response.data, db, onSuccess, onError);
+      fb.pushAlbum(response.data, onSuccess, onError);
     })
     .catch((error) => {
       let message = handleErrorMessage(error);

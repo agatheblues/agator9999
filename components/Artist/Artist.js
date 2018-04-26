@@ -23,7 +23,6 @@ class Artist extends React.Component {
   }
 
   handleGetArtistSuccess(artist) {
-
     this.setState({
       hasArtistData: true,
       artistData: artist

@@ -71,7 +71,7 @@ class SpotifySync extends React.Component {
         api.setAlbumsThenArtists(this.accessToken, offset + this.limit, this.limit, this.handleAlbumSyncSuccess, this.handleError);
 
       } else {
-        
+
         // Start fetching artist images
         this.updateMessage(false, 'Loading albums and artists successful! Loading artist images...');
         api.getThenSetArtistImages(this.accessToken, this.handleSyncImageSuccess, this.handleError);
@@ -99,7 +99,8 @@ class SpotifySync extends React.Component {
   render() {
     return (
       <div className='content-container'>
-        {this.state.message && <Message message={this.state.message} error={this.state.error}/>}
+        {this.state.message &&
+          <Message message={this.state.message} error={this.state.error}/>}
         <div className='back-to-library'>
           <Link to='/'>&#9839; Back to library</Link>
         </div>

@@ -19,10 +19,10 @@ class App extends React.Component {
       loadedArtists: false
     };
 
-    this.handleGetArtists = this.handleGetArtists.bind(this);
+    this.handleGetArtistsSuccess = this.handleGetArtistsSuccess.bind(this);
   }
 
-  handleGetArtists(artists) {
+  handleGetArtistsSuccess(artists) {
     this.setState({
       artists: artists,
       loadedArtists: true
@@ -30,7 +30,7 @@ class App extends React.Component {
   }
 
   componentDidMount() {
-    fb.getArtists(this.handleGetArtists);
+    fb.getArtists(this.handleGetArtistsSuccess);
   }
 
   render() {

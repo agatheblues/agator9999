@@ -33,12 +33,10 @@ let albumStructure = (
   }) => (
   {
     id,
-    albumData: {
-      name,
-      spotify,
-      images,
-      release_date
-    }
+    name,
+    spotify,
+    images,
+    release_date
   });
 
 let artistStructure = (
@@ -166,7 +164,7 @@ export function pushAlbums(items, onSuccess, onError, totalAlbums, offset) {
  * @return {array}       Array of artists
  */
 function formatArtists(items) {
-  return flatten(items.map(item => item.album.artists.map(artist => convertArtistOrAlbum(artist, artistStructure))));
+  return items.map(item => item.album.artists.map(artist => convertArtistOrAlbum(artist, artistStructure)));
 }
 
 
@@ -223,7 +221,7 @@ function pushArtists(items, onSuccess, onError, totalItems, offset) {
   const ref = getRef('artists');
 
   // Transform array to object with key = artist id
-  const artistsList = formatArtists(items).reduce((obj, item) => Object.assign({}, obj, item), {});
+  const artistsList = flatten(formatArtists(items)).reduce((obj, item) => Object.assign({}, obj, item), {});
 
   // Prepare album list to update already existing + new artists
   const albumList = flatten(items.map(item => item.album.artists.map(artist => getAlbumFromArtist(artist.id, item.album.id, item.album.tracks.total))))
@@ -238,49 +236,83 @@ function pushArtists(items, onSuccess, onError, totalItems, offset) {
     });
 }
 
+
+/**
+ * Save a single album in Firebase
+ * @param  {objet} item       Spotify Album
+ * @param  {func} onSuccess   Success callback
+ * @param  {func} onError     Error callback
+ */
 export function pushAlbum(item, onSuccess, onError) {
 
-  // Get db
-  const db = getFbDb();
-
-  // Flatten the array of albums
-  const album = convertToAlbumFromSpotify(item);
+  // Convert album to expected structure
+  const album = convertArtistOrAlbum(item, albumStructure);
 
   // Create /albums ref
-  const ref = db.ref('albums');
+  const ref = getRef('albums');
 
+  console.log(album);
   // Get album Ids already in the db
   getAllKeysThen(ref, (keys) => {
 
     // Compare albums to those in the DB, extract only ids that are not there yet
-    if (isInArray(keys, album.id)) {
-
+    if (isInArray(keys, item.id)) {
       onError('Oops ! Album is already in your library.');
-
     } else {
 
-      // Save album in DB
-      ref.child(album.id).set(album.albumData);
-
-      // Flatten the array of artists
-      const artists = flatten(item.artists.map(artist => convertToArtistFromSpotify(artist, item.id, item.tracks.total)));
-
-      // Push artists for real
-      pushArtists(artists, onSuccess);
+      ref
+        .update(album)
+        .then(() => {
+          pushArtistsFromAlbum(item, onSuccess, onError);
+        })
+        .catch((error) => {
+          onError('Oops ! Something went wrong while pushing the Album to Firebase. ');
+        });
     }
   });
 }
 
+/**
+ * Save artists to firebase
+ * @param  {array} artists Array of artists
+ * @return
+ */
+function pushArtistsFromAlbum(item, onSuccess, onError) {
+
+  //TODO : Override artists and remove all other data. See how to handle this.
+  // Create /artist ref
+  const ref = getRef('artists');
+
+  // Transform array to object with key = artist id
+  const artistsList = item.artists.map(artist => convertArtistOrAlbum(artist, artistStructure))
+    .reduce((obj, item) => Object.assign({}, obj, item), {});
+
+  console.log('artist lists', artistsList);
+  // Prepare album list to update already existing + new artists
+  const albumList = item.artists.map(artist => getAlbumFromArtist(artist.id, item.id, item.tracks.total))
+    .reduce((obj, item) => Object.assign({}, obj, item), {});
+
+  console.log('album lists', albumList);
+  // Push new albums to DB
+  ref.update(artistsList)
+    .then(() => ref.update(albumList))
+    .then(() => { onSuccess(); })
+    .catch((error) => {
+      onError('Oops ! Something went wrong while adding artists to Firebase.');
+    });
+}
 
 
-// TODO: Add onError
+/******** GET DATA FROM FIREBASE *******/
+
+/**
+ * Get list of all artists stored in Firebase
+ * @param  {func} onSuccess Handle success callback
+ */
 export function getArtists(onSuccess) {
 
-  // Get db
-  const db = getFbDb();
-
   // Create /artist ref
-  const ref = db.ref('artists');
+  const ref = getRef('artists');
 
   let artists = [];
 
@@ -300,7 +332,7 @@ export function getArtists(onSuccess) {
 
 
 /**
- * Get artist from FB
+ * Get a single artist from FB
  * @param  {string} id        Artist id
  * @param  {func} onSuccess   Success callback
  * @param  {func} onError     Error callback
@@ -308,11 +340,8 @@ export function getArtists(onSuccess) {
  */
 export function getArtist(id, onSuccess, onError) {
 
-  // Get db
-  const db = getFbDb();
-
   // Create /artist ref
-  const ref = db.ref('artists/' + id);
+  const ref = getRef('artists/' + id);
 
   ref.once('value').then(function(snapshot) {
     let artist = snapshot.val();
@@ -337,11 +366,8 @@ export function getArtist(id, onSuccess, onError) {
  */
 export function getAlbum(id, onSuccess, onError) {
 
-  // Get db
-  const db = getFbDb();
-
   // Create /album ref
-  const ref = db.ref('albums/' + id);
+  const ref = getRef('albums/' + id);
 
   ref.once('value').then(function(snapshot) {
     let album = snapshot.val();
