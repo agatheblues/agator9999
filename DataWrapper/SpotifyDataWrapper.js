@@ -310,6 +310,41 @@ function setImageChunk(ref, token, artistIdsChunks, chunkId, onSuccess, onError)
 
 }
 
+
+/**
+ * Fetch artists images for a chunk of artist Ids
+ * @param {object} ref         firebase reference to /artists
+ * @param {String} token     Access token
+ * @param {array} artistIdsChunks   array of array of artist Ids
+ * @param {int} chunkId     index of the artist ids chunk
+ * @param {function} onSuccess Success callback
+ * @param {function} onError   Error callback
+ */
+function getArtistsImage(token, data, onSuccess, onError) {
+
+  let artistIds = data.artists.map((artist) => artist.id);
+
+  getInstance(token)
+    .get('/artists', {
+      params: {
+        ids: artistIds.join(',')
+      }
+    })
+    .then((response) => {
+      // Prepare image object
+      let images = {};
+      response.data.artists.forEach((artist) => { images[artist.id] = getArtistImageUrl(artist); });
+
+      // Add album then artists to fb
+      fb.pushAlbum(data, images, onSuccess, onError);
+
+    })
+    .catch((error) => {
+      onError('Something went wrong while pushing artist images.');
+    });
+
+}
+
 /**
  * For a given artist object, return its first image url or returned
  * default image
@@ -336,7 +371,7 @@ export function getThenSetAlbum(token, albumId, onSuccess, onError) {
   getInstance(token)
     .get('/albums/' + albumId)
     .then((response) => {
-      fb.pushAlbum(response.data, onSuccess, onError);
+      getArtistsImage(token, response.data, onSuccess, onError);
     })
     .catch((error) => {
       let message = handleErrorMessage(error);

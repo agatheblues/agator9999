@@ -243,7 +243,7 @@ function pushArtists(items, onSuccess, onError, totalItems, offset) {
  * @param  {func} onSuccess   Success callback
  * @param  {func} onError     Error callback
  */
-export function pushAlbum(item, onSuccess, onError) {
+export function pushAlbum(item, images, onSuccess, onError) {
 
   // Convert album to expected structure
   const album = convertArtistOrAlbum(item, albumStructure);
@@ -251,7 +251,6 @@ export function pushAlbum(item, onSuccess, onError) {
   // Create /albums ref
   const ref = getRef('albums');
 
-  console.log(album);
   // Get album Ids already in the db
   getAllKeysThen(ref, (keys) => {
 
@@ -265,7 +264,7 @@ export function pushAlbum(item, onSuccess, onError) {
       ref
         .update(album)
         .then(() => {
-          pushArtistsFromAlbum(item, onSuccess, onError);
+          pushArtistsFromAlbum(item, images, onSuccess, onError);
         })
         .catch((error) => {
           onError('Oops ! Something went wrong while pushing the Album to Firebase. ');
@@ -279,7 +278,7 @@ export function pushAlbum(item, onSuccess, onError) {
  * @param  {array} artists Array of artists
  * @return
  */
-function pushArtistsFromAlbum(item, onSuccess, onError) {
+function pushArtistsFromAlbum(item, images, onSuccess, onError) {
 
   //TODO : Override artists and remove all other data. See how to handle this.
   // Create /artist ref
@@ -288,41 +287,38 @@ function pushArtistsFromAlbum(item, onSuccess, onError) {
   // Transform array to object with key = artist id
   const artistsList = item.artists.map(artist => convertArtistOrAlbum(artist, artistStructure));
 
-
-  artistsList.forEach((artist) => {
+  const arrayofpromises = artistsList.map((artist) => {
     const artistId = Object.keys(artist)[0];
 
+    function updateA(snapshot) {
+      if (!snapshot.val()) { return true; /* did not update */ }
+
+      ref.update(setAlbumToArtist(artistId, item.id, item.tracks.total));
+    }
+
+    function setA(didNotUpdate) {
+      // Add album to artist object and artist image
+      artist[artistId]['albums'] = { [item.id]: {'totalTracks': item.tracks.total} };
+      artist[artistId]['imgUrl'] = images[artistId];
+
+      if (!didNotUpdate) { return; /* already updated */ }
+      
+      ref.child(artistId)
+        .set(artist[artistId]);
+    }
+
     // If artist exists, update else create new.
-    ref.child(artistId)
-      .once('value', snapshot => {
-
-        if (!snapshot.val()) {
-
-          // Add album to artist object
-          artist[artistId]['albums'] = { [item.id]: {'totalTracks': item.tracks.total} };
-
-          // Create new artist
-          ref.child(artistId)
-            .set(artist[artistId])
-            .then(() => { onSuccess(); })
-            .catch((error) => {
-              onError('Oops ! Something went wrong while adding a new artist to Firebase.');
-            });
-
-        } else {
-
-          let updates = setAlbumToArtist(artistId, item.id, item.tracks.total);
-
-          ref.update(updates)
-            .then(() => { onSuccess(); })
-            .catch((error) => {
-              onError('Oops ! Something went wrong while updating an artist in Firebase.');
-            });
-
-        }
-
+    return ref.child(artistId)
+      .once('value')
+      .then(updateA)
+      .then(setA)
+      .catch((error) => {
+        onError('Oops ! Something went wrong while setting/updating an artist in Firebase.');
       });
   });
+
+  Promise.all(arrayofpromises)
+    .then(() => console.log('terminado'));
 }
 
 
@@ -400,21 +396,4 @@ export function getAlbum(id, onSuccess, onError) {
     onError('Something went wrong! ' + errorObject.code);
   });
 
-}
-
-
-
-
-
-
-/**
- * Convert an album object returned by spotify to a simpler album object
- * @param  {object} item album object from spotify
- * @return {object}      album object for DB
- */
-function convertToAlbumFromSpotify(item) {
-  let album = albumStructure(item);
-  album['albumData'] = renameSpotifyKeyToUrl(album['albumData']);
-  album['albumData']['added_at'] = Date.now();
-  return album;
 }
