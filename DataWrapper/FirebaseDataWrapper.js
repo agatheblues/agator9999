@@ -205,7 +205,7 @@ function convertArtistOrAlbum(item, destructuringRef) {
  * @return {object}      artist object for DB: { id: {}}
  */
 
-function getAlbumFromArtist(artistId, albumId, totalTracks) {
+function setAlbumToArtist(artistId, albumId, totalTracks) {
   return { ['/' + artistId + '/albums/' + albumId]: { 'totalTracks': totalTracks }};
 }
 
@@ -224,7 +224,7 @@ function pushArtists(items, onSuccess, onError, totalItems, offset) {
   const artistsList = flatten(formatArtists(items)).reduce((obj, item) => Object.assign({}, obj, item), {});
 
   // Prepare album list to update already existing + new artists
-  const albumList = flatten(items.map(item => item.album.artists.map(artist => getAlbumFromArtist(artist.id, item.album.id, item.album.tracks.total))))
+  const albumList = flatten(items.map(item => item.album.artists.map(artist => setAlbumToArtist(artist.id, item.album.id, item.album.tracks.total))))
     .reduce((obj, item) => Object.assign({}, obj, item), {});
 
   // Push new albums to DB
@@ -259,6 +259,8 @@ export function pushAlbum(item, onSuccess, onError) {
     if (isInArray(keys, item.id)) {
       onError('Oops ! Album is already in your library.');
     } else {
+      // Add album added date
+      album[item.id]['added_at'] = Date.now();
 
       ref
         .update(album)
@@ -284,22 +286,43 @@ function pushArtistsFromAlbum(item, onSuccess, onError) {
   const ref = getRef('artists');
 
   // Transform array to object with key = artist id
-  const artistsList = item.artists.map(artist => convertArtistOrAlbum(artist, artistStructure))
-    .reduce((obj, item) => Object.assign({}, obj, item), {});
+  const artistsList = item.artists.map(artist => convertArtistOrAlbum(artist, artistStructure));
 
-  console.log('artist lists', artistsList);
-  // Prepare album list to update already existing + new artists
-  const albumList = item.artists.map(artist => getAlbumFromArtist(artist.id, item.id, item.tracks.total))
-    .reduce((obj, item) => Object.assign({}, obj, item), {});
 
-  console.log('album lists', albumList);
-  // Push new albums to DB
-  ref.update(artistsList)
-    .then(() => ref.update(albumList))
-    .then(() => { onSuccess(); })
-    .catch((error) => {
-      onError('Oops ! Something went wrong while adding artists to Firebase.');
-    });
+  artistsList.forEach((artist) => {
+    const artistId = Object.keys(artist)[0];
+
+    // If artist exists, update else create new.
+    ref.child(artistId)
+      .once('value', snapshot => {
+
+        if (!snapshot.val()) {
+
+          // Add album to artist object
+          artist[artistId]['albums'] = { [item.id]: {'totalTracks': item.tracks.total} };
+
+          // Create new artist
+          ref.child(artistId)
+            .set(artist[artistId])
+            .then(() => { onSuccess(); })
+            .catch((error) => {
+              onError('Oops ! Something went wrong while adding a new artist to Firebase.');
+            });
+
+        } else {
+
+          let updates = setAlbumToArtist(artistId, item.id, item.tracks.total);
+
+          ref.update(updates)
+            .then(() => { onSuccess(); })
+            .catch((error) => {
+              onError('Oops ! Something went wrong while updating an artist in Firebase.');
+            });
+
+        }
+
+      });
+  });
 }
 
 
