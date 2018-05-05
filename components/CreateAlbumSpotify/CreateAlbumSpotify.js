@@ -4,6 +4,7 @@ import Button from '../Button/Button';
 import SpotifyLogin from '../SpotifyLogin/SpotifyLogin';
 import Message from '../Message/Message';
 import * as api from '../../DataWrapper/SpotifyDataWrapper.js';
+import * as fb from './FirebaseDataWrapper.js';
 require('./CreateAlbumSpotify.scss');
 
 class CreateAlbumSpotify extends React.Component {
@@ -42,34 +43,40 @@ class CreateAlbumSpotify extends React.Component {
 
   handleError(message) {
     this.setState({
-      'error': true,
-      'message': message
+      error: true,
+      message: message
     });
   }
 
   handleSuccess() {
     this.setState({
-      'error': false,
-      'message': 'Create album is successful!'
+      error: false,
+      message: 'Create album is successful!'
+    });
+  }
+
+  updateMessages(messageForm, message) {
+    this.setState({
+      messageForm: messageForm,
+      message: message
     });
   }
 
   handleSubmit(event) {
     event.preventDefault();
 
+    // Check if input is as expected
     if (!this.checkSpotifyUri(this.state.value)) {
-      this.setState({
-        messageForm: 'URI should be formed as spotify:album:...',
-        message: null
-      });
-    } else {
-      this.setState({
-        messageForm: null,
-        message: null
-      });
-
-      api.getThenSetAlbum(this.accessToken, this.getSpotifyId(this.state.value), this.handleSuccess, this.handleError);
+      this.updateMessages('URI should be formed as spotify:album:...', null);
+      return;
     }
+
+    // Clear all error messages
+    this.updateMessages(null, null);
+
+    api.getAlbum(this.accessToken, this.getSpotifyId(this.state.value))
+    // .then((response) => api.getArtistsImage(this.accessToken, response.data))
+      .then((response) => fb.pushAlbum(response));
   }
 
   render() {

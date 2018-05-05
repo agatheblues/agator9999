@@ -320,28 +320,28 @@ function setImageChunk(ref, token, artistIdsChunks, chunkId, onSuccess, onError)
  * @param {function} onSuccess Success callback
  * @param {function} onError   Error callback
  */
-function getArtistsImage(token, data, onSuccess, onError) {
+export function getArtistsImages(token, data) {
 
   let artistIds = data.artists.map((artist) => artist.id);
 
-  getInstance(token)
+  return getInstance(token)
     .get('/artists', {
       params: {
         ids: artistIds.join(',')
       }
-    })
-    .then((response) => {
-      // Prepare image object
-      let images = {};
-      response.data.artists.forEach((artist) => { images[artist.id] = getArtistImageUrl(artist); });
-
-      // Add album then artists to fb
-      fb.pushAlbum(data, images, onSuccess, onError);
-
-    })
-    .catch((error) => {
-      onError('Something went wrong while pushing artist images.');
     });
+  // .then((response) => {
+  //   // Prepare image object
+  //   let images = {};
+  //   response.data.artists.forEach((artist) => { images[artist.id] = getArtistImageUrl(artist); });
+  //
+  //   // Add album then artists to fb
+  //   fb.pushAlbum(data, images, onSuccess, onError);
+  //
+  // })
+  // .catch((error) => {
+  //   onError('Something went wrong while pushing artist images.');
+  // });
 
 }
 
@@ -363,19 +363,22 @@ function getArtistImageUrl(artist) {
   return url;
 }
 
+export function formatArtistImages(response) {
+
+}
 
 /****** CREATE ALBUM AND ARTISTS ******/
 
-export function getThenSetAlbum(token, albumId, onSuccess, onError) {
+export function getAlbum(token, albumId) {
 
-  getInstance(token)
-    .get('/albums/' + albumId)
-    .then((response) => {
-      getArtistsImage(token, response.data, onSuccess, onError);
-    })
-    .catch((error) => {
-      let message = handleErrorMessage(error);
-      onError(message);
-    });
+  return getInstance(token)
+    .get('/albums/' + albumId);
+  // .then((response) => {
+  //   getArtistsImage(token, response.data, onSuccess, onError);
+  // })
+  // .catch((error) => {
+  //   let message = handleErrorMessage(error);
+  //   onError(message);
+  // });
 
 }
