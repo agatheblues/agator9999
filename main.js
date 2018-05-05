@@ -16,10 +16,12 @@ class App extends React.Component {
 
     this.state = {
       artists: [],
-      loadedArtists: false
+      loadedArtists: false,
+      albumCount: 0
     };
 
     this.handleSuccess = this.handleSuccess.bind(this);
+    this.handleCountSuccess = this.handleCountSuccess.bind(this);
     this.handleError = this.handleError.bind(this);
   }
 
@@ -27,6 +29,12 @@ class App extends React.Component {
     this.setState({
       artists: artists,
       loadedArtists: true
+    });
+  }
+
+  handleCountSuccess(count) {
+    this.setState({
+      albumCount: count
     });
   }
 
@@ -39,6 +47,7 @@ class App extends React.Component {
 
   componentDidMount() {
     fb.getArtists(this.handleSuccess, this.handleError);
+    fb.getAlbumCount(this.handleCountSuccess, this.handleError);
   }
 
   render() {
@@ -47,7 +56,12 @@ class App extends React.Component {
         <Link to='/spotify/sync'>Synchronize Spotify Data</Link>
         <Link to='/album/create'>Add album</Link>
         <SpotifyProfile />
-        <CardGrid cards={this.state.artists} loaded={this.state.loadedArtists} title='Artists'/>
+        <CardGrid
+          cards={this.state.artists}
+          loaded={this.state.loadedArtists}
+          title='Artists'
+          albumCount={this.state.albumCount}
+        />
       </div>
     );
   }

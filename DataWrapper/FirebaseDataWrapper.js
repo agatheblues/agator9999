@@ -377,10 +377,8 @@ export function getArtist(id, onSuccess, onError) {
  */
 export function getAlbum(id, onSuccess, onError) {
 
-  // Create /album ref
-  const ref = getRef('albums/' + id);
-
-  ref.once('value')
+  getRef('albums/' + id)
+    .once('value')
     .then(function(snapshot) {
       let album = snapshot.val();
 
@@ -390,4 +388,25 @@ export function getAlbum(id, onSuccess, onError) {
       onError('Something went wrong! ' + errorObject.code);
     });
 
+}
+
+/**
+ * Counts the number of albums stored in the library
+ * @param  {func} onSuccess   onSuccess callback
+ * @param  {func} onError     onError callback
+ * @return {int}              total number of albums
+ */
+export function getAlbumCount(onSuccess, onError) {
+
+  getRef('albums')
+    .once('value')
+    .then((data) => {
+      let i = 0;
+      data.forEach(function(item) {
+        i++;
+      });
+      onSuccess(i);
+    })
+    .catch((error) => console.log(error));
+    
 }

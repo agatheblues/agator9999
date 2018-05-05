@@ -35,10 +35,18 @@ class CardGrid extends React.Component {
     }
   }
 
+  renderCounts() {
+    return <p>{`${this.props.cards.length} artists, ${this.props.albumCount} albums`}</p>;
+  }
+
   render() {
     return (
       <div>
-        <h1 className='title title--marginlr'>Artists</h1>
+        <div className='title-container title--marginlr'>
+          <h1 className='title'>Artists</h1>
+          {this.renderCounts()}
+        </div>
+
         {this.renderCards()}
       </div>
     );
@@ -47,7 +55,8 @@ class CardGrid extends React.Component {
 
 CardGrid.propTypes = {
   cards: PropTypes.array.isRequired,
-  loaded: PropTypes.bool.isRequired
+  loaded: PropTypes.bool.isRequired,
+  albumCount: PropTypes.number.isRequired
 };
 
 export default CardGrid;
