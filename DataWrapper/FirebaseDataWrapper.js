@@ -261,14 +261,9 @@ export function pushAlbum(item, images, onSuccess, onError) {
       // Add album added date
       album[item.id]['added_at'] = Date.now();
 
-      ref
-        .update(album)
-        .then(() => {
-          pushArtistsFromAlbum(item, images, onSuccess, onError);
-        })
-        .catch((error) => {
-          onError('Oops ! Something went wrong while pushing the Album to Firebase. ');
-        });
+      ref.update(album)
+        .then(() => pushArtistsFromAlbum(item, images, onSuccess, onError))
+        .catch((error) => onError('Oops ! Something went wrong while pushing the Album to Firebase. '));
     }
   });
 }
@@ -280,29 +275,26 @@ export function pushAlbum(item, images, onSuccess, onError) {
  */
 function pushArtistsFromAlbum(item, images, onSuccess, onError) {
 
-  //TODO : Override artists and remove all other data. See how to handle this.
   // Create /artist ref
   const ref = getRef('artists');
 
-  // Transform array to object with key = artist id
-  const artistsList = item.artists.map(artist => convertArtistOrAlbum(artist, artistStructure));
-
-  const arrayofpromises = artistsList.map((artist) => {
+  const arrayofpromises = item.artists.map((artistData) => {
+    const artist = convertArtistOrAlbum(artistData, artistStructure);
     const artistId = Object.keys(artist)[0];
 
-    function updateA(snapshot) {
+    function mightUpdateArtist(snapshot) {
       if (!snapshot.val()) { return true; /* did not update */ }
 
       ref.update(setAlbumToArtist(artistId, item.id, item.tracks.total));
     }
 
-    function setA(didNotUpdate) {
+    function mightSetArtist(didNotUpdate) {
       // Add album to artist object and artist image
       artist[artistId]['albums'] = { [item.id]: {'totalTracks': item.tracks.total} };
       artist[artistId]['imgUrl'] = images[artistId];
 
       if (!didNotUpdate) { return; /* already updated */ }
-      
+
       ref.child(artistId)
         .set(artist[artistId]);
     }
@@ -310,15 +302,15 @@ function pushArtistsFromAlbum(item, images, onSuccess, onError) {
     // If artist exists, update else create new.
     return ref.child(artistId)
       .once('value')
-      .then(updateA)
-      .then(setA)
+      .then(mightUpdateArtist)
+      .then(mightSetArtist)
       .catch((error) => {
         onError('Oops ! Something went wrong while setting/updating an artist in Firebase.');
       });
   });
 
   Promise.all(arrayofpromises)
-    .then(() => console.log('terminado'));
+    .then(() => onSuccess());
 }
 
 
@@ -328,24 +320,24 @@ function pushArtistsFromAlbum(item, images, onSuccess, onError) {
  * Get list of all artists stored in Firebase
  * @param  {func} onSuccess Handle success callback
  */
-export function getArtists(onSuccess) {
+export function getArtists(onSuccess, onError) {
 
   // Create /artist ref
   const ref = getRef('artists');
 
   let artists = [];
 
-  ref.on('value', function(data) {
-    data.forEach(function(item) {
-      let artist = item.val();
-      artist['id'] = item.key;
-      artists.push(artist);
-    });
+  ref.once('value')
+    .then((data) => {
+      data.forEach(function(item) {
+        let artist = item.val();
+        artist['id'] = item.key;
+        artists.push(artist);
+      });
 
-    onSuccess(artists);
-  }, function (errorObject) {
-    console.log('The read failed: ' + errorObject.code);
-  });
+      onSuccess(artists);
+    })
+    .catch(() => onError());
 
 }
 
@@ -362,22 +354,22 @@ export function getArtist(id, onSuccess, onError) {
   // Create /artist ref
   const ref = getRef('artists/' + id);
 
-  ref.once('value').then(function(snapshot) {
-    let artist = snapshot.val();
+  ref.once('value')
+    .then(function(snapshot) {
+      let artist = snapshot.val();
 
-    // Update albums structure in artist object
-    artist.albums = objectToArray(artist.albums);
+      // Update albums structure in artist object
+      artist.albums = objectToArray(artist.albums);
 
-    onSuccess(artist);
-  }, function (errorObject) {
-    onError('Something went wrong while getting artist data! ' + errorObject.code);
-  });
+      onSuccess(artist);
+    })
+    .catch((errorObject) => { onError('Something went wrong while getting artist data! ' + errorObject.code);});
 
 }
 
 
 /**
- * Get album from FB
+ * Get a single album from FB
  * @param  {string} id        Album id
  * @param  {func} onSuccess   Success callback
  * @param  {func} onError     Error callback
@@ -388,12 +380,14 @@ export function getAlbum(id, onSuccess, onError) {
   // Create /album ref
   const ref = getRef('albums/' + id);
 
-  ref.once('value').then(function(snapshot) {
-    let album = snapshot.val();
+  ref.once('value')
+    .then(function(snapshot) {
+      let album = snapshot.val();
 
-    onSuccess(album);
-  }, function (errorObject) {
-    onError('Something went wrong! ' + errorObject.code);
-  });
+      onSuccess(album);
+    })
+    .catch((errorObject) => {
+      onError('Something went wrong! ' + errorObject.code);
+    });
 
 }

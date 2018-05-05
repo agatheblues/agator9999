@@ -19,18 +19,26 @@ class App extends React.Component {
       loadedArtists: false
     };
 
-    this.handleGetArtistsSuccess = this.handleGetArtistsSuccess.bind(this);
+    this.handleSuccess = this.handleSuccess.bind(this);
+    this.handleError = this.handleError.bind(this);
   }
 
-  handleGetArtistsSuccess(artists) {
+  handleSuccess(artists) {
     this.setState({
       artists: artists,
       loadedArtists: true
     });
   }
 
+  handleError() {
+    this.setState({
+      artists: [],
+      loadedArtists: false
+    });
+  }
+
   componentDidMount() {
-    fb.getArtists(this.handleGetArtistsSuccess);
+    fb.getArtists(this.handleSuccess, this.handleError);
   }
 
   render() {
