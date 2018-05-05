@@ -2,7 +2,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import CreateAlbumSpotify from '../CreateAlbumSpotify/CreateAlbumSpotify';
-require('./CreateAlbum.scss');
 
 class CreateAlbum extends React.Component {
 
@@ -40,7 +39,7 @@ class CreateAlbum extends React.Component {
         <div className='back-to-library'>
           <Link to='/'>&#9839; Back to library</Link>
         </div>
-        <h2>Add an album</h2>
+        <h2>Add new album</h2>
         <nav>
           <ul onClick={this.handleClick}>
             <li id='spotify' className={this.state.source == 'spotify' ? 'active' : ''}>From Spotify</li>

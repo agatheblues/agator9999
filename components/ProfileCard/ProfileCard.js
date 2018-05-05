@@ -3,10 +3,10 @@ import PropTypes from 'prop-types';
 require('../ProfileCard/ProfileCard.scss');
 
 const ProfileCard = ({id, imgUrl}) => (
-  <div className='profileContainer'>
-    <img alt='profile picture' src={imgUrl} className='profilePicture'/>
-    <div className='profileId'>
-      <p>Logged in as:</p>
+  <div className='profile-container'>
+    <img alt='profile picture' src={imgUrl} className='profile-picture'/>
+    <div className='profile-id'>
+      <p>Logged in Spotify as:</p>
       <p>{id}</p>
     </div>
   </div>

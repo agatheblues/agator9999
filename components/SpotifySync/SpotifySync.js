@@ -6,7 +6,7 @@ import SpotifyLogin from '../SpotifyLogin/SpotifyLogin.js';
 import SpotifyProfile from '../SpotifyProfile/SpotifyProfile';
 import { Link } from 'react-router-dom';
 import * as api from '../../DataWrapper/SpotifyDataWrapper.js';
-
+require('./SpotifySync.scss');
 
 class SpotifySync extends React.Component {
 
@@ -104,18 +104,24 @@ class SpotifySync extends React.Component {
         <div className='back-to-library'>
           <Link to='/'>&#9839; Back to library</Link>
         </div>
-        {this.accessToken &&
-          <div>
-            <SpotifyProfile />
-            <Button
-              label={'Sync your Spotify music'}
-              handleClick={this.handleClick}
-            />
-          </div>
-        }
-        {!this.accessToken &&
-          <SpotifyLogin redirect='spotify/sync'/>
-        }
+
+        <h2>Synchronize your Spotify saved albums</h2>
+
+        <div className='form-container'>
+          {this.accessToken &&
+            <div className='sync-container'>
+              <SpotifyProfile />
+              <Button
+                label={'Synchronize'}
+                handleClick={this.handleClick}
+              />
+            </div>
+          }
+          {!this.accessToken &&
+            <SpotifyLogin redirect='spotify/sync'/>
+          }
+          <p className='note'>Synchronize saves all of your Spotify saved albums, and all of their artists to the database. It does not erase your current library but completes it.</p>
+        </div>
       </div>
     );
   }

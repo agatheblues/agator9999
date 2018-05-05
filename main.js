@@ -64,7 +64,6 @@ class App extends React.Component {
             </div>
           </Link>
         </nav>
-        <SpotifyProfile />
         <CardGrid
           cards={this.state.artists}
           loaded={this.state.loadedArtists}

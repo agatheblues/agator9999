@@ -4,7 +4,7 @@
   display: flex;
   flex-wrap: wrap;
   margin: 10px 0 10px 0;
-  
+
   input {
     display: inline-block; // for safari
     flex: 1;
@@ -14,6 +14,7 @@
     border: none;
     border-bottom: solid 1px $orange;
     font-family: inherit;
+    font-size: 14px;
 
     &:focus {
       outline: none;
