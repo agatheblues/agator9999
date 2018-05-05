@@ -53,8 +53,14 @@ class App extends React.Component {
   render() {
     return (
       <div className='content-container'>
-        <Link to='/spotify/sync'>Synchronize Spotify Data</Link>
-        <Link to='/album/create'>Add album</Link>
+        <Link to='/spotify/sync'>Sync. Spotify Albums</Link>
+
+        <div>
+          <Link to='/album/create'>
+            <p>Add an album</p>
+            <img src='../static/images/Add-New-32.png' alt='plus-button'/>
+          </Link>
+        </div>
         <SpotifyProfile />
         <CardGrid
           cards={this.state.artists}
