@@ -3,7 +3,7 @@
 
 .btn {
   overflow: hidden;
-  
+
   padding: 12px 12px;
 
   cursor: pointer;
@@ -28,6 +28,8 @@
   align-items: center;
   flex: 0 0 160px;
 
+  font-family: inherit;
+  font-size: inherit;
 
   &:hover {
     transition: all 150ms linear;

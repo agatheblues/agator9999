@@ -5,7 +5,7 @@ require('./Button.scss');
 const Button = ({id, label, handleClick}) => (
   <button
     id={id}
-    className='btn btn-primary'
+    className='btn'
     onClick={handleClick}
   >{label}</button>
 );

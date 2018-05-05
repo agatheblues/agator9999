@@ -53,14 +53,17 @@ class App extends React.Component {
   render() {
     return (
       <div className='content-container'>
-        <Link to='/spotify/sync'>Sync. Spotify Albums</Link>
-
-        <div>
+        <nav className='menu-container'>
+          <div className='menu-item-container'>
+            <Link to='/spotify/sync'>Sync. Spotify Albums</Link>
+          </div>
           <Link to='/album/create'>
-            <p>Add an album</p>
-            <img src='../static/images/Add-New-32.png' alt='plus-button'/>
+            <div className='menu-item-container menu-item-container--icon'>
+              <p className='menu-item'>New album</p>
+              <img className='menu-icon' src='../static/images/Add-New-32.png' alt='plus-button'/>
+            </div>
           </Link>
-        </div>
+        </nav>
         <SpotifyProfile />
         <CardGrid
           cards={this.state.artists}

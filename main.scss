@@ -5,12 +5,16 @@ body {
   font-family: 'IBM Plex Mono', monospace;
   font-size: 14px;
   background: $bg-grey;
+  margin: 0;
 }
 
 h1 {
   color: $white;
   font-size: 48px;
   margin: 20px 0 20px 0;
+  font-family: inherit;
+  font-weight: 500;
+  line-height: 1.1;
 }
 
 
@@ -18,6 +22,13 @@ h2 {
   color: $black;
   font-size: 28px;
   margin: 0 0 20px 0;
+  font-family: inherit;
+  font-weight: 500;
+  line-height: 1.1;
+}
+
+p {
+  margin: 5px 0 5px 0;
 }
 
 
@@ -28,10 +39,12 @@ h2 {
 
 a {
   color: $orange;
+  text-decoration: none;
 }
 
 a:hover {
   color: $orange;
+  text-decoration: underline;
 }
 
 
@@ -52,13 +65,9 @@ a:hover {
 
 
 .back-to-library {
-  padding: 30px 0 30px 0;
+  margin: 30px 0 30px 0;
 }
 
-
-nav {
-  display: flex;
-}
 
 ul {
   display: flex;
@@ -82,4 +91,26 @@ li.active {
 .input-error {
   font-size: 12px;
   color: $orange;
+}
+
+.menu-container {
+  margin: 20px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.menu-item-container--icon {
+  display: flex;
+  align-items: center;
+}
+
+.menu-item {
+  display: inline-block;
+  padding: 0 10px 0 10px;
+}
+
+.menu-icon {
+  width: 20px;
+  height: auto;
+  display: inline-block;
 }

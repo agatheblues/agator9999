@@ -42,7 +42,7 @@ class SpotifyLogin extends React.Component {
 
   render() {
     return (
-      <div  className='content-container'>
+      <div>
         {this.state.message && <Message message={this.state.message} error={this.state.error}/>}
         <Button
           label={'Log in with Spotify'}

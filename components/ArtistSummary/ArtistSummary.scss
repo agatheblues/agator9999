@@ -17,9 +17,14 @@
 .artist-banner-back-wrapper {
   width: 100%;
   position: absolute;
-  top: 0;
+  top: 30px;
   left: 0;
 }
+
+.artist-banner-back a {
+  font-size: 16px;
+}
+
 
 .artist-banner-content {
   padding-bottom: 30px;
