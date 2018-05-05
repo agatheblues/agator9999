@@ -142,20 +142,29 @@ export function getAllKeysThen(ref, doThis) {
  */
 export function pushAlbums(items, onSuccess, onError, totalAlbums, offset) {
 
-  // Convert list of albums to expected structure
-  const albumsList = items.map(item => convertArtistOrAlbum(item, albumsStructure))
-    .reduce((obj, item) => Object.assign({}, obj, item), {});
-
   // Create /albums ref
   const ref = getRef('albums');
 
-  // Push new albums to DB, then push corresponding artists
-  ref
-    .update(albumsList)
-    .then(() => { pushArtists(items, onSuccess, onError, totalAlbums, offset); })
-    .catch((error) => {
-      onError('Oops ! Something went wrong while pushing Albums to Firebase. ');
-    });
+  // Array of promises of album set in FB
+  const arrayofpromises = items.map((albumData) => {
+    const album = convertArtistOrAlbum(albumData, albumsStructure);
+    const albumId = Object.keys(album)[0];
+
+    return ref.child(albumId)
+      .once('value')
+      .then((snapshot) => {
+        if (snapshot.exists()) { console.log('album already exists'); return;}
+
+        ref.child(albumId)
+          .set(album[albumId]);
+      })
+      .catch((error) => {
+        onError('Oops ! Something went wrong while pushing Albums to Firebase. ');
+      });
+  });
+
+  Promise.all(arrayofpromises)
+    .then(() => {console.log('terminadoooo album'); pushArtists(items, onSuccess, onError, totalAlbums, offset);});
 }
 
 /**
@@ -220,19 +229,47 @@ function pushArtists(items, onSuccess, onError, totalItems, offset) {
   // Create /artist ref
   const ref = getRef('artists');
 
-  // Transform array to object with key = artist id
-  const artistsList = flatten(formatArtists(items)).reduce((obj, item) => Object.assign({}, obj, item), {});
+  const arrayofpromises = flatten(items.map((item) => {
+    const albumId = item.album.id;
+    const albumTotalTracks = item.album.tracks.total;
 
-  // Prepare album list to update already existing + new artists
-  const albumList = flatten(items.map(item => item.album.artists.map(artist => setAlbumToArtist(artist.id, item.album.id, item.album.tracks.total))))
-    .reduce((obj, item) => Object.assign({}, obj, item), {});
+    return item.album.artists.map((artistData) => updateOrSetArtist(ref, artistData, albumId, albumTotalTracks));
+  }));
 
-  // Push new albums to DB
-  ref.update(artistsList)
-    .then(() => ref.update(albumList))
-    .then(() => { onSuccess(totalItems, offset); })
+  Promise.all(arrayofpromises)
+    .then(() => {console.log('done pushing artist'); onSuccess(totalItems, offset);});
+}
+
+
+
+function updateOrSetArtist(ref, artistData, albumId, albumTotalTracks) {
+
+  const artist = convertArtistOrAlbum(artistData, artistStructure);
+  const artistId = Object.keys(artist)[0];
+
+  function mightUpdateArtist(snapshot) {
+    if (!snapshot.exists()) { return true; /* did not update */ }
+    console.log('update', artistId);
+    ref.update(setAlbumToArtist(artistId, albumId, albumTotalTracks));
+  }
+
+  function mightSetArtist(didNotUpdate) {
+    if (!didNotUpdate) { return; /* already updated */ }
+    console.log('set', artistId);
+    // Add album to artist object
+    artist[artistId]['albums'] = { [albumId]: {'totalTracks': albumTotalTracks} };
+
+    ref.child(artistId)
+      .set(artist[artistId]);
+  }
+
+  // If artist exists, update else create new.
+  return ref.child(artistId)
+    .once('value')
+    .then(mightUpdateArtist)
+    .then(mightSetArtist)
     .catch((error) => {
-      onError('Oops ! Something went wrong while adding artists to Firebase.');
+      onError('Oops ! Something went wrong while setting/updating an artist in Firebase.');
     });
 }
 
@@ -274,7 +311,7 @@ export function pushAlbum(item, images, onSuccess, onError) {
  * @return
  */
 function pushArtistsFromAlbum(item, images, onSuccess, onError) {
-
+  console.log('item', item);
   // Create /artist ref
   const ref = getRef('artists');
 
@@ -283,17 +320,17 @@ function pushArtistsFromAlbum(item, images, onSuccess, onError) {
     const artistId = Object.keys(artist)[0];
 
     function mightUpdateArtist(snapshot) {
-      if (!snapshot.val()) { return true; /* did not update */ }
-
+      if (!snapshot.exists()) { return true; /* did not update */ }
+      console.log('update', artistId);
       ref.update(setAlbumToArtist(artistId, item.id, item.tracks.total));
     }
 
     function mightSetArtist(didNotUpdate) {
+      if (!didNotUpdate) { return; /* already updated */ }
+      console.log('set', artistId);
       // Add album to artist object and artist image
       artist[artistId]['albums'] = { [item.id]: {'totalTracks': item.tracks.total} };
-      artist[artistId]['imgUrl'] = images[artistId];
-
-      if (!didNotUpdate) { return; /* already updated */ }
+      if (images) { artist[artistId]['imgUrl'] = images[artistId]; };
 
       ref.child(artistId)
         .set(artist[artistId]);
@@ -309,8 +346,9 @@ function pushArtistsFromAlbum(item, images, onSuccess, onError) {
       });
   });
 
+  console.log(arrayofpromises);
   Promise.all(arrayofpromises)
-    .then(() => onSuccess());
+    .then(() => { onSuccess(); });
 }
 
 

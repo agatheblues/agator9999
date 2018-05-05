@@ -31,6 +31,7 @@ class SpotifySync extends React.Component {
     this.handleError = this.handleError.bind(this);
   }
 
+  //TODO: https://reactjs.org/blog/2015/12/16/ismounted-antipattern.html
   /**
    * Update the Message component props
    * @param  {Boolean} error   Has error
