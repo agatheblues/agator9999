@@ -363,7 +363,7 @@ export function getArtist(id, onSuccess, onError) {
 
       onSuccess(artist);
     })
-    .catch((errorObject) => { onError('Something went wrong while getting artist data! ' + errorObject.code);});
+    .catch((errorObject) => onError());
 
 }
 
@@ -384,9 +384,7 @@ export function getAlbum(id, onSuccess, onError) {
 
       onSuccess(album);
     })
-    .catch((errorObject) => {
-      onError('Something went wrong! ' + errorObject.code);
-    });
+    .catch((errorObject) => onError());
 
 }
 
@@ -408,5 +406,5 @@ export function getAlbumCount(onSuccess, onError) {
       onSuccess(i);
     })
     .catch((error) => console.log(error));
-    
+
 }

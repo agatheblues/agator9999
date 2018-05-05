@@ -1,9 +1,17 @@
 @import "variables";
 
-.msg--success {
-  background-color: $msgGreen;
-}
+.msg {
+  padding: 10px;
+  margin: 10px 0 10px 0;
+  transition: all 150ms linear;
 
-.msg--error {
-  background-color: $msgRed;
+  &.msg--success {
+    background-color: $msgGreen;
+    color: $white;
+  }
+
+  &.msg--error {
+    background-color: $msgRed;
+    color: $white;
+  }
 }

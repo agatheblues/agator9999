@@ -59,11 +59,13 @@ class CreateAlbumSpotify extends React.Component {
 
     if (!this.checkSpotifyUri(this.state.value)) {
       this.setState({
-        messageForm: 'URI should be formed as spotify:album:...'
+        messageForm: 'URI should be formed as spotify:album:...',
+        message: null
       });
     } else {
       this.setState({
-        messageForm: ''
+        messageForm: null,
+        message: null
       });
 
       api.getThenSetAlbum(this.accessToken, this.getSpotifyId(this.state.value), this.handleSuccess, this.handleError);

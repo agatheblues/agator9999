@@ -1,9 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import Message from '../Message/Message.js';
 import ArtistSummary from '../ArtistSummary/ArtistSummary.js';
 import Album from '../Album/Album.js';
-import {getArtist, getFbDb} from '../../DataWrapper/FirebaseDataWrapper.js';
+import Message from '../Message/Message.js';
+import {getArtist} from '../../DataWrapper/FirebaseDataWrapper.js';
 require('./Artist.scss');
 
 class Artist extends React.Component {
@@ -13,7 +13,6 @@ class Artist extends React.Component {
 
     this.state = {
       error: false,
-      message: null,
       hasArtistData: false,
       artistData: {}
     };
@@ -29,10 +28,9 @@ class Artist extends React.Component {
     });
   }
 
-  handleGetArtistError(message) {
+  handleGetArtistError() {
     this.setState({
-      'error': true,
-      'message': message
+      error: true
     });
   }
 
@@ -60,13 +58,21 @@ class Artist extends React.Component {
   render() {
     return (
       <div>
-        {this.state.message && <Message message={this.state.message} error={this.state.error}/>}
-        {this.state.hasArtistData &&
+        {this.state.hasArtistData && !this.state.error &&
             <div>
               <ArtistSummary artist={this.state.artistData} />
               {this.renderAlbums()}
             </div>}
-        {!this.state.hasArtistData && <p>Loading...</p>}
+        {!this.state.hasArtistData && !this.state.error &&
+            <div className='content-container'>
+              <p>Loading...</p>
+            </div>
+        }
+        {this.state.error &&
+          <div className='content-container'>
+            <Message message='Oops! There was a problem while retrieving data for this artist.' error={this.state.error}/>
+          </div>
+        }
       </div>
     );
   }

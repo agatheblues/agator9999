@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Message from '../Message/Message.js';
-import {getAlbum, getFbDb} from '../../DataWrapper/FirebaseDataWrapper.js';
+import {getAlbum} from '../../DataWrapper/FirebaseDataWrapper.js';
 require('./Album.scss');
 
 class Album extends React.Component {
@@ -16,9 +16,11 @@ class Album extends React.Component {
 
     this.state = {
       error: false,
-      message: null,
       hasAlbumData: false,
-      albumData: {}
+      albumData: {
+        source: '',
+        added_at: ''
+      }
     };
 
     this.handleGetAlbumSuccess = this.handleGetAlbumSuccess.bind(this);
@@ -43,10 +45,9 @@ class Album extends React.Component {
     });
   }
 
-  handleGetAlbumError(message) {
+  handleGetAlbumError() {
     this.setState({
-      'error': true,
-      'message': message
+      error: true
     });
   }
 
@@ -75,15 +76,22 @@ class Album extends React.Component {
             {this.renderAlbumCover()}
           </div>
           <div className='album-detail-container'>
-            <h2>{this.state.albumData.name}</h2>
-            <div className='album-main-details'>
-              <p>{this.state.albumData.release_date}&emsp;/&emsp;{this.props.totalTracks} tracks</p>
-              <p><a href={this.state.albumData.url}>&#9836; {`Listen on ${this.state.albumData.source}`}</a></p>
-            </div>
-            <div className='album-minor-details'>
-              <p>{`Added on ${this.state.albumData.added_at}`}</p>
-              <p>Tags: </p>
-            </div>
+            {!this.state.error &&
+              <div>
+                <h2>{this.state.albumData.name}</h2>
+                <div className='album-main-details'>
+                  <p>{this.state.albumData.release_date}&emsp;/&emsp;{this.props.totalTracks} tracks</p>
+                  <p><a href={this.state.albumData.url}>&#9836; {`Listen on ${this.state.albumData.source}`}</a></p>
+                </div>
+                <div className='album-minor-details'>
+                  <p>{`Added on ${this.state.albumData.added_at}`}</p>
+                  <p>Tags: </p>
+                </div>
+              </div>
+            }
+            {this.state.error &&
+              <Message message='Oops! There was a problem while retrieving data for this album.' error={this.state.error}/>
+            }
           </div>
         </div>
       </div>

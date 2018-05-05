@@ -99,8 +99,6 @@ class SpotifySync extends React.Component {
   render() {
     return (
       <div className='content-container'>
-        {this.state.message &&
-          <Message message={this.state.message} error={this.state.error}/>}
         <div className='back-to-library'>
           <Link to='/'>&#9839; Back to library</Link>
         </div>
@@ -117,10 +115,15 @@ class SpotifySync extends React.Component {
               />
             </div>
           }
+
+
+          {this.state.message &&
+            <Message message={this.state.message} error={this.state.error}/>}
+          <p className='note'>Synchronize saves all of your Spotify saved albums, and all of their artists to the database. It does not erase your current library but completes it.</p>
+
           {!this.accessToken &&
             <SpotifyLogin redirect='spotify/sync'/>
           }
-          <p className='note'>Synchronize saves all of your Spotify saved albums, and all of their artists to the database. It does not erase your current library but completes it.</p>
         </div>
       </div>
     );
