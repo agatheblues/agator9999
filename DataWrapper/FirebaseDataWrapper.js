@@ -5,25 +5,17 @@ import config from '../config.json';
 let albumsStructure = (
   {
     added_at,
-    album: {
-      id,
-      name,
-      external_urls:  {spotify},
-      images,
-      release_date
-    }
+    album
   }) => (
   {
-    id,
-    added_at,
-    name,
-    spotify,
-    images,
-    release_date
+    [album.id]: {
+      added_at,
+      ...formatAlbum(album)[album.id]
+    }
   }
 );
 
-let albumStructure = (
+export const formatAlbum = (
   {
     id,
     name,
@@ -34,12 +26,14 @@ let albumStructure = (
   {
     id,
     name,
-    spotify,
+    url: spotify,
     images,
-    release_date
+    release_date,
+    source: 'spotify'
   });
 
-let artistStructure = (
+
+export const formatArtist = (
   {
     id,
     name,
@@ -48,7 +42,8 @@ let artistStructure = (
   {
     id,
     name,
-    spotify
+    url: spotify,
+    source: 'spotify'
   });
 
 /******* UTILS *******/
@@ -128,6 +123,19 @@ export function getAllKeysThen(ref, doThis) {
   });
 }
 
+/**
+ * Omits given keys in object
+ * @param  {array} keys   Array of keys to omit
+ * @param  {object} obj   Object to omit keys of
+ * @return {object}      Object with omitted keys
+ */
+function omit(keys, obj) {
+  return Object.keys(obj)
+    .reduce((acc, currentValue) => {
+      if (keys.indexOf(currentValue) < 0) acc[currentValue] = obj[currentValue];
+      return acc;
+    }, {});
+}
 
 
 /****** PUSH DATA TO FIREBASE ******/
@@ -147,7 +155,7 @@ export function pushAlbums(items, onSuccess, onError, totalAlbums, offset) {
 
   // Array of promises of album set in FB
   const arrayofpromises = items.map((albumData) => {
-    const album = convertArtistOrAlbum(albumData, albumsStructure);
+    const album = convertToStructure(albumData, albumsStructure);
     const albumId = Object.keys(album)[0];
 
     return ref.child(albumId)
@@ -173,39 +181,20 @@ export function pushAlbums(items, onSuccess, onError, totalAlbums, offset) {
  * @return {array}       Array of artists
  */
 function formatArtists(items) {
-  return items.map(item => item.album.artists.map(artist => convertArtistOrAlbum(artist, artistStructure)));
+  return items.map(item => item.album.artists.map(artist => convertToStructure(artist, artistStructure)));
 }
 
 
-/**
- * Rename the key 'spotify' to 'url' and add a source key
- * @param  {object} item album or artist object
- * @return {object}      album or artist object with renamed and additionnal keys
- */
-function formatObject(item) {
-  let formatted = Object.keys(item).reduce((acc, key) => {
-    // Rename spotify key
-    let accKey = (key == 'spotify') ? 'url' : key;
 
-    // Skip id key, else assign key
-    if (key != 'id') { acc[accKey] = item[key]; }
-    return acc;
-  }, {});
 
-  // Add source and albums
-  formatted['source'] = 'spotify';
-
-  return { [item.id]: formatted};
-}
-
-/**
- * Convert an artist object returned by spotify to the firebase expected artist or album object
- * @param  {object} item album or artist object from spotify
- * @return {object}      album or artist object with renamed url key + additional source field
- */
-function convertArtistOrAlbum(item, destructuringRef) {
-  return formatObject(destructuringRef(item));
-}
+// /**
+//  * Convert an artist object returned by spotify to the firebase expected artist or album object
+//  * @param  {object} item album or artist object from spotify
+//  * @return {object}      album or artist object with renamed url key + additional source field
+//  */
+// export function convertToStructure(item, destructuringRef) {
+//   return formatObject(destructuringRef(item));
+// }
 
 
 /**
@@ -242,67 +231,59 @@ function pushArtists(items, onSuccess, onError, totalItems, offset) {
 
 
 
-function updateOrSetArtist(ref, artistData, albumId, albumTotalTracks) {
+export function updateOrSetArtist(ref, artistData, albumId, albumTotalTracks) {
 
-  const artist = convertArtistOrAlbum(artistData, artistStructure);
-  const artistId = Object.keys(artist)[0];
-
-  function mightUpdateArtist(snapshot) {
-    if (!snapshot.exists()) { return true; /* did not update */ }
-    console.log('update', artistId);
-    ref.update(setAlbumToArtist(artistId, albumId, albumTotalTracks));
-  }
-
-  function mightSetArtist(didNotUpdate) {
-    if (!didNotUpdate) { return; /* already updated */ }
-    console.log('set', artistId);
-    // Add album to artist object
-    artist[artistId]['albums'] = { [albumId]: {'totalTracks': albumTotalTracks} };
-
-    ref.child(artistId)
-      .set(artist[artistId]);
-  }
-
-  // If artist exists, update else create new.
-  return ref.child(artistId)
-    .once('value')
-    .then(mightUpdateArtist)
-    .then(mightSetArtist)
-    .catch((error) => {
-      onError('Oops ! Something went wrong while setting/updating an artist in Firebase.');
-    });
+  // const artist = convertToStructure(artistData, artistStructure);
+  // const artistId = Object.keys(artist)[0];
+  //
+  // function mightUpdateArtist(snapshot) {
+  //   if (!snapshot.exists()) { return true; /* did not update */ }
+  //   console.log('update', artistId);
+  //   ref.update(setAlbumToArtist(artistId, albumId, albumTotalTracks));
+  // }
+  //
+  // function mightSetArtist(didNotUpdate) {
+  //   if (!didNotUpdate) { return; /* already updated */ }
+  //   console.log('set', artistId);
+  //   // Add album to artist object
+  //   artist[artistId]['albums'] = { [albumId]: {'totalTracks': albumTotalTracks} };
+  //
+  //   ref.child(artistId)
+  //     .set(artist[artistId]);
+  // }
+  //
+  // // If artist exists, update else create new.
+  // return ref.child(artistId)
+  //   .once('value')
+  //   .then(mightUpdateArtist)
+  //   .then(mightSetArtist)
+  //   .catch((error) => {
+  //     onError('Oops ! Something went wrong while setting/updating an artist in Firebase.');
+  //   });
 }
 
 
 /**
  * Save a single album in Firebase
  * @param  {objet} item       Spotify Album
- * @param  {func} onSuccess   Success callback
- * @param  {func} onError     Error callback
  */
-export function pushAlbum(item, images, onSuccess, onError) {
+function setAlbum(album) {
+  // Add album added date
+  album['added_at'] = Date.now();
 
-  // Convert album to expected structure
-  const album = convertArtistOrAlbum(item, albumStructure);
+  // Set album
+  return getRef('albums')
+    .child(album.id)
+    .set(omit(['id'], album));
+}
 
-  // Create /albums ref
-  const ref = getRef('albums');
 
-  // Get album Ids already in the db
-  getAllKeysThen(ref, (keys) => {
-
-    // Compare albums to those in the DB, extract only ids that are not there yet
-    if (isInArray(keys, item.id)) {
-      onError('Oops ! Album is already in your library.');
-    } else {
-      // Add album added date
-      album[item.id]['added_at'] = Date.now();
-
-      ref.update(album)
-        .then(() => pushArtistsFromAlbum(item, images, onSuccess, onError))
-        .catch((error) => onError('Oops ! Something went wrong while pushing the Album to Firebase. '));
-    }
-  });
+export function setAlbumIfNotExists(album) {
+  return getAlbum(album.id)
+    .then((snapshot) => {
+      if (snapshot.exists()) { throw('Oops! This album is already in your library!');}
+      setAlbum(album);
+    });
 }
 
 /**
@@ -316,7 +297,7 @@ function pushArtistsFromAlbum(item, images, onSuccess, onError) {
   const ref = getRef('artists');
 
   const arrayofpromises = item.artists.map((artistData) => {
-    const artist = convertArtistOrAlbum(artistData, artistStructure);
+    const artist = convertToStructure(artistData, artistStructure);
     const artistId = Object.keys(artist)[0];
 
     function mightUpdateArtist(snapshot) {
@@ -413,18 +394,22 @@ export function getArtist(id, onSuccess, onError) {
  * @param  {func} onError     Error callback
  * @return
  */
-export function getAlbum(id, onSuccess, onError) {
+export function getAlbum(id) {
 
-  getRef('albums/' + id)
-    .once('value')
-    .then(function(snapshot) {
-      let album = snapshot.val();
+  return getRef('albums/' + id)
+    .once('value');
 
-      onSuccess(album);
-    })
-    .catch((errorObject) => onError());
+  // TODO update album page
+  // .then(function(snapshot) {
+  //   let album = snapshot.val();
+  //
+  //   onSuccess(album);
+  // })
+  // .catch((errorObject) => onError());
 
 }
+
+
 
 /**
  * Counts the number of albums stored in the library

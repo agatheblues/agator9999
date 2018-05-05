@@ -4,7 +4,7 @@ import Button from '../Button/Button';
 import SpotifyLogin from '../SpotifyLogin/SpotifyLogin';
 import Message from '../Message/Message';
 import * as api from '../../DataWrapper/SpotifyDataWrapper.js';
-import * as fb from './FirebaseDataWrapper.js';
+import * as fb from '../../DataWrapper/FirebaseDataWrapper.js';
 require('./CreateAlbumSpotify.scss');
 
 class CreateAlbumSpotify extends React.Component {
@@ -74,9 +74,14 @@ class CreateAlbumSpotify extends React.Component {
     // Clear all error messages
     this.updateMessages(null, null);
 
+    // Set album
     api.getAlbum(this.accessToken, this.getSpotifyId(this.state.value))
     // .then((response) => api.getArtistsImage(this.accessToken, response.data))
-      .then((response) => fb.pushAlbum(response));
+      .then(({data}) => Promise.all([
+        fb.setAlbumIfNotExists(fb.formatAlbum(data)),
+        fb.updateOrSetArtist(fb.formatArtist(data.artists))
+      ]))
+      .catch((error) => {console.log(error);}); //this.handleError('OOPS!'));
   }
 
   render() {
