@@ -311,39 +311,37 @@ function setImageChunk(ref, token, artistIdsChunks, chunkId, onSuccess, onError)
 }
 
 
+/******** ARTIST IMAGES  *********/
+
+export function getArtistsImages(token, artistIds) {
+
+  // Create batches of 50 ids
+  const artistIdsChunks = splitArrayInChunks(artistIds, 50);
+
+  const arrayOfImagePromises = artistIdsChunks.map((chunk) =>
+    getArtistsChunkImages(token, chunk)
+      .then((response) => fb.updateArtistsImages(formatArtistsImages(response.data.artists)))
+  );
+
+  return Promise.all(arrayOfImagePromises);
+}
+
+
 /**
- * Fetch artists images for a chunk of artist Ids
- * @param {object} ref         firebase reference to /artists
- * @param {String} token     Access token
- * @param {array} artistIdsChunks   array of array of artist Ids
- * @param {int} chunkId     index of the artist ids chunk
- * @param {function} onSuccess Success callback
- * @param {function} onError   Error callback
+ * Get artists images for a list of artist ids < 50 items
+ * @param  {string} token     Spotify API Token
+ * @param  {array} artistIds  List of artist Ids
+ * @return {Promise}
  */
-export function getArtistsImages(token, data) {
-
-  let artistIds = data.artists.map((artist) => artist.id);
-
+function getArtistsChunkImages(token, artistIds) {
   return getInstance(token)
     .get('/artists', {
       params: {
         ids: artistIds.join(',')
       }
     });
-  // .then((response) => {
-  //   // Prepare image object
-  //   let images = {};
-  //   response.data.artists.forEach((artist) => { images[artist.id] = getArtistImageUrl(artist); });
-  //
-  //   // Add album then artists to fb
-  //   fb.pushAlbum(data, images, onSuccess, onError);
-  //
-  // })
-  // .catch((error) => {
-  //   onError('Something went wrong while pushing artist images.');
-  // });
-
 }
+
 
 /**
  * For a given artist object, return its first image url or returned
@@ -352,33 +350,34 @@ export function getArtistsImages(token, data) {
  * @return {String}        Image url
  */
 function getArtistImageUrl(artist) {
-  let url = '';
-
   if (artist.hasOwnProperty('images') && (artist.images.length > 0)) {
-    url = artist.images[0].url;
-  } else {
-    url = '/static/images/missing.jpg';
+    return artist.images[0].url;
   }
 
-  return url;
+  return '/static/images/missing.jpg';
 }
 
-export function formatArtistImages(response) {
 
+/**
+ * Format the response of getting artists to extract images
+ * @param  {array} artists  List of Spotify Artists
+ * @return {array}          List of object containing id and imgUrl of each artist
+ */
+function formatArtistsImages(artists) {
+  return artists.map((artist) => {
+    return {
+      id: artist.id,
+      imgUrl: getArtistImageUrl(artist)
+    };
+  });
 }
 
-/****** CREATE ALBUM AND ARTISTS ******/
+
+/************ ALBUM ***********/
 
 export function getAlbum(token, albumId) {
 
   return getInstance(token)
     .get('/albums/' + albumId);
-  // .then((response) => {
-  //   getArtistsImage(token, response.data, onSuccess, onError);
-  // })
-  // .catch((error) => {
-  //   let message = handleErrorMessage(error);
-  //   onError(message);
-  // });
 
 }

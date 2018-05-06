@@ -51,7 +51,7 @@ class CreateAlbumSpotify extends React.Component {
   handleSuccess() {
     this.setState({
       error: false,
-      message: 'Create album is successful!'
+      message: 'Album successfully added to your library!'
     });
   }
 
@@ -60,6 +60,10 @@ class CreateAlbumSpotify extends React.Component {
       messageForm: messageForm,
       message: message
     });
+  }
+
+  getArtistIds(artists) {
+    return artists.map((artist) => artist.id);
   }
 
   handleSubmit(event) {
@@ -74,16 +78,15 @@ class CreateAlbumSpotify extends React.Component {
     // Clear all error messages
     this.updateMessages(null, null);
 
-    // Set album
+    // Set album, artist, and artist images
     api.getAlbum(this.accessToken, this.getSpotifyId(this.state.value))
       .then(({data}) => Promise.all([
         fb.setAlbumIfNotExists(fb.formatAlbum(data)),
         fb.updateOrSetArtists(fb.formatArtists(data.artists), fb.formatAlbumSummary(data))
+          .then(() => api.getArtistsImages(this.accessToken, this.getArtistIds(data.artists)))
       ]))
-      .catch((error) => {console.log(error);}); //this.handleError('OOPS!'));
-
-    // TODO
-    // .then((response) => api.getArtistsImage(this.accessToken, response.data))
+      .then(() => this.handleSuccess())
+      .catch((error) => this.handleError(error.message));
   }
 
   render() {

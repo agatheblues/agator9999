@@ -2,6 +2,9 @@ import axios from 'axios';
 import firebase from 'firebase';
 import config from '../config.json';
 
+
+/******* FORMATTING *******/
+
 let albumsStructure = (
   {
     added_at,
@@ -64,6 +67,24 @@ export function formatArtists(artists) {
   return artists.map(artist => formatArtist(artist));
 }
 
+
+/**
+ * Converts an album list object {id: {totalTracks}} to an array of albums
+ * [{id, totalTracks}]
+ * @param  {object} item Album list object
+ * @return {array}       Array of ids
+ */
+export function convertAlbumSummaryToArray(item) {
+
+  return Object.keys(item).reduce((acc, key) => {
+    acc.push(Object.assign({id: key}, item[key]));
+    return acc;
+  }, []);
+
+}
+
+
+
 /******* UTILS *******/
 
 /**
@@ -86,15 +107,6 @@ export function getFbDb() {
   return firebase.database();
 }
 
-/**
- * CHeck if an item is in an array
- * @param  {array}  arr  Array to check
- * @param  {}  item Item to check if it belongs to array
- * @return {Boolean}      Return true if item is in array
- */
-function isInArray(arr, item) {
-  return (arr.indexOf(item) >= 0);
-}
 
 /**
  * Get Firebase ref
@@ -116,38 +128,6 @@ function flatten(arr) {
   }, []);
 }
 
-
-/**
- * Converts an album list object {id: {totalTracks}} to an array of albums
- * [{id, totalTracks}]
- * @param  {object} item Album list object
- * @return {array}       Array of ids
- */
-export function convertAlbumSummaryToArray(item) {
-
-  return Object.keys(item).reduce((acc, key) => {
-    acc.push(Object.assign({id: key}, item[key]));
-    return acc;
-  }, []);
-
-}
-
-
-/**
- * Get all key names of first level of data
- * @param  {ref} ref Reference to a db path
- * @return {array}     array of keys
- */
-export function getAllKeysThen(ref, doThis) {
-
-  ref.once('value', function(snapshot) {
-    let keys = [];
-    snapshot.forEach(function(key) {
-      keys.push(key.key);
-    });
-    doThis(keys);
-  });
-}
 
 /**
  * Omits given keys in object
@@ -202,19 +182,7 @@ export function pushAlbums(items, onSuccess, onError, totalAlbums, offset) {
 }
 
 
-
-
-
-
-// /**
-//  * Convert an artist object returned by spotify to the firebase expected artist or album object
-//  * @param  {object} item album or artist object from spotify
-//  * @return {object}      album or artist object with renamed url key + additional source field
-//  */
-// export function convertToStructure(item, destructuringRef) {
-//   return formatObject(destructuringRef(item));
-// }
-
+/******** ARTISTS *******/
 
 /**
  * Convert an artist object returned by spotify to the firebase expected artist object
@@ -324,6 +292,34 @@ function addFirstAlbumToArtist(artist, album) {
 
 
 /**
+ * Get a single artist from FB
+ * @param  {string} id        Artist id
+ * @return {Promise}
+ */
+export function getArtist(id) {
+
+  return getRef('artists/' + id)
+    .once('value');
+
+}
+
+
+/**
+ * Get list of all artists stored in Firebase
+ * @return {Promise}
+ */
+export function getArtists() {
+
+  return getRef('artists')
+    .once('value');
+
+}
+
+
+
+/********** ALBUMS *********/
+
+/**
  * Save a single album in Firebase
  * @param  {objet} item       Spotify Album
  */
@@ -331,7 +327,6 @@ function setAlbum(album) {
   // Add album added date
   album['added_at'] = Date.now();
 
-  // Set album
   return getRef('albums')
     .child(album.id)
     .set(omit(['id'], album));
@@ -341,10 +336,78 @@ function setAlbum(album) {
 export function setAlbumIfNotExists(album) {
   return getAlbum(album.id)
     .then((snapshot) => {
-      if (snapshot.exists()) { throw('Oops! This album is already in your library!');}
+      if (snapshot.exists()) { throw({ message : 'Oops! This album is already in your library!'});}
       setAlbum(album);
     });
 }
+
+
+/**
+ * Get a single album from FB
+ * @param  {string} id        Album id
+ * @return {Promise}
+ */
+export function getAlbum(id) {
+
+  return getRef('albums/' + id)
+    .once('value');
+
+}
+
+
+/**
+ * Get list of all albums stored in firebase
+ * @return {Promise}
+ */
+export function getAlbums() {
+
+  return getRef('albums')
+    .once('value');
+
+}
+
+/********* ARTIST IMAGES ******/
+
+/**
+ * If artists do not exists, set the artists with the imgUrl property.
+ * Else, update the imgUrl property.
+ * @param  {array} images   Array of object which contains artist id and imgUrl
+ * @return {Promise}
+ */
+export function updateArtistsImages(images) {
+  return Promise.all(images.map((image) => updateASingleArtistImage(image)));
+}
+
+
+/**
+ * If artist does not exists, set the artist with the imgUrl property.
+ * Else, update the imgUrl property.
+ * @param  {object} image   Contains artist id and imgUrl
+ * @return {Promise}
+ */
+function updateASingleArtistImage(image) {
+
+  return getArtist(image.id)
+    .then(updateArtistImage(image));
+}
+
+
+/**
+ * Update artist imgUrl property
+ * @param  {object} image Contains artist id and imgUrl
+ * @return {Promise}
+ */
+function updateArtistImage(image) {
+  return getRef('artists')
+    .update({
+      ['/' + image.id + '/imgUrl/']: image.imgUrl
+    });
+}
+
+
+
+
+
 
 /**
  * Save artists to firebase
@@ -390,56 +453,4 @@ function pushArtistsFromAlbum(item, images, onSuccess, onError) {
   console.log(arrayofpromises);
   Promise.all(arrayofpromises)
     .then(() => { onSuccess(); });
-}
-
-
-/******** GET DATA FROM FIREBASE *******/
-
-/**
- * Get a single artist from FB
- * @param  {string} id        Artist id
- * @return {Promise}
- */
-export function getArtist(id) {
-
-  return getRef('artists/' + id)
-    .once('value');
-
-}
-
-
-/**
- * Get a single album from FB
- * @param  {string} id        Album id
- * @return {Promise}
- */
-export function getAlbum(id) {
-
-  return getRef('albums/' + id)
-    .once('value');
-
-}
-
-
-/**
- * Get list of all albums stored in firebase
- * @return {Promise}
- */
-export function getAlbums() {
-
-  return getRef('albums')
-    .once('value');
-
-}
-
-
-/**
- * Get list of all artists stored in Firebase
- * @return {Promise}
- */
-export function getArtists() {
-
-  return getRef('artists')
-    .once('value');
-
 }
