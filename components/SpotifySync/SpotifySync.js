@@ -6,6 +6,7 @@ import SpotifyLogin from '../SpotifyLogin/SpotifyLogin.js';
 import SpotifyProfile from '../SpotifyProfile/SpotifyProfile';
 import { Link } from 'react-router-dom';
 import * as api from '../../DataWrapper/SpotifyDataWrapper.js';
+import * as fb from '../../DataWrapper/FirebaseDataWrapper.js';
 require('./SpotifySync.scss');
 
 class SpotifySync extends React.Component {
@@ -26,7 +27,6 @@ class SpotifySync extends React.Component {
     };
 
     this.handleClick = this.handleClick.bind(this);
-    this.handleAlbumSyncSuccess = this.handleAlbumSyncSuccess.bind(this);
     this.handleSyncImageSuccess = this.handleSyncImageSuccess.bind(this);
     this.handleError = this.handleError.bind(this);
   }
@@ -48,8 +48,11 @@ class SpotifySync extends React.Component {
    * Start fetching first batch of albums
    */
   handleClick() {
-    this.updateMessage(false, 'Loading albums 0 - ' + this.limit);
-    api.setAlbumsThenArtists(this.accessToken, 0, this.limit, this.handleAlbumSyncSuccess, this.handleError);
+    this.updateMessage(false, 'Loading albums and artists...');
+
+    api.getAndSetUserSavedAlbums(this.accessToken, 0)
+      .then(() => this.handleAlbumSyncSuccess())
+      .catch((error) => { console.log(error); });
   }
 
 
@@ -59,26 +62,8 @@ class SpotifySync extends React.Component {
    * @param  {int} totalAlbums  Total number of albums to fetch
    * @param  {int} offset      Current pagination offset
    */
-  handleAlbumSyncSuccess(totalAlbums, offset) {
-
-    if (this.accessToken) {
-      if (offset < totalAlbums) {
-
-        // Update message
-        const upperLimit = ((offset + 2*this.limit) >= totalAlbums) ? totalAlbums : (offset + 2*this.limit);
-        this.updateMessage(false, 'Loading albums ' + (offset + this.limit) + ' - ' + upperLimit + ' of ' + totalAlbums);
-
-        // Load next batch of albums
-        api.setAlbumsThenArtists(this.accessToken, offset + this.limit, this.limit, this.handleAlbumSyncSuccess, this.handleError);
-
-      } else {
-
-        // Start fetching artist images
-        this.updateMessage(false, 'Loading albums and artists successful! Loading artist images...');
-        api.getThenSetArtistImages(this.accessToken, this.handleSyncImageSuccess, this.handleError);
-
-      }
-    }
+  handleAlbumSyncSuccess() {
+    this.updateMessage(false, 'Loading albums and artists successful! Loading artist images...');
   }
 
   /**
@@ -117,14 +102,14 @@ class SpotifySync extends React.Component {
             </div>
           }
 
+          {!this.accessToken &&
+            <SpotifyLogin redirect='spotify/sync'/>
+          }
 
           {this.state.message &&
             <Message message={this.state.message} error={this.state.error}/>}
           <p className='note'>Synchronize saves all of your Spotify saved albums, and all of their artists to the database. It does not erase your current library but completes it.</p>
 
-          {!this.accessToken &&
-            <SpotifyLogin redirect='spotify/sync'/>
-          }
         </div>
       </div>
     );

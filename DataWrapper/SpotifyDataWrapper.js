@@ -186,7 +186,57 @@ export function authenticate(onError) {
 
 
 
-/***** FETCH USER ALBUMS AND ARTISTS *****/
+
+
+/************ ALBUM ***********/
+
+export function getAlbum(token, albumId) {
+
+  return getInstance(token)
+    .get('/albums/' + albumId);
+
+}
+
+
+/**
+ * Get chunks of 50 albums from spotify, and save albums and artists to Firebase.
+ * Loop over the different pages by calling the function recursively.
+ * @param  {String} token  Spotify access token
+ * @param  {number} offset Batch offset
+ * @return {Promise}
+ */
+export function getAndSetUserSavedAlbums(token, offset) {
+
+  return getUserSavedAlbumsChunk(token, offset)
+    .then(({data}) => {
+      const arrayOfPromises = [
+        fb.setAlbums(data.items.map((item) => fb.formatAlbums(item))),
+        fb.setArtists(data.items)
+      ];
+
+      // If there is a next page, push next promise to array
+      if (data.next) { arrayOfPromises.push(getAndSetUserSavedAlbums(token, offset + 50));}
+      return Promise.all(arrayOfPromises);
+    });
+
+}
+
+
+/**
+ * Retrieve a batch of 50 albums from Spotify user's saved albums
+ * @param  {String} token  Spotify access token
+ * @param  {number} offset Batch offset (limit is 50)
+ * @return {Promise}
+ */
+export function getUserSavedAlbumsChunk(token, offset) {
+  return getInstance(token)
+    .get('/me/albums', {
+      params: {
+        limit: 50,
+        offset: offset
+      }
+    });
+}
 
 /**
  * Get albums saved by user (batch of 50), then save it in firebase
@@ -370,14 +420,4 @@ function formatArtistsImages(artists) {
       imgUrl: getArtistImageUrl(artist)
     };
   });
-}
-
-
-/************ ALBUM ***********/
-
-export function getAlbum(token, albumId) {
-
-  return getInstance(token)
-    .get('/albums/' + albumId);
-
 }

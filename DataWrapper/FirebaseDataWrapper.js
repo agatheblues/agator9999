@@ -5,27 +5,14 @@ import config from '../config.json';
 
 /******* FORMATTING *******/
 
-let albumsStructure = (
+export const formatAlbums = ({ added_at, album }) => (
   {
     added_at,
-    album
-  }) => (
-  {
-    [album.id]: {
-      added_at,
-      ...formatAlbum(album)[album.id]
-    }
+    ...formatAlbum(album)
   }
 );
 
-export const formatAlbum = (
-  {
-    id,
-    name,
-    external_urls:  {spotify},
-    images,
-    release_date
-  }) => (
+export const formatAlbum = ({ id, name, external_urls: { spotify }, images, release_date }) => (
   {
     id,
     name,
@@ -35,22 +22,13 @@ export const formatAlbum = (
     source: 'spotify'
   });
 
-export const formatAlbumSummary = (
-  {
-    id,
-    tracks: { total }
-  }) => (
+export const formatAlbumSummary = ({ id, tracks: { total } }) => (
   {
     id,
     tracks: { total }
   });
 
-const formatArtist = (
-  {
-    id,
-    name,
-    external_urls:  {spotify}
-  }) => (
+const formatArtist = ({ id, name, external_urls: { spotify } }) => (
   {
     id,
     name,
@@ -217,6 +195,10 @@ function pushArtists(items, onSuccess, onError, totalItems, offset) {
 }
 
 
+export function setArtists(items) {
+  return Promise.all(flatten(items.map((item) => updateOrSetArtists(formatArtists(item.album.artists), formatAlbumSummary(item.album)))));
+}
+
 /**
  * If artists already exist in Firebase, update their album list
  * else, set new artists
@@ -332,6 +314,16 @@ function setAlbum(album) {
     .set(omit(['id'], album));
 }
 
+/**
+ * If artists already exist in Firebase, update their album list
+ * else, set new artists
+ * @param  {object} artists List of Firebase artist object
+ * @param  {object} album   Firebase album object
+ * @return {Promise}
+ */
+export function setAlbums(albums) {
+  return Promise.all(flatten(albums.map((album) => setAlbum(album))));
+}
 
 export function setAlbumIfNotExists(album) {
   return getAlbum(album.id)
