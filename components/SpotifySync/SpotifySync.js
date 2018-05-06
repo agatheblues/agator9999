@@ -27,8 +27,6 @@ class SpotifySync extends React.Component {
     };
 
     this.handleClick = this.handleClick.bind(this);
-    this.handleSyncImageSuccess = this.handleSyncImageSuccess.bind(this);
-    this.handleError = this.handleError.bind(this);
   }
 
   //TODO: https://reactjs.org/blog/2015/12/16/ismounted-antipattern.html
@@ -52,7 +50,7 @@ class SpotifySync extends React.Component {
 
     api.getAndSetUserSavedAlbums(this.accessToken, 0)
       .then(() => this.handleAlbumSyncSuccess())
-      .catch((error) => { console.log(error); });
+      .catch((error) => this.handleError(error.message));
   }
 
 
@@ -63,15 +61,9 @@ class SpotifySync extends React.Component {
    * @param  {int} offset      Current pagination offset
    */
   handleAlbumSyncSuccess() {
-    this.updateMessage(false, 'Loading albums and artists successful! Loading artist images...');
+    this.updateMessage(false, 'Loading albums and artists successful!');
   }
 
-  /**
-   * Display success message when all artist images have been fetched
-   */
-  handleSyncImageSuccess() {
-    this.updateMessage(false, 'Loaded artist images! Spotify sync is complete.');
-  }
 
   /**
    * Display error message when a problem occured

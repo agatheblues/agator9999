@@ -197,6 +197,9 @@ export function getAlbum(token, albumId) {
 
 }
 
+function getArtistsIds(items) {
+  return fb.flatten(items.map((item) => item.album.artists.map((artist) => artist.id)));
+}
 
 /**
  * Get chunks of 50 albums from spotify, and save albums and artists to Firebase.
@@ -211,7 +214,8 @@ export function getAndSetUserSavedAlbums(token, offset) {
     .then(({data}) => {
       const arrayOfPromises = [
         fb.setAlbums(data.items.map((item) => fb.formatAlbums(item))),
-        fb.setArtists(data.items)
+        fb.updateOrSetArtistsFromAlbums(data.items)
+          .then(() => getArtistsImages(token, getArtistsIds(data.items)))
       ];
 
       // If there is a next page, push next promise to array
@@ -238,32 +242,6 @@ export function getUserSavedAlbumsChunk(token, offset) {
     });
 }
 
-/**
- * Get albums saved by user (batch of 50), then save it in firebase
- * @param {String} token     Access token
- * @param {integer} offset   Pagination offset
- * @param {integer} limit    Pagination limit
- * @param {function} onSuccess Success callback
- * @param {function} onError   Error callback
- */
-export function setAlbumsThenArtists(token, offset, limit, onSuccess, onError) {
-
-  getInstance(token)
-    .get('/me/albums', {
-      params: {
-        limit: limit,
-        offset: offset
-      }
-    })
-    .then((response) => {
-      fb.pushAlbums(response.data.items, onSuccess, onError, response.data.total, offset);
-    })
-    .catch((error) => {
-      let message = handleErrorMessage(error);
-      onError(message);
-    });
-
-}
 
 /**
  * Get Spotify user profile
@@ -286,85 +264,10 @@ export function getProfile(token, onSuccess, onError) {
 }
 
 
-/**
- * Get artist Ids from Firebase, then fetch their image in Spotify
- * and update the artist in Firebase
- * @param {String} token     Access token
- * @param {function} onSuccess Success callback
- * @param {function} onError   Error callback
- */
-export function getThenSetArtistImages(token, onSuccess, onError) {
-
-  // Create /artist ref
-  const db = fb.getFbDb();
-  const ref = db.ref('artists');
-
-  // Get artists ids stored in Firebase
-  fb.getAllKeysThen(ref, (keys) => {
-
-    // Create batches of 50 ids
-    const artistIdsChunks = splitArrayInChunks(keys, 50);
-
-    // Load first batch of images
-    setImageChunk(ref, token, artistIdsChunks, 0, onSuccess, onError);
-  });
-}
-
-
-/**
- * Fetch artists images for a chunk of artist Ids
- * @param {object} ref         firebase reference to /artists
- * @param {String} token     Access token
- * @param {array} artistIdsChunks   array of array of artist Ids
- * @param {int} chunkId     index of the artist ids chunk
- * @param {function} onSuccess Success callback
- * @param {function} onError   Error callback
- */
-function setImageChunk(ref, token, artistIdsChunks, chunkId, onSuccess, onError) {
-
-  getInstance(token)
-    .get('/artists', {
-      params: {
-        ids: artistIdsChunks[chunkId].join(',')
-      }
-    })
-    .then((response) => {
-
-      // Get total number of chunks
-      const totalChunks = artistIdsChunks.length;
-
-      // Prepare updates object
-      let updates = {};
-
-      // Update image url value of artist and store in updates
-      response.data.artists.forEach(function(artist) {
-        updates['/' + artist.id + '/imgUrl'] = getArtistImageUrl(artist);
-      });
-
-      // Update artist image url in Firebase
-      ref.update(updates)
-        .then(() => {
-
-          // If last chunk, call success callback, else, load next batch
-          if (chunkId == totalChunks - 1) {
-            onSuccess();
-          } else {
-            setImageChunk(ref, token, artistIdsChunks, chunkId + 1, onSuccess, onError);
-          }
-        });
-
-    })
-    .catch((error) => {
-      onError('Something went wrong while pushing artist images.');
-    });
-
-}
-
-
 /******** ARTIST IMAGES  *********/
 
 export function getArtistsImages(token, artistIds) {
-
+  
   // Create batches of 50 ids
   const artistIdsChunks = splitArrayInChunks(artistIds, 50);
 
