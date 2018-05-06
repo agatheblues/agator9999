@@ -32,8 +32,17 @@ export const formatAlbum = (
     source: 'spotify'
   });
 
+export const formatAlbumSummary = (
+  {
+    id,
+    tracks: { total }
+  }) => (
+  {
+    id,
+    tracks: { total }
+  });
 
-export const formatArtist = (
+const formatArtist = (
   {
     id,
     name,
@@ -45,6 +54,15 @@ export const formatArtist = (
     url: spotify,
     source: 'spotify'
   });
+
+/**
+ * Format the array of array of artists send back by /me/albums
+ * @param  {array} items Array of albums
+ * @return {array}       Array of artists
+ */
+export function formatArtists(artists) {
+  return artists.map(artist => formatArtist(artist));
+}
 
 /******* UTILS *******/
 
@@ -99,11 +117,19 @@ function flatten(arr) {
 }
 
 
-function objectToArray(item) {
+/**
+ * Converts an album list object {id: {totalTracks}} to an array of albums
+ * [{id, totalTracks}]
+ * @param  {object} item Album list object
+ * @return {array}       Array of ids
+ */
+export function convertAlbumSummaryToArray(item) {
+
   return Object.keys(item).reduce((acc, key) => {
     acc.push(Object.assign({id: key}, item[key]));
     return acc;
   }, []);
+
 }
 
 
@@ -175,14 +201,7 @@ export function pushAlbums(items, onSuccess, onError, totalAlbums, offset) {
     .then(() => {console.log('terminadoooo album'); pushArtists(items, onSuccess, onError, totalAlbums, offset);});
 }
 
-/**
- * Format the array of array of artists send back by /me/albums
- * @param  {array} items Array of albums
- * @return {array}       Array of artists
- */
-function formatArtists(items) {
-  return items.map(item => item.album.artists.map(artist => convertToStructure(artist, artistStructure)));
-}
+
 
 
 
@@ -230,38 +249,47 @@ function pushArtists(items, onSuccess, onError, totalItems, offset) {
 }
 
 
-
-export function updateOrSetArtist(ref, artistData, albumId, albumTotalTracks) {
-
-  // const artist = convertToStructure(artistData, artistStructure);
-  // const artistId = Object.keys(artist)[0];
-  //
-  // function mightUpdateArtist(snapshot) {
-  //   if (!snapshot.exists()) { return true; /* did not update */ }
-  //   console.log('update', artistId);
-  //   ref.update(setAlbumToArtist(artistId, albumId, albumTotalTracks));
-  // }
-  //
-  // function mightSetArtist(didNotUpdate) {
-  //   if (!didNotUpdate) { return; /* already updated */ }
-  //   console.log('set', artistId);
-  //   // Add album to artist object
-  //   artist[artistId]['albums'] = { [albumId]: {'totalTracks': albumTotalTracks} };
-  //
-  //   ref.child(artistId)
-  //     .set(artist[artistId]);
-  // }
-  //
-  // // If artist exists, update else create new.
-  // return ref.child(artistId)
-  //   .once('value')
-  //   .then(mightUpdateArtist)
-  //   .then(mightSetArtist)
-  //   .catch((error) => {
-  //     onError('Oops ! Something went wrong while setting/updating an artist in Firebase.');
-  //   });
+export function updateOrSetArtists(artists, albumData) {
+  return Promise.all(artists.map((artist) => updateOrSetASingleArtist(artist, albumData)));
 }
 
+
+function updateOrSetASingleArtist(artist, album) {
+  console.log(artist, album);
+
+  function mightUpdateArtist(snapshot) {
+    if (!snapshot.exists()) { return true; /* did not update */ }
+    updateArtistAlbumsList(artist, album);
+  }
+
+  function mightSetArtist(didNotUpdate) {
+    if (!didNotUpdate) { return; /* already updated */ }
+    setArtist(addFirstAlbumToArtist(artist, album));
+  }
+
+  // If artist exists, update else create new.
+  return getArtist(artist.id)
+    .then(mightUpdateArtist)
+    .then(mightSetArtist);
+}
+
+function updateArtistAlbumsList(artist, album) {
+  return getRef('artists')
+    .update({
+      ['/' + artist.id + '/albums/' + album.id]: { 'totalTracks': album.tracks.total }
+    });
+}
+
+function setArtist(artist) {
+  return getRef('artists')
+    .child(artist.id)
+    .set(omit(['id'], artist));
+}
+
+function addFirstAlbumToArtist(artist, album) {
+  artist['albums'] = { [album.id]: {'totalTracks': album.tracks.total} };
+  return artist;
+}
 
 /**
  * Save a single album in Firebase
@@ -364,25 +392,12 @@ export function getArtists(onSuccess, onError) {
 /**
  * Get a single artist from FB
  * @param  {string} id        Artist id
- * @param  {func} onSuccess   Success callback
- * @param  {func} onError     Error callback
  * @return
  */
-export function getArtist(id, onSuccess, onError) {
+export function getArtist(id) {
 
-  // Create /artist ref
-  const ref = getRef('artists/' + id);
-
-  ref.once('value')
-    .then(function(snapshot) {
-      let artist = snapshot.val();
-
-      // Update albums structure in artist object
-      artist.albums = objectToArray(artist.albums);
-
-      onSuccess(artist);
-    })
-    .catch((errorObject) => onError());
+  return getRef('artists/' + id)
+    .once('value');
 
 }
 
@@ -390,22 +405,12 @@ export function getArtist(id, onSuccess, onError) {
 /**
  * Get a single album from FB
  * @param  {string} id        Album id
- * @param  {func} onSuccess   Success callback
- * @param  {func} onError     Error callback
  * @return
  */
 export function getAlbum(id) {
 
   return getRef('albums/' + id)
     .once('value');
-
-  // TODO update album page
-  // .then(function(snapshot) {
-  //   let album = snapshot.val();
-  //
-  //   onSuccess(album);
-  // })
-  // .catch((errorObject) => onError());
 
 }
 

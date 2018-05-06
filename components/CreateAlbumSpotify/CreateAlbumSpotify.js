@@ -76,12 +76,14 @@ class CreateAlbumSpotify extends React.Component {
 
     // Set album
     api.getAlbum(this.accessToken, this.getSpotifyId(this.state.value))
-    // .then((response) => api.getArtistsImage(this.accessToken, response.data))
       .then(({data}) => Promise.all([
         fb.setAlbumIfNotExists(fb.formatAlbum(data)),
-        fb.updateOrSetArtist(fb.formatArtist(data.artists))
+        fb.updateOrSetArtists(fb.formatArtists(data.artists), fb.formatAlbumSummary(data))
       ]))
       .catch((error) => {console.log(error);}); //this.handleError('OOPS!'));
+
+    // TODO
+    // .then((response) => api.getArtistsImage(this.accessToken, response.data))
   }
 
   render() {

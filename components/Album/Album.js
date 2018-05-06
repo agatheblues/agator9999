@@ -52,7 +52,9 @@ class Album extends React.Component {
   }
 
   componentDidMount() {
-    getAlbum(this.props.id, this.handleGetAlbumSuccess, this.handleGetAlbumError);
+    getAlbum(this.props.id)
+      .then((snapshot) => this.handleGetAlbumSuccess(snapshot.val()))
+      .catch((error) => this.handleGetAlbumError());
   }
 
   renderAlbumCover() {

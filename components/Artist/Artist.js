@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import ArtistSummary from '../ArtistSummary/ArtistSummary.js';
 import Album from '../Album/Album.js';
 import Message from '../Message/Message.js';
-import {getArtist} from '../../DataWrapper/FirebaseDataWrapper.js';
+import {getArtist, convertAlbumSummaryToArray} from '../../DataWrapper/FirebaseDataWrapper.js';
 require('./Artist.scss');
 
 class Artist extends React.Component {
@@ -22,6 +22,10 @@ class Artist extends React.Component {
   }
 
   handleGetArtistSuccess(artist) {
+    
+    // Update albums structure in artist object
+    artist.albums = convertAlbumSummaryToArray(artist.albums);
+
     this.setState({
       hasArtistData: true,
       artistData: artist
@@ -51,7 +55,9 @@ class Artist extends React.Component {
   }
 
   componentDidMount() {
-    getArtist(this.props.match.params.id, this.handleGetArtistSuccess, this.handleGetArtistError);
+    getArtist(this.props.match.params.id)
+      .then((snapshot) => this.handleGetArtistSuccess(snapshot.val()))
+      .catch((error) => this.handleGetArtistError());
   }
 
 
