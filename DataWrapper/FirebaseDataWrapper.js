@@ -249,13 +249,26 @@ function pushArtists(items, onSuccess, onError, totalItems, offset) {
 }
 
 
-export function updateOrSetArtists(artists, albumData) {
-  return Promise.all(artists.map((artist) => updateOrSetASingleArtist(artist, albumData)));
+/**
+ * If artists already exist in Firebase, update their album list
+ * else, set new artists
+ * @param  {object} artists List of Firebase artist object
+ * @param  {object} album   Firebase album object
+ * @return {Promise}
+ */
+export function updateOrSetArtists(artists, album) {
+  return Promise.all(artists.map((artist) => updateOrSetASingleArtist(artist, album)));
 }
 
 
+/**
+ * If artist already exists in Firebase, update its album list
+ * else, set new artist
+ * @param  {object} artist Firebase artist object
+ * @param  {object} album  Firebase album object
+ * @return {Promise}
+ */
 function updateOrSetASingleArtist(artist, album) {
-  console.log(artist, album);
 
   function mightUpdateArtist(snapshot) {
     if (!snapshot.exists()) { return true; /* did not update */ }
@@ -267,12 +280,18 @@ function updateOrSetASingleArtist(artist, album) {
     setArtist(addFirstAlbumToArtist(artist, album));
   }
 
-  // If artist exists, update else create new.
   return getArtist(artist.id)
     .then(mightUpdateArtist)
     .then(mightSetArtist);
 }
 
+
+/**
+ * Update album property in artist object by adding a new album to the list
+ * @param  {object} artist Firebase artist object
+ * @param  {object} album  Firebase album object
+ * @return {Promise}
+ */
 function updateArtistAlbumsList(artist, album) {
   return getRef('artists')
     .update({
@@ -280,16 +299,29 @@ function updateArtistAlbumsList(artist, album) {
     });
 }
 
+/**
+ * Sets an artist to Firebase
+ * @param {object} artist Firebase artist object
+ * @return {Promise}
+ */
 function setArtist(artist) {
   return getRef('artists')
     .child(artist.id)
     .set(omit(['id'], artist));
 }
 
+
+/**
+ * Add the album property to the artist object
+ * @param {object} artist Firebase artist object
+ * @param {object} album  Firebase album object
+ * @return {object}       Firebase artist object
+ */
 function addFirstAlbumToArtist(artist, album) {
   artist['albums'] = { [album.id]: {'totalTracks': album.tracks.total} };
   return artist;
 }
+
 
 /**
  * Save a single album in Firebase
