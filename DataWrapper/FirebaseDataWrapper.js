@@ -364,35 +364,9 @@ function pushArtistsFromAlbum(item, images, onSuccess, onError) {
 /******** GET DATA FROM FIREBASE *******/
 
 /**
- * Get list of all artists stored in Firebase
- * @param  {func} onSuccess Handle success callback
- */
-export function getArtists(onSuccess, onError) {
-
-  // Create /artist ref
-  const ref = getRef('artists');
-
-  let artists = [];
-
-  ref.once('value')
-    .then((data) => {
-      data.forEach(function(item) {
-        let artist = item.val();
-        artist['id'] = item.key;
-        artists.push(artist);
-      });
-
-      onSuccess(artists);
-    })
-    .catch(() => onError());
-
-}
-
-
-/**
  * Get a single artist from FB
  * @param  {string} id        Artist id
- * @return
+ * @return {Promise}
  */
 export function getArtist(id) {
 
@@ -405,7 +379,7 @@ export function getArtist(id) {
 /**
  * Get a single album from FB
  * @param  {string} id        Album id
- * @return
+ * @return {Promise}
  */
 export function getAlbum(id) {
 
@@ -415,24 +389,25 @@ export function getAlbum(id) {
 }
 
 
+/**
+ * Get list of all albums stored in firebase
+ * @return {Promise}
+ */
+export function getAlbums() {
+
+  return getRef('albums')
+    .once('value');
+
+}
+
 
 /**
- * Counts the number of albums stored in the library
- * @param  {func} onSuccess   onSuccess callback
- * @param  {func} onError     onError callback
- * @return {int}              total number of albums
+ * Get list of all artists stored in Firebase
+ * @return {Promise}
  */
-export function getAlbumCount(onSuccess, onError) {
+export function getArtists() {
 
-  getRef('albums')
-    .once('value')
-    .then((data) => {
-      let i = 0;
-      data.forEach(function(item) {
-        i++;
-      });
-      onSuccess(i);
-    })
-    .catch((error) => console.log(error));
+  return getRef('artists')
+    .once('value');
 
 }

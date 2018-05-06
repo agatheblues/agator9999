@@ -7,48 +7,13 @@ import SpotifyProfile from './components/SpotifyProfile/SpotifyProfile';
 import CardGrid from './components/CardGrid/CardGrid';
 import CreateAlbum from './components/CreateAlbum/CreateAlbum';
 import Artist from './components/Artist/Artist';
-import * as fb from './DataWrapper/FirebaseDataWrapper';
 require('./main.scss');
 
 class App extends React.Component {
   constructor(props){
     super(props);
-
-    this.state = {
-      artists: [],
-      loadedArtists: false,
-      albumCount: 0
-    };
-
-    this.handleSuccess = this.handleSuccess.bind(this);
-    this.handleCountSuccess = this.handleCountSuccess.bind(this);
-    this.handleError = this.handleError.bind(this);
   }
 
-  handleSuccess(artists) {
-    this.setState({
-      artists: artists,
-      loadedArtists: true
-    });
-  }
-
-  handleCountSuccess(count) {
-    this.setState({
-      albumCount: count
-    });
-  }
-
-  handleError() {
-    this.setState({
-      artists: [],
-      loadedArtists: false
-    });
-  }
-
-  componentDidMount() {
-    fb.getArtists(this.handleSuccess, this.handleError);
-    fb.getAlbumCount(this.handleCountSuccess, this.handleError);
-  }
 
   render() {
     return (
@@ -64,12 +29,7 @@ class App extends React.Component {
             </div>
           </Link>
         </nav>
-        <CardGrid
-          cards={this.state.artists}
-          loaded={this.state.loadedArtists}
-          title='Artists'
-          albumCount={this.state.albumCount}
-        />
+        <CardGrid />
       </div>
     );
   }
