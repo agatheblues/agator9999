@@ -2,7 +2,8 @@ node_modules
 bundle.js
 style.css
 dist
-config.json
+firebase.config.json
+spotify.config.json
 
 ### Node ###
 # Logs
