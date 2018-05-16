@@ -3,7 +3,7 @@ bundle.js
 style.css
 dist
 firebase.config.json
-spotify.config.json
+spotify.config.js
 
 ### Node ###
 # Logs
