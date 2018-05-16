@@ -3,11 +3,11 @@ import PropTypes from 'prop-types';
 import Button from '../Button/Button';
 import SpotifyLogin from '../SpotifyLogin/SpotifyLogin';
 import Message from '../Message/Message';
-import * as api from '../../DataWrapper/SpotifyDataWrapper.js';
-import * as fb from '../../DataWrapper/FirebaseDataWrapper.js';
-require('./CreateAlbumSpotify.scss');
+import * as api from '../../Helpers/SpotifyHelper';
+import * as fb from '../../Helpers/FirebaseHelper';
+require('./SpotifyCreateAlbum.scss');
 
-class CreateAlbumSpotify extends React.Component {
+class SpotifyCreateAlbum extends React.Component {
   constructor(props) {
     super();
 
@@ -25,8 +25,6 @@ class CreateAlbumSpotify extends React.Component {
 
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
-    this.handleSuccess = this.handleSuccess.bind(this);
-    this.handleError = this.handleError.bind(this);
   }
 
   handleChange(event) {
@@ -62,13 +60,7 @@ class CreateAlbumSpotify extends React.Component {
     });
   }
 
-  getArtistIds(artists) {
-    return artists.map((artist) => artist.id);
-  }
-
-  handleSubmit(event) {
-    event.preventDefault();
-
+  handleSubmitMessages() {
     // Check if input is as expected
     if (!this.checkSpotifyUri(this.state.value)) {
       this.updateMessages('URI should be formed as spotify:album:...', null);
@@ -77,6 +69,16 @@ class CreateAlbumSpotify extends React.Component {
 
     // Clear all error messages
     this.updateMessages(null, null);
+  }
+
+  getArtistIds(artists) {
+    return artists.map((artist) => artist.id);
+  }
+
+  handleSubmit(event) {
+    event.preventDefault();
+
+    this.handleSubmitMessages();
 
     // Set album, artist, and artist images
     api.getAlbum(this.accessToken, this.getSpotifyId(this.state.value))
@@ -133,4 +135,4 @@ class CreateAlbumSpotify extends React.Component {
   }
 }
 
-export default CreateAlbumSpotify;
+export default SpotifyCreateAlbum;

@@ -1,9 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import ArtistSummary from '../ArtistSummary/ArtistSummary.js';
-import Album from '../Album/Album.js';
-import Message from '../Message/Message.js';
-import {getArtist, convertAlbumSummaryToArray} from '../../DataWrapper/FirebaseDataWrapper.js';
+import ArtistSummary from '../ArtistSummary/ArtistSummary';
+import Album from '../Album/Album';
+import Message from '../Message/Message';
+import { getArtist, convertAlbumSummaryToArray } from '../../Helpers/FirebaseHelper';
 require('./Artist.scss');
 
 class Artist extends React.Component {
@@ -16,13 +16,10 @@ class Artist extends React.Component {
       hasArtistData: false,
       artistData: {}
     };
-
-    this.handleGetArtistSuccess = this.handleGetArtistSuccess.bind(this);
-    this.handleGetArtistError = this.handleGetArtistError.bind(this);
   }
 
   handleGetArtistSuccess(artist) {
-    
+
     // Update albums structure in artist object
     artist.albums = convertAlbumSummaryToArray(artist.albums);
 

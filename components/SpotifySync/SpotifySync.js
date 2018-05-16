@@ -1,13 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import Button from '../Button/Button';
-import Message from '../Message/Message.js';
-import SpotifyLogin from '../SpotifyLogin/SpotifyLogin.js';
-import SpotifyProfile from '../SpotifyProfile/SpotifyProfile';
+import Synchronize from '../Synchronize/Synchronize';
 import { Link } from 'react-router-dom';
-import * as api from '../../DataWrapper/SpotifyDataWrapper.js';
-import * as fb from '../../DataWrapper/FirebaseDataWrapper.js';
-require('./SpotifySync.scss');
+import { getAccessToken, getAndSetUserSavedAlbums } from '../../Helpers/SpotifyHelper.js';
+import * as fb from '../../Helpers/FirebaseHelper.js';
 
 class SpotifySync extends React.Component {
 
@@ -18,7 +14,7 @@ class SpotifySync extends React.Component {
     this.limit = 50;
 
     // Get accessToken
-    this.accessToken = api.getAccessToken();
+    this.accessToken = getAccessToken();
 
     // set local state
     this.state = {
@@ -48,7 +44,7 @@ class SpotifySync extends React.Component {
   handleClick() {
     this.updateMessage(false, 'Loading albums and artists...');
 
-    api.getAndSetUserSavedAlbums(this.accessToken, 0)
+    getAndSetUserSavedAlbums(this.accessToken, 0)
       .then(() => this.handleAlbumSyncSuccess())
       .catch((error) => this.handleError(error.message));
   }
@@ -76,34 +72,11 @@ class SpotifySync extends React.Component {
 
   render() {
     return (
-      <div className='content-container'>
-        <div className='back-to-library'>
-          <Link to='/'>&#9839; Back to library</Link>
-        </div>
-
-        <h2>Synchronize your Spotify saved albums</h2>
-
-        <div className='form-container'>
-          {this.accessToken &&
-            <div className='sync-container'>
-              <SpotifyProfile />
-              <Button
-                label={'Synchronize'}
-                handleClick={this.handleClick}
-              />
-            </div>
-          }
-
-          {!this.accessToken &&
-            <SpotifyLogin redirect='spotify/sync'/>
-          }
-
-          {this.state.message &&
-            <Message message={this.state.message} error={this.state.error}/>}
-          <p className='note'>Synchronize saves all of your Spotify saved albums, and all of their artists to the database. It does not erase your current library but completes it.</p>
-
-        </div>
-      </div>
+      <Synchronize
+        message = { this.state.message }
+        error = { this.state.error }
+        handleClick={ this.handleClick }
+      />
     );
   }
 }

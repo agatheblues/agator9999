@@ -1,12 +1,13 @@
 import axios from 'axios';
-import * as fb from './FirebaseDataWrapper.js';
+import * as fb from './FirebaseHelper';
+import { spotifyConfig } from '../spotify.config';
 
 // Constants
-const SPOTIFY_LOGIN_URL = 'https://accounts.spotify.com/authorize';
-const STATE_KEY = 'spotify_auth_state';
-const CLIENT_ID = '349fcdbe411c472eac393c9fdcc73b13';
-const REDIRECT_URI = 'http://localhost:8888/#/callback';
-const SCOPE = 'user-read-private user-read-email user-library-read';
+// const spotifyConfig.SPOTIFY_LOGIN_URL = 'https://accounts.spotify.com/authorize';
+// const spotifyConfig.STATE_KEY = 'spotify_auth_state';
+// const spotifyConfig.CLIENT_ID = '349fcdbe411c472eac393c9fdcc73b13';
+// const spotifyConfig.REDIRECT_URI = 'http://localhost:8888/#/callback';
+// const spotifyConfig.SCOPE = 'user-read-private user-read-email user-library-read';
 
 
 /***** UTILS *****/
@@ -16,7 +17,7 @@ const SCOPE = 'user-read-private user-read-email user-library-read';
  * @param  {object} error Error object
  * @return {string}       Error message
  */
-function handleErrorMessage(error) {
+export function handleErrorMessage(error) {
   let message;
 
   if (typeof error.response === 'undefined') {
@@ -75,7 +76,7 @@ function splitArrayInChunks(arr, chunkLength) {
  * @return {string} Value of state
  */
 function getStateKey() {
-  return localStorage.getItem(STATE_KEY);
+  return localStorage.getItem(spotifyConfig.STATE_KEY);
 }
 
 
@@ -84,7 +85,7 @@ function getStateKey() {
  * @return {string} Value of state
  */
 function removeStateKey() {
-  localStorage.removeItem(STATE_KEY);
+  localStorage.removeItem(spotifyConfig.STATE_KEY);
 }
 
 /**
@@ -143,13 +144,13 @@ export function getAccessToken() {
 export function getLoginUrl(redirectTo) {
   const urlState = redirectTo;
 
-  localStorage.setItem(STATE_KEY, urlState);
-  let url = SPOTIFY_LOGIN_URL;
+  localStorage.setItem(spotifyConfig.STATE_KEY, urlState);
+  let url = spotifyConfig.SPOTIFY_LOGIN_URL;
 
   url += '?response_type=token';
-  url += '&client_id=' + encodeURIComponent(CLIENT_ID);
-  url += '&scope=' + encodeURIComponent(SCOPE);
-  url += '&redirect_uri=' + encodeURIComponent(REDIRECT_URI);
+  url += '&client_id=' + encodeURIComponent(spotifyConfig.CLIENT_ID);
+  url += '&scope=' + encodeURIComponent(spotifyConfig.SCOPE);
+  url += '&redirect_uri=' + encodeURIComponent(spotifyConfig.REDIRECT_URI);
   url += '&state=' + encodeURIComponent(urlState);
 
   return url;
@@ -161,6 +162,7 @@ export function getLoginUrl(redirectTo) {
  * @param  {function} onError handles error
  */
 export function authenticate(onError) {
+
   const storedState = getStateKey();
 
   // URL dependencies
@@ -243,23 +245,18 @@ export function getUserSavedAlbumsChunk(token, offset) {
 }
 
 
+/********* PROFILE **********/
+
 /**
  * Get Spotify user profile
  * @param {String} token     Access token
  * @param {function} onSuccess Success callback
  * @param {function} onError   Error callback
  */
-export function getProfile(token, onSuccess, onError) {
+export function getProfile(token) {
 
-  getInstance(token)
-    .get('/me')
-    .then((response) => {
-      onSuccess(response.data.id,  response.data.images[0].url);
-    })
-    .catch((error) => {
-      let message = handleErrorMessage(error);
-      onError(message);
-    });
+  return getInstance(token)
+    .get('/me');
 
 }
 
@@ -267,7 +264,7 @@ export function getProfile(token, onSuccess, onError) {
 /******** ARTIST IMAGES  *********/
 
 export function getArtistsImages(token, artistIds) {
-  
+
   // Create batches of 50 ids
   const artistIdsChunks = splitArrayInChunks(artistIds, 50);
 

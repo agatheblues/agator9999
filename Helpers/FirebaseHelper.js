@@ -1,6 +1,6 @@
 import axios from 'axios';
 import firebase from 'firebase';
-import config from '../config.json';
+import config from '../firebase.config.json';
 
 
 /******* FORMATTING *******/

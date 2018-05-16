@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import Message from '../Message/Message.js';
-import {getAlbum} from '../../DataWrapper/FirebaseDataWrapper.js';
+import Message from '../Message/Message';
+import { getAlbum } from '../../Helpers/FirebaseHelper';
 require('./Album.scss');
 
 class Album extends React.Component {
@@ -22,10 +22,6 @@ class Album extends React.Component {
         added_at: ''
       }
     };
-
-    this.handleGetAlbumSuccess = this.handleGetAlbumSuccess.bind(this);
-    this.handleGetAlbumError = this.handleGetAlbumError.bind(this);
-    this.formatDate = this.formatDate.bind(this);
   }
 
   formatDate(dateString) {

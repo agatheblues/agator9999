@@ -2,8 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Button from '../Button/Button';
 import Message from '../Message/Message.js';
-import config from '../../config.json';
-import * as api from '../../DataWrapper/SpotifyDataWrapper.js';
+import { getLoginUrl, authenticate } from '../../Helpers/SpotifyHelper.js';
 
 
 class SpotifyLogin extends React.Component {
@@ -26,7 +25,7 @@ class SpotifyLogin extends React.Component {
    * Handle click button to request Spotify authentication
    */
   handleClick() {
-    window.location = api.getLoginUrl(this.props.redirect);
+    window.location = getLoginUrl(this.props.redirect);
   }
 
   handleError(message) {
@@ -37,7 +36,7 @@ class SpotifyLogin extends React.Component {
   }
 
   componentDidMount() {
-    api.authenticate(this.handleError);
+    authenticate(this.handleError);
   }
 
   render() {

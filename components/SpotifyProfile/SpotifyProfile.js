@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import ProfileCard from '../ProfileCard/ProfileCard';
 import Message from '../Message/Message.js';
-import * as api from '../../DataWrapper/SpotifyDataWrapper.js';
+import {getAccessToken, getProfile, handleErrorMessage} from '../../Helpers/SpotifyHelper.js';
 
 
 class SpotifyProfile extends React.Component {
@@ -11,7 +11,7 @@ class SpotifyProfile extends React.Component {
     super();
 
     // Get accessToken
-    this.accessToken = api.getAccessToken();
+    this.accessToken = getAccessToken();
 
     // set local state
     this.state = {
@@ -21,13 +21,10 @@ class SpotifyProfile extends React.Component {
       error: false,
       message: null
     };
-
-    this.handleProfileSuccess = this.handleProfileSuccess.bind(this);
-    this.handleError = this.handleError.bind(this);
   }
 
 
-  handleProfileSuccess(id, url) {
+  handleSuccess(id, url) {
     this.setState({
       hasProfileData: true,
       userId: id,
@@ -43,9 +40,17 @@ class SpotifyProfile extends React.Component {
   }
 
   componentDidMount() {
+
     if (this.accessToken) {
-      api.getProfile(this.accessToken, this.handleProfileSuccess, this.handleError);
+      getProfile(this.accessToken)
+        .then((response) => {
+          this.handleSuccess(response.data.id,  response.data.images[0].url);
+        })
+        .catch((error) => {
+          this.handleError(handleErrorMessage(error));
+        });
     }
+    
   }
 
   render() {

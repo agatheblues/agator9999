@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Card from '../Card/Card';
 import Message from '../Message/Message';
-import {getAlbums, getArtists} from '../../DataWrapper/FirebaseDataWrapper';
+import { getAlbums, getArtists } from '../../Helpers/FirebaseHelper';
 require('./CardGrid.scss');
 
 class CardGrid extends React.Component {
@@ -73,7 +73,7 @@ class CardGrid extends React.Component {
     this.getArtistsList();
     this.getAlbumCount();
   }
-  
+
   renderCards() {
     if ((this.state.artists.length != 0) && this.state.loaded && !this.state.error) {
       return (

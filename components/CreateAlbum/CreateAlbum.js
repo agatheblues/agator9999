@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
-import CreateAlbumSpotify from '../CreateAlbumSpotify/CreateAlbumSpotify';
+import SpotifyCreateAlbum from '../SpotifyCreateAlbum/SpotifyCreateAlbum';
 
 class CreateAlbum extends React.Component {
 
@@ -23,7 +23,7 @@ class CreateAlbum extends React.Component {
   renderForm() {
     switch (this.state.source) {
     case 'spotify':
-      return <CreateAlbumSpotify />;
+      return <SpotifyCreateAlbum />;
       break;
     case 'bandcamp':
       return <p>Soon...</p>;
