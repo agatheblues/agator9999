@@ -14,7 +14,7 @@ It all started when Spotify told me: *"Epic collection, friend. Your library is 
 - Synchronize your Spotify saved albums to agator9999 library (if your Spotify library is not full like mine, you can continue to save your albums and press the Sync button to update agator9999 library).
 - Add an album to agator9999 library by providing its Spotify URI
 
-![How the library looks like]('https://github.com/agatheblues/agator9999/tree/master/static/images/library.png')
+![How the library looks like]('https://github.com/agatheblues/agator9999/static/images/library.png')
 
 ## What agator9999 does not do?
 
@@ -37,4 +37,4 @@ To run the application, do `node app.js` and `npm start`!
 This tool has been created for personal use. No artworks are stored in the database, only metadata and links.
 
 ## Kudos
-Thanks to [PierreGUI](https://github.com/PierreGUI) & [KtorZ](https://github.com/KtorZ) for their support :heart:! 
+Thanks to [PierreGUI](https://github.com/PierreGUI) & [KtorZ](https://github.com/KtorZ) for their support :heart:!
