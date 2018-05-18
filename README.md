@@ -35,3 +35,6 @@ To run the application, do `node app.js` and `npm start`!
 
 ## Disclaimer
 This tool has been created for personal use. No artworks are stored in the database, only metadata and links.
+
+## Kudos
+Thanks to [PierreGUI](https://github.com/PierreGUI) & [KtorZ](https://github.com/KtorZ) for their support :heart:! 
