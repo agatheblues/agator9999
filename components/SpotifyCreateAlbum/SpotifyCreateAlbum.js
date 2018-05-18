@@ -3,8 +3,8 @@ import PropTypes from 'prop-types';
 import Button from '../Button/Button';
 import SpotifyLogin from '../SpotifyLogin/SpotifyLogin';
 import Message from '../Message/Message';
-import * as api from '../../Helpers/SpotifyHelper';
-import * as fb from '../../Helpers/FirebaseHelper';
+import * as api from '../../helpers/SpotifyHelper';
+import * as fb from '../../helpers/FirebaseHelper';
 require('./SpotifyCreateAlbum.scss');
 
 class SpotifyCreateAlbum extends React.Component {

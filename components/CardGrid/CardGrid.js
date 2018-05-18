@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Card from '../Card/Card';
 import Message from '../Message/Message';
-import { getAlbums, getArtists } from '../../Helpers/FirebaseHelper';
+import { getAlbums, getArtists } from '../../helpers/FirebaseHelper';
 require('./CardGrid.scss');
 
 class CardGrid extends React.Component {

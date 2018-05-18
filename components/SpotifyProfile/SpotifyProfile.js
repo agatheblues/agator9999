@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import ProfileCard from '../ProfileCard/ProfileCard';
 import Message from '../Message/Message.js';
-import {getAccessToken, getProfile, handleErrorMessage} from '../../Helpers/SpotifyHelper.js';
+import {getAccessToken, getProfile, handleErrorMessage} from '../../helpers/SpotifyHelper.js';
 
 
 class SpotifyProfile extends React.Component {

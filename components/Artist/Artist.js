@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import ArtistSummary from '../ArtistSummary/ArtistSummary';
 import Album from '../Album/Album';
 import Message from '../Message/Message';
-import { getArtist, convertAlbumSummaryToArray } from '../../Helpers/FirebaseHelper';
+import { getArtist, convertAlbumSummaryToArray } from '../../helpers/FirebaseHelper';
 require('./Artist.scss');
 
 class Artist extends React.Component {

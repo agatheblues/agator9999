@@ -5,7 +5,7 @@ import Message from '../Message/Message.js';
 import SpotifyLogin from '../SpotifyLogin/SpotifyLogin.js';
 import SpotifyProfile from '../SpotifyProfile/SpotifyProfile';
 import { Link } from 'react-router-dom';
-import { getAccessToken } from '../../Helpers/SpotifyHelper.js';
+import { getAccessToken } from '../../helpers/SpotifyHelper.js';
 require('./Synchronize.scss');
 
 class Synchronize extends React.Component {

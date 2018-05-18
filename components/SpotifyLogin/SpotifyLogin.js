@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Button from '../Button/Button';
 import Message from '../Message/Message.js';
-import { getLoginUrl, authenticate } from '../../Helpers/SpotifyHelper.js';
+import { getLoginUrl, authenticate } from '../../helpers/SpotifyHelper.js';
 
 
 class SpotifyLogin extends React.Component {

@@ -2,8 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Synchronize from '../Synchronize/Synchronize';
 import { Link } from 'react-router-dom';
-import { getAccessToken, getAndSetUserSavedAlbums } from '../../Helpers/SpotifyHelper.js';
-import * as fb from '../../Helpers/FirebaseHelper.js';
+import { getAccessToken, getAndSetUserSavedAlbums } from '../../helpers/SpotifyHelper.js';
+import * as fb from '../../helpers/FirebaseHelper.js';
 
 class SpotifySync extends React.Component {
 
