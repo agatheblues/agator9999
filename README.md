@@ -31,3 +31,6 @@ agator9999 is a modest [React](https://reactjs.org/) web application which uses 
 
 
 To run the application, do `node app.js` and `npm start`!
+
+## Disclaimer
+This tool has been created for personal use. No artworks are stored in the database, only metadata and links.
