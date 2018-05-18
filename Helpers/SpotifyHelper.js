@@ -2,13 +2,6 @@ import axios from 'axios';
 import * as fb from './FirebaseHelper';
 import { spotifyConfig } from '../spotify.config';
 
-// Constants
-// const spotifyConfig.SPOTIFY_LOGIN_URL = 'https://accounts.spotify.com/authorize';
-// const spotifyConfig.STATE_KEY = 'spotify_auth_state';
-// const spotifyConfig.CLIENT_ID = '349fcdbe411c472eac393c9fdcc73b13';
-// const spotifyConfig.REDIRECT_URI = 'http://localhost:8888/#/callback';
-// const spotifyConfig.SCOPE = 'user-read-private user-read-email user-library-read';
-
 
 /***** UTILS *****/
 
