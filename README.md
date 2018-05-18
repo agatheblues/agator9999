@@ -14,7 +14,7 @@ It all started when Spotify told me: *"Epic collection, friend. Your library is 
 - Synchronize your Spotify saved albums to agator9999 library (if your Spotify library is not full like mine, you can continue to save your albums and press the Sync button to update agator9999 library).
 - Add an album to agator9999 library by providing its Spotify URI
 
-![How the library looks like]('https://github.com/agatheblues/agator9999/blob/master/static/images/library.png')
+![How the library looks like](https://github.com/agatheblues/agator9999/blob/master/static/images/library.png)
 
 ## What agator9999 does not do?
 
