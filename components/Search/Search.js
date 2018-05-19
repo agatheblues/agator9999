@@ -1,7 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import Message from '../Message/Message';
-import * as fb from '../../helpers/FirebaseHelper';
 require('./Search.scss');
 
 class Search extends React.Component {
