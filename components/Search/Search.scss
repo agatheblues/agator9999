@@ -1,0 +1,29 @@
+@import 'variables';
+
+
+.search-input-container {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 10px 0 10px 0;
+
+  input {
+    display: inline-block; // for safari
+    flex: 1;
+
+    line-height: 1.8;
+    border: none;
+    border-bottom: solid 1px $orange;
+    font-family: inherit;
+    font-size: 14px;
+
+    background-image: url('../../static/images/Search-24.png');
+    background-position: 10px 10px;
+    background-repeat: no-repeat;
+    padding: 10px 10px 10px 40px;
+    background-size: 20px;
+    
+    &:focus {
+      outline: none;
+    }
+  }
+}
