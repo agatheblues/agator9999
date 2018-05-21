@@ -22,7 +22,14 @@ export const formatAlbum = ({ id, name, external_urls: { spotify }, images, rele
     source: 'spotify'
   });
 
-export const formatAlbumSummary = ({ id, tracks: { total } }) => (
+export const formatAlbumSummary = ({ added_at, album: { id, tracks: { total }}}) => (
+  {
+    id,
+    added_at,
+    tracks: { total }
+  });
+
+export const formatSingleAlbumSummary = ({ id, tracks: { total }}) => (
   {
     id,
     tracks: { total }
@@ -131,7 +138,7 @@ function omit(keys, obj) {
  */
 
 export function updateOrSetArtistsFromAlbums(items) {
-  return Promise.all(items.map((item) => updateOrSetArtistsFromSingleAlbum(formatArtists(item.album.artists), formatAlbumSummary(item.album))));
+  return Promise.all(items.map((item) => updateOrSetArtistsFromSingleAlbum(formatArtists(item.album.artists), formatAlbumSummary(item))));
 }
 
 /**
@@ -165,6 +172,11 @@ function updateOrSetSingleArtistFromSingleAlbum(artist, album) {
     setArtist(addFirstAlbumToArtist(artist, album));
   }
 
+  if (!album.hasOwnProperty('added_at')) {
+    // Add album added date
+    album.added_at = new Date().toUTCString();
+  }
+
   return getArtist(artist.id)
     .then(mightUpdateArtist)
     .then(mightSetArtist);
@@ -180,7 +192,10 @@ function updateOrSetSingleArtistFromSingleAlbum(artist, album) {
 function updateArtistAlbumsList(artist, album) {
   return getRef('artists')
     .update({
-      ['/' + artist.id + '/albums/' + album.id]: { 'totalTracks': album.tracks.total }
+      ['/' + artist.id + '/albums/' + album.id]: {
+        'totalTracks': album.tracks.total,
+        'added_at': album.added_at
+      },
     });
 }
 
@@ -203,7 +218,12 @@ function setArtist(artist) {
  * @return {object}       Firebase artist object
  */
 function addFirstAlbumToArtist(artist, album) {
-  artist['albums'] = { [album.id]: {'totalTracks': album.tracks.total} };
+  artist['albums'] = {
+    [album.id]: {
+      'totalTracks': album.tracks.total,
+      'added_at': album.added_at
+    }
+  };
   return artist;
 }
 
@@ -241,8 +261,10 @@ export function getArtists() {
  * @param  {objet} item       Spotify Album
  */
 function setAlbum(album) {
-  // Add album added date
-  album['added_at'] = Date.now();
+  if (!album.hasOwnProperty('added_at')) {
+    // Add album added date
+    album.added_at = new Date().toUTCString();
+  }
 
   return getRef('albums')
     .child(album.id)
