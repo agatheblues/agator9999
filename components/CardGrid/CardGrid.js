@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import Card from '../Card/Card';
 import Message from '../Message/Message';
 import Search from '../Search/Search';
+import SortBy from '../SortBy/SortBy';
 import { getAlbums, getArtists } from '../../helpers/FirebaseHelper';
 require('./CardGrid.scss');
 
@@ -20,6 +21,7 @@ class CardGrid extends React.Component {
     };
 
     this.filterList = this.filterList.bind(this);
+    this.sortList = this.sortList.bind(this);
   }
 
   handleSuccess(artists) {
@@ -85,6 +87,14 @@ class CardGrid extends React.Component {
     });
   }
 
+  sortList(order) {
+    this.setState({
+      visibleArtists: this.state.visibleArtists.sort((a, b) => {
+        return (a.name.toLowerCase() > b.name.toLowerCase()) ? order : -order;
+      })
+    });
+  }
+
   componentDidMount() {
     this.getArtistsList();
     this.getAlbumCount();
@@ -135,6 +145,7 @@ class CardGrid extends React.Component {
           <h1 className='title'>Artists</h1>
           {this.renderCounts()}
           <Search filter={this.filterList} />
+          <SortBy sort={this.sortList} />
         </div>
 
         {this.renderCards()}
