@@ -44,13 +44,14 @@ class SpotifyProfile extends React.Component {
     if (this.accessToken) {
       getProfile(this.accessToken)
         .then((response) => {
-          this.handleSuccess(response.data.id,  response.data.images[0].url);
+          const url = (response.data.images.length == 0) ? '../static/images/missing.jpg' : response.data.images[0].url;
+          this.handleSuccess(response.data.id, url);
         })
         .catch((error) => {
           this.handleError(handleErrorMessage(error));
         });
     }
-    
+
   }
 
   render() {
