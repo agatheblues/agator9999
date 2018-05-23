@@ -13,8 +13,11 @@ It all started when Spotify told me: *"Epic collection, friend. Your library is 
 - Link to the streaming platform for the given album
 - Synchronize your Spotify saved albums to agator9999 library (if your Spotify library is not full like mine, you can continue to save your albums and press the Sync button to update agator9999 library).
 - Add an album to agator9999 library by providing its Spotify URI
+- Search your artists
+- Sort alphabetically and by recently added
 
 ![How the library looks like](https://github.com/agatheblues/agator9999/blob/master/static/images/library.png)
+![Artist view like](https://github.com/agatheblues/agator9999/blob/master/static/images/artist.png)
 
 ## What agator9999 does not do?
 
