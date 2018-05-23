@@ -6,12 +6,12 @@ require('./SortBy.scss');
 class SortBy extends React.Component {
 
   constructor(props) {
-    super();
+    super(props);
 
     this.state = {
       active: false,
       order: 1,
-      orderLabel: 'A - Z',
+      orderLabel: this.props.labelUp,
       orderIcon: '../static/images/Arrowhead-Down-01-32.png'
     };
 
@@ -19,7 +19,7 @@ class SortBy extends React.Component {
   }
 
   handleClick() {
-    const orderLabel = (this.state.order == 1) ? 'A - Z' : 'Z - A';
+    const orderLabel = (this.state.order == 1) ? this.props.labelUp : this.props.labelDown;
     const orderIcon = (this.state.order == 1) ? '../static/images/Arrowhead-Down-01-32.png' : '../static/images/Arrowhead-01-32.png';
 
     this.setState({
@@ -35,11 +35,11 @@ class SortBy extends React.Component {
   render() {
     const linkClass = classNames({
       'sort-label': true,
-      'sort-label--off': !this.state.active
+      'sort-label--off': !this.state.active || (this.props.type !== this.props.activeSort)
     });
 
     return (
-      <div className='sort-container sort-item-container--icon' onClick={ this.handleClick }>
+      <div className='sort-container' onClick={ this.handleClick }>
         <img className='sort-icon' src={ this.state.orderIcon } alt='sort-button'/>
         <a className={ linkClass }>{ this.state.orderLabel }</a>
       </div>
@@ -48,7 +48,11 @@ class SortBy extends React.Component {
 }
 
 SortBy.propTypes = {
-  sort: PropTypes.func.isRequired
+  sort: PropTypes.func.isRequired,
+  labelUp: PropTypes.string.isRequired,
+  labelDown: PropTypes.string.isRequired,
+  activeSort: PropTypes.string.isRequired,
+  type: PropTypes.string.isRequired
 };
 
 export default SortBy;

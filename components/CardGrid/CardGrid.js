@@ -17,11 +17,13 @@ class CardGrid extends React.Component {
       visibleArtists: [],
       loaded: false,
       error: false,
-      albumCount: 0
+      albumCount: 0,
+      activeSort: ''
     };
 
     this.filterList = this.filterList.bind(this);
-    this.sortList = this.sortList.bind(this);
+    this.sortListAlphabetically = this.sortListAlphabetically.bind(this);
+    this.sortListRecently = this.sortListRecently.bind(this);
   }
 
   handleSuccess(artists) {
@@ -87,12 +89,27 @@ class CardGrid extends React.Component {
     });
   }
 
-  sortList(order) {
+  sortListAlphabetically(order) {
     this.setState({
       visibleArtists: this.state.visibleArtists.sort((a, b) => {
         return (a.name.toLowerCase() > b.name.toLowerCase()) ? order : -order;
-      })
+      }),
+      activeSort: 'alphabetically'
     });
+  }
+
+  sortListRecently(order) {
+    this.setState({
+      visibleArtists: this.state.visibleArtists.sort((a, b) => {
+        return order * (this.getMostRecentDate(b.albums) - this.getMostRecentDate(a.albums));
+      }),
+      activeSort: 'recently'
+    });
+  }
+
+  getMostRecentDate(albums) {
+    let dates = Object.keys(albums).map((albumKey) => new Date(albums[albumKey].added_at));
+    return new Date(Math.max.apply(null, dates));
   }
 
   componentDidMount() {
@@ -145,7 +162,22 @@ class CardGrid extends React.Component {
           <h1 className='title'>Artists</h1>
           {this.renderCounts()}
           <Search filter={this.filterList} />
-          <SortBy sort={this.sortList} />
+          <div className='sort-controls-container'>
+            <SortBy
+              type='recently'
+              sort={this.sortListRecently}
+              labelUp='Recently Added'
+              labelDown='Recently Added'
+              activeSort={this.state.activeSort}
+            />
+            <SortBy
+              type='alphabetically'
+              sort={this.sortListAlphabetically}
+              labelUp='A - Z'
+              labelDown='Z- A'
+              activeSort={this.state.activeSort}
+            />
+          </div>
         </div>
 
         {this.renderCards()}
