@@ -12,6 +12,17 @@ export const formatAlbums = ({ added_at, album }) => (
   }
 );
 
+export const formatDiscogsAlbum = ({ id, title, images, year, genres}) => (
+  {
+    id,
+    name: title,
+    images,
+    release_date: year,
+    source: 'discogs',
+    url: '',
+    genres
+  });
+
 export const formatAlbum = ({ id, name, external_urls: { spotify }, images, release_date }) => (
   {
     id,
