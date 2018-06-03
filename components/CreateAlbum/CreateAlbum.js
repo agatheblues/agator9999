@@ -2,16 +2,14 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import SpotifyCreateAlbum from '../SpotifyCreateAlbum/SpotifyCreateAlbum';
-import SearchDropdown from '../SearchDropdown/SearchDropdown';
-import { getArtists } from '../../helpers/FirebaseHelper.js';
+import FormCreateAlbum from '../FormCreateAlbum/FormCreateAlbum';
 
 class CreateAlbum extends React.Component {
 
   constructor(props) {
     super();
     this.state = {
-      source: 'bandcamp',
-      artists: []
+      source: 'bandcamp'
     };
 
     this.handleClick = this.handleClick.bind(this);
@@ -23,43 +21,19 @@ class CreateAlbum extends React.Component {
     });
   }
 
-  handleSuccess(artists) {
-    this.setState({
-      artists: artists.slice(0, 15)
-    });
-  }
-
-  formatArtistList(data) {
-    let artists = [];
-    data.forEach(function(item) {
-      let artist = item.val();
-      artists.push({ 'id': item.key, 'name': artist.name} );
-    });
-    return artists;
-  }
-
-  getArtistsList() {
-    getArtists()
-      .then((data) => this.handleSuccess(this.formatArtistList(data)))
-      .catch((error) => { console.log(error); });
-  }
-
   renderForm() {
     switch (this.state.source) {
     case 'spotify':
       return <SpotifyCreateAlbum />;
     case 'bandcamp':
       return(
-        <SearchDropdown list={ this.state.artists } id={ 'id' } value={ 'name' } placeholder={ 'Type an artist' }/>
+        <FormCreateAlbum />
       );
     default:
       return <p>Oops! This platform does not exist :(</p>;
     }
   }
 
-  componentDidMount() {
-    this.getArtistsList();
-  }
 
   render() {
     return (
