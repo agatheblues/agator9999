@@ -10,7 +10,7 @@ class SearchDropdown extends React.Component {
 
     this.state = {
       isOpen: false,
-      labelItem: null,
+      labelItem: '',
       filteredList: []
     };
 
@@ -22,7 +22,7 @@ class SearchDropdown extends React.Component {
   showSearchDropdown(value) {
     this.setState({
       isOpen: true,
-      labelItem: null,
+      labelItem: value,
       filteredList: this.filterList(value)
     });
     document.addEventListener('click', this.hideSearchDropdown);
@@ -66,7 +66,6 @@ class SearchDropdown extends React.Component {
   }
 
   render() {
-    console.log(this.state);
     return (
       <div className={`searchdropdown ${this.state.isOpen ? 'open' : ''}`}>
         <Search
