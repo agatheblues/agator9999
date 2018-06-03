@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import SpotifyCreateAlbum from '../SpotifyCreateAlbum/SpotifyCreateAlbum';
+import DiscogsCreateAlbum from '../DiscogsCreateAlbum/DiscogsCreateAlbum';
 import FormCreateAlbum from '../FormCreateAlbum/FormCreateAlbum';
 
 class CreateAlbum extends React.Component {
@@ -9,7 +10,7 @@ class CreateAlbum extends React.Component {
   constructor(props) {
     super();
     this.state = {
-      source: 'bandcamp'
+      source: 'discogs'
     };
 
     this.handleClick = this.handleClick.bind(this);
@@ -26,9 +27,9 @@ class CreateAlbum extends React.Component {
     case 'spotify':
       return <SpotifyCreateAlbum />;
     case 'bandcamp':
-      return(
-        <FormCreateAlbum />
-      );
+      return <FormCreateAlbum />;
+    case 'discogs':
+      return <DiscogsCreateAlbum />;
     default:
       return <p>Oops! This platform does not exist :(</p>;
     }
@@ -45,6 +46,7 @@ class CreateAlbum extends React.Component {
         <nav>
           <ul onClick={this.handleClick}>
             <li id='spotify' className={this.state.source == 'spotify' ? 'active' : ''}>From Spotify</li>
+            <li id='discogs' className={this.state.source == 'discogs' ? 'active' : ''}>From Discogs</li>
             <li id='bandcamp' className={this.state.source == 'bandcamp' ? 'active' : ''}>From Bandcamp</li>
           </ul>
         </nav>
