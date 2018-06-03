@@ -20,14 +20,17 @@ class Search extends React.Component {
         <input
           type='text'
           onChange={this.handleChange}
-          placeholder='Search for an artist' />
+          value={this.props.value}
+          placeholder={this.props.placeholder} />
       </div>
     );
   }
 }
 
 Search.propTypes = {
-  filter: PropTypes.func.isRequired
+  filter: PropTypes.func.isRequired,
+  value: PropTypes.string,
+  placeholder: PropTypes.string.isRequired
 };
 
 export default Search;

@@ -161,7 +161,7 @@ class CardGrid extends React.Component {
         <div className='title--marginlr'>
           <h1 className='title'>Artists</h1>
           {this.renderCounts()}
-          <Search filter={this.filterList} />
+          <Search filter={this.filterList} placeholder='Search for an artist' />
           <div className='sort-controls-container'>
             <SortBy
               type='recently'
