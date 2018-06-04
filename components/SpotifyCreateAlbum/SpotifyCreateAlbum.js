@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import Button from '../Button/Button';
 import SpotifyLogin from '../SpotifyLogin/SpotifyLogin';
 import Message from '../Message/Message';
+import InputText from '../InputText/InputText';
 import * as api from '../../helpers/SpotifyHelper';
 import * as fb from '../../helpers/FirebaseHelper';
 
@@ -22,16 +23,12 @@ class SpotifyCreateAlbum extends React.Component {
       accessToken: this.accessToken
     };
 
-    this.handleChange = this.handleChange.bind(this);
+    this.checkSpotifyUri = this.checkSpotifyUri.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
-  handleChange(event) {
-    this.setState({value: event.target.value});
-  }
-
   checkSpotifyUri(s) {
-    return s.indexOf('spotify:album:') == 0;
+    return (s.indexOf('spotify:album:') != 0) ? 'URI should be formed as spotify:album:...' : null;
   }
 
   getSpotifyId(s) {
@@ -50,24 +47,6 @@ class SpotifyCreateAlbum extends React.Component {
       error: false,
       message: 'Album successfully added to your library!'
     });
-  }
-
-  updateMessages(messageForm, message) {
-    this.setState({
-      messageForm: messageForm,
-      message: message
-    });
-  }
-
-  handleSubmitMessages() {
-    // Check if input is as expected
-    if (!this.checkSpotifyUri(this.state.value)) {
-      this.updateMessages('URI should be formed as spotify:album:...', null);
-      return;
-    }
-
-    // Clear all error messages
-    this.updateMessages(null, null);
   }
 
   getArtistIds(artists) {
@@ -103,16 +82,9 @@ class SpotifyCreateAlbum extends React.Component {
           <div>
             <p>To add an album from Spotify, copy its Spotify URI.</p>
             <form onSubmit={this.handleSubmit}>
-              <div className='input-container'>
+              <div className='form-row-container'>
                 <label>Spotify URI:</label>
-                <input
-                  type='text'
-                  spellCheck='false'
-                  value={this.state.value}
-                  onChange={this.handleChange}
-                  className='form-input-text'
-                  placeholder='spotify:album:...'
-                />
+                <InputText getErrorMessage={this.checkSpotifyUri} placeholder='spotify:album:...'/>
               </div>
 
               {this.state.message &&

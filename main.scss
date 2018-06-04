@@ -94,11 +94,6 @@ li.active {
   padding-top: 20px;
 }
 
-.input-error {
-  font-size: 12px;
-  color: $orange;
-}
-
 .menu-container {
   margin: 20px;
   display: flex;
@@ -131,38 +126,16 @@ li.active {
   background-color: $white;
 }
 
-.input-container {
+.form-row-container {
   display: flex;
   flex-wrap: wrap;
   margin: 10px 0 10px 0;
-
-  input {
-    display: inline-block; // for safari
-    flex: 1;
-
-    background: none;
-    line-height: 1.8;
-    border: none;
-    border-bottom: solid 1px $orange;
-    font-family: inherit;
-    font-size: 14px;
-    padding: 6px;
-    margin-left: 10px;
-
-    &:focus {
-      outline: none;
-    }
-  }
 
   label {
     line-height: 1.8;
     margin-right: 10px;
     padding: 6px 0 6px 0;
   }
-}
-
-.input-error-container {
-  text-align: right;
 }
 
 .submit-container {
