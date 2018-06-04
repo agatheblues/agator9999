@@ -5,7 +5,6 @@ import SpotifyLogin from '../SpotifyLogin/SpotifyLogin';
 import Message from '../Message/Message';
 import * as api from '../../helpers/SpotifyHelper';
 import * as fb from '../../helpers/FirebaseHelper';
-require('./SpotifyCreateAlbum.scss');
 
 class SpotifyCreateAlbum extends React.Component {
   constructor(props) {
