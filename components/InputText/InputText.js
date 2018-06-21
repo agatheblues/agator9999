@@ -17,6 +17,8 @@ class InputText extends React.Component {
   handleChange(event) {
     const message = this.props.setErrorMessage(event.target.value);
 
+    this.props.handleValue(event.target.value);
+
     this.setState({
       value: event.target.value,
       errorMessage: message
@@ -47,7 +49,8 @@ class InputText extends React.Component {
 
 InputText.propTypes = {
   placeholder: PropTypes.string,
-  setErrorMessage: PropTypes.func
+  setErrorMessage: PropTypes.func,
+  handleValue: PropTypes.func
 };
 
 export default InputText;

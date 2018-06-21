@@ -17,7 +17,9 @@ class DiscogsCreateAlbum extends React.Component {
       error: false,
       message: null,
       selectedSource: null,
-      selectedReleaseType: null
+      selectedReleaseType: null,
+      discogsUri: null,
+      listeningUri: null
     };
 
     this.sourceList = [
@@ -33,8 +35,7 @@ class DiscogsCreateAlbum extends React.Component {
     this.handleSubmit = this.handleSubmit.bind(this);
     this.checkDiscogsUri = this.checkDiscogsUri.bind(this);
     this.checkListeningUri = this.checkListeningUri.bind(this);
-    this.handleSelectedSource = this.handleSelectedSource.bind(this);
-    this.handleSelectedReleaseType = this.handleSelectedReleaseType.bind(this);
+    this.handleValueFor = this.handleValueFor.bind(this);
   }
 
   checkDiscogsUri(s) {
@@ -60,16 +61,15 @@ class DiscogsCreateAlbum extends React.Component {
     return (s.indexOf(this.state.selectedSource.id) == -1) ? 'URI should contain "' + this.state.selectedSource.id + '".' : null;
   }
 
-  handleSelectedSource(value) {
-    this.setState({
-      selectedSource: value
-    });
-  }
+  handleValueFor(label) {
 
-  handleSelectedReleaseType(value) {
-    this.setState({
-      selectedReleaseType: value
-    });
+    const handleValue = (value) => {
+      this.setState({
+        [label]: value
+      });
+    };
+
+    return handleValue;
   }
 
   handleError(message) {
@@ -119,9 +119,13 @@ class DiscogsCreateAlbum extends React.Component {
                 id={'id'}
                 value={'name'}
                 placeholder={'Select type'}
-                handleSelectedValue={this.handleSelectedReleaseType}
+                handleSelectedValue={this.handleValueFor('selectedReleaseType')}
               />
-              <InputText placeholder={'https://discogs.com/...'} setErrorMessage={this.checkDiscogsUri}/>
+              <InputText
+                placeholder={'https://discogs.com/...'}
+                setErrorMessage={this.checkDiscogsUri}
+                handleValue={this.handleValueFor('discogsUri')}
+              />
             </div>
 
 
@@ -132,9 +136,12 @@ class DiscogsCreateAlbum extends React.Component {
                 id={'id'}
                 value={'name'}
                 placeholder={'Select source'}
-                handleSelectedValue={this.handleSelectedSource}
+                handleSelectedValue={this.handleValueFor('selectedSource')}
               />
-              <InputText setErrorMessage={this.checkListeningUri}/>
+              <InputText
+                setErrorMessage={this.checkListeningUri}
+                handleValue={this.handleValueFor('listeningUri')}
+              />
             </div>
 
             {this.state.message &&
