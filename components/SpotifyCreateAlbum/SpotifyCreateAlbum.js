@@ -84,7 +84,7 @@ class SpotifyCreateAlbum extends React.Component {
             <form onSubmit={this.handleSubmit}>
               <div className='form-row-container'>
                 <label>Spotify URI:</label>
-                <InputText getErrorMessage={this.checkSpotifyUri} placeholder='spotify:album:...'/>
+                <InputText setErrorMessage={this.checkSpotifyUri} placeholder='spotify:album:...'/>
               </div>
 
               {this.state.message &&

@@ -27,11 +27,13 @@ class Dropdown extends React.Component {
     document.removeEventListener('click', this.hideDropdown);
   }
 
-  chooseItem(value) {
+  chooseItem(id, value) {
     if (this.state.labelItem !== value) {
       this.setState({
         labelItem: value
       });
+
+      if (this.props.handleSelectedValue) { this.props.handleSelectedValue(id); }
     }
   }
 
@@ -40,7 +42,7 @@ class Dropdown extends React.Component {
       <li
         key={index}
         value={item[this.props.id]}
-        onClick={() => this.chooseItem(item[this.props.value])}
+        onClick={() => this.chooseItem(item[this.props.id], item[this.props.value])}
       >{item[this.props.value]}</li>
     );
   }
@@ -65,7 +67,8 @@ Dropdown.propTypes = {
   list: PropTypes.array.isRequired,
   id: PropTypes.string.isRequired,
   value: PropTypes.string.isRequired,
-  placeholder: PropTypes.string.isRequired
+  placeholder: PropTypes.string.isRequired,
+  handleSelectedValue: PropTypes.func
 };
 
 export default Dropdown;
