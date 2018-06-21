@@ -58,7 +58,7 @@ class DiscogsCreateAlbum extends React.Component {
       return 'Please provide a source!';
     }
 
-    return (s.indexOf(this.state.selectedSource.id) == -1) ? 'URI should contain "' + this.state.selectedSource.id + '".' : null;
+    return (s.indexOf(this.state.selectedSource) == -1) ? 'URI should contain "' + this.state.selectedSource + '".' : null;
   }
 
   handleValueFor(label) {
@@ -89,10 +89,10 @@ class DiscogsCreateAlbum extends React.Component {
   handleSubmit(event) {
     event.preventDefault();
 
-    dg.getRelease(this.state.value, 'master')
+    dg.getRelease(this.state.discogsUri, this.state.selectedReleaseType)
       .then(({data}) => {
         console.log('coucou', data);
-        return fb.setAlbumIfNotExists(fb.formatDiscogsAlbum(data));
+        return fb.setAlbumIfNotExists(fb.formatDiscogsAlbum(data, this.state.selectedSource, this.state.listeningUri));
       });
     // // Set album, artist, and artist images
     // api.getAlbum(this.accessToken, this.getSpotifyId(this.state.value))

@@ -12,14 +12,15 @@ export const formatAlbums = ({ added_at, album }) => (
   }
 );
 
-export const formatDiscogsAlbum = ({ id, title, images, year, genres}) => (
+export const formatDiscogsAlbum = ({ id, title, images, year, genres, resource_url}, source, url) => (
   {
     id,
     name: title,
     images,
     release_date: year,
-    source: 'discogs',
-    url: '',
+    source,
+    url,
+    discogs_url: resource_url,
     genres
   });
 
