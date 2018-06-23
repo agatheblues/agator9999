@@ -50,7 +50,7 @@ class InputText extends React.Component {
 InputText.propTypes = {
   placeholder: PropTypes.string,
   setErrorMessage: PropTypes.func,
-  handleValue: PropTypes.func
+  handleValue: PropTypes.func.isRequired
 };
 
 export default InputText;

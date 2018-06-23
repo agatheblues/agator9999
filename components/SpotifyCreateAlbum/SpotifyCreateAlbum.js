@@ -24,6 +24,7 @@ class SpotifyCreateAlbum extends React.Component {
     };
 
     this.checkSpotifyUri = this.checkSpotifyUri.bind(this);
+    this.handleValue = this.handleValue.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
@@ -49,14 +50,18 @@ class SpotifyCreateAlbum extends React.Component {
     });
   }
 
+  handleValue(value) {
+    this.setState({
+      value: value
+    });
+  }
+
   getArtistIds(artists) {
     return artists.map((artist) => artist.id);
   }
 
   handleSubmit(event) {
     event.preventDefault();
-
-    this.handleSubmitMessages();
 
     // Set album, artist, and artist images
     api.getAlbum(this.accessToken, this.getSpotifyId(this.state.value))
@@ -84,7 +89,11 @@ class SpotifyCreateAlbum extends React.Component {
             <form onSubmit={this.handleSubmit}>
               <div className='form-row-container'>
                 <label>Spotify URI:</label>
-                <InputText setErrorMessage={this.checkSpotifyUri} placeholder='spotify:album:...'/>
+                <InputText
+                  setErrorMessage={this.checkSpotifyUri}
+                  placeholder='spotify:album:...'
+                  handleValue={this.handleValue}
+                />
               </div>
 
               {this.state.message &&

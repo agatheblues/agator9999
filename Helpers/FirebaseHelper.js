@@ -53,7 +53,7 @@ export const formatDiscogsSingleAlbumSummary = ({ id, tracklist}) => (
     tracks: { total: tracklist.length }
   });
 
-const formatArtist = ({ id, name, external_urls: { spotify } }) => (
+export const formatArtist = ({ id, name, external_urls: { spotify } }) => (
   {
     id,
     name,
