@@ -4,6 +4,7 @@ import Button from '../Button/Button';
 import Message from '../Message/Message';
 import Dropdown from '../Dropdown/Dropdown';
 import InputText from '../InputText/InputText';
+import SearchDropdown from '../SearchDropdown/SearchDropdown';
 import * as dg from '../../helpers/DiscogsHelper';
 import * as fb from '../../helpers/FirebaseHelper';
 require('./DiscogsCreateAlbum.scss');
@@ -19,7 +20,8 @@ class DiscogsCreateAlbum extends React.Component {
       selectedSource: null,
       selectedReleaseType: null,
       discogsUri: null,
-      listeningUri: null
+      listeningUri: null,
+      artists: []
     };
 
     this.sourceList = [
@@ -86,6 +88,19 @@ class DiscogsCreateAlbum extends React.Component {
     });
   }
 
+  handleArtistsListSuccess(artists) {
+    this.setState({
+      artists: artists
+    });
+  }
+
+  getArtistsList() {
+    fb.getArtists()
+      .then((data) => this.handleArtistsListSuccess(fb.formatArtistList(data)))
+      .catch((error) => this.handleError('Oops! Something went wrong while retrieving the artists'));
+
+  }
+
   handleSubmit(event) {
     event.preventDefault();
 
@@ -99,7 +114,7 @@ class DiscogsCreateAlbum extends React.Component {
       })
       .then(() => this.handleSuccess())
       .catch((error) => this.handleError(error.message));
-      
+
     // // Set album, artist, and artist images
     // api.getAlbum(this.accessToken, this.getSpotifyId(this.state.value))
     //   .then(({data}) => Promise.all([
@@ -111,6 +126,10 @@ class DiscogsCreateAlbum extends React.Component {
     //   .catch((error) => this.handleError(error.message));
   }
 
+  componentDidMount() {
+    this.getArtistsList();
+  }
+
   render() {
     console.log(this.state);
     return (
@@ -118,6 +137,16 @@ class DiscogsCreateAlbum extends React.Component {
         <div>
           <p>To add an album from Discogs, copy the Url to the Id</p>
           <form onSubmit={this.handleSubmit}>
+            <div className='form-row-container'>
+              <label>Existing artist:</label>
+              <SearchDropdown
+                list={this.state.artists}
+                id={'id'}
+                value={'name'}
+                placeholder={'Select an artist in your library'}
+              />
+            </div>
+
             <div className='form-row-container'>
               <label>Discogs URI:</label>
               <Dropdown

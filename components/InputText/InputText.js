@@ -12,10 +12,22 @@ class InputText extends React.Component {
     };
 
     this.handleChange = this.handleChange.bind(this);
+    this.handleFocus = this.handleFocus.bind(this);
+  }
+
+
+  handleFocus(event) {
+    if (this.props.handleFocus) {
+      this.props.handleFocus(this.state.value);
+    }
   }
 
   handleChange(event) {
-    const message = this.props.setErrorMessage(event.target.value);
+    let message = null;
+
+    if (this.props.setErrorMessage) {
+      message = this.props.setErrorMessage(event.target.value);
+    }
 
     this.props.handleValue(event.target.value);
 
@@ -25,7 +37,17 @@ class InputText extends React.Component {
     });
   }
 
+  componentWillReceiveProps(nextProps) {
+    console.log(nextProps);
+    if (nextProps.value != this.state.value) {
+      this.setState({
+        value: nextProps.value
+      });
+    }
+  }
+
   render() {
+    console.log('input text', this.state);
     return (
       <div className='input-container'>
         <input
@@ -33,8 +55,10 @@ class InputText extends React.Component {
           spellCheck='false'
           value={this.state.value}
           onChange={this.handleChange}
+          onFocus={this.handleFocus}
           className='form-input-text'
           placeholder={this.props.placeholder}
+          id={this.props.id}
         />
         {this.state.errorMessage &&
           <div className='input-error-container'>
@@ -50,7 +74,10 @@ class InputText extends React.Component {
 InputText.propTypes = {
   placeholder: PropTypes.string,
   setErrorMessage: PropTypes.func,
-  handleValue: PropTypes.func.isRequired
+  handleValue: PropTypes.func.isRequired,
+  handleFocus: PropTypes.func,
+  id: PropTypes.string,
+  value: PropTypes.string
 };
 
 export default InputText;

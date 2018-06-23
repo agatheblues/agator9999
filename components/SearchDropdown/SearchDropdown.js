@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import Search from '../Search/Search';
+import InputText from '../InputText/InputText';
 require('./SearchDropdown.scss');
 
 class SearchDropdown extends React.Component {
@@ -23,7 +23,7 @@ class SearchDropdown extends React.Component {
     this.setState({
       isOpen: true,
       labelItem: value,
-      filteredList: this.filterList(value)
+      filteredList: value ? this.filterList(value) : this.props.list
     });
     document.addEventListener('click', this.hideSearchDropdown);
   }
@@ -34,7 +34,9 @@ class SearchDropdown extends React.Component {
     });
   }
 
-  hideSearchDropdown() {
+  hideSearchDropdown(event) {
+    if (event.target.id == 'search-dropdown-input') return;
+
     this.setState({ isOpen: false });
     document.removeEventListener('click', this.hideSearchDropdown);
   }
@@ -68,9 +70,11 @@ class SearchDropdown extends React.Component {
   render() {
     return (
       <div className={`searchdropdown ${this.state.isOpen ? 'open' : ''}`}>
-        <Search
-          filter={this.showSearchDropdown}
+        <InputText
           placeholder={this.props.placeholder}
+          handleFocus={this.showSearchDropdown}
+          handleValue={this.showSearchDropdown}
+          id={'search-dropdown-input'}
           value={this.state.labelItem}
         />
         <ul className='searchdropdown-menu'>

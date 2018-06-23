@@ -38,7 +38,6 @@ export function handleErrorMessage(error) {
 function getInstance(access_token) {
   return axios.create({
     baseURL: 'https://api.spotify.com/v1/',
-    timeout: 1000,
     headers: {'Authorization': 'Bearer ' + access_token}
   });
 }
