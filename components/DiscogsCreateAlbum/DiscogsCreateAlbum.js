@@ -92,8 +92,14 @@ class DiscogsCreateAlbum extends React.Component {
     dg.getRelease(this.state.discogsUri, this.state.selectedReleaseType)
       .then(({data}) => {
         console.log('coucou', data);
-        return fb.setAlbumIfNotExists(fb.formatDiscogsAlbum(data, this.state.selectedSource, this.state.listeningUri));
-      });
+        return Promise.all([
+          fb.setAlbumIfNotExists(fb.formatDiscogsAlbum(data, this.state.selectedSource, this.state.listeningUri)),
+          fb.updateOrSetArtistsFromSingleAlbum(fb.formatArtists(data.artists, fb.formatDiscogsArtist), fb.formatDiscogsSingleAlbumSummary(data))
+        ]);
+      })
+      .then(() => this.handleSuccess())
+      .catch((error) => this.handleError(error.message));
+      
     // // Set album, artist, and artist images
     // api.getAlbum(this.accessToken, this.getSpotifyId(this.state.value))
     //   .then(({data}) => Promise.all([

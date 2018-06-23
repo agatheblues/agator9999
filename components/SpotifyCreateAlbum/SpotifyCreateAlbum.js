@@ -62,7 +62,7 @@ class SpotifyCreateAlbum extends React.Component {
     api.getAlbum(this.accessToken, this.getSpotifyId(this.state.value))
       .then(({data}) => Promise.all([
         fb.setAlbumIfNotExists(fb.formatAlbum(data)),
-        fb.updateOrSetArtistsFromSingleAlbum(fb.formatArtists(data.artists), fb.formatSingleAlbumSummary(data))
+        fb.updateOrSetArtistsFromSingleAlbum(fb.formatArtists(data.artists, fb.formatArtist), fb.formatSingleAlbumSummary(data))
           .then(() => api.getArtistsImages(this.accessToken, this.getArtistIds(data.artists)))
       ]))
       .then(() => this.handleSuccess())

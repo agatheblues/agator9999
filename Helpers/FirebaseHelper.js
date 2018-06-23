@@ -47,6 +47,12 @@ export const formatSingleAlbumSummary = ({ id, tracks: { total }}) => (
     tracks: { total }
   });
 
+export const formatDiscogsSingleAlbumSummary = ({ id, tracklist}) => (
+  {
+    id,
+    tracks: { total: tracklist.length }
+  });
+
 const formatArtist = ({ id, name, external_urls: { spotify } }) => (
   {
     id,
@@ -55,13 +61,21 @@ const formatArtist = ({ id, name, external_urls: { spotify } }) => (
     source: 'spotify'
   });
 
+export const formatDiscogsArtist = ({ id, name }) => (
+  {
+    id,
+    name
+  });
+
+
+
 /**
  * Format the array of array of artists send back by /me/albums
  * @param  {array} items Array of albums
  * @return {array}       Array of artists
  */
-export function formatArtists(artists) {
-  return artists.map(artist => formatArtist(artist));
+export function formatArtists(artists, formatMethod) {
+  return artists.map(artist => formatMethod(artist));
 }
 
 
