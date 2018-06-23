@@ -278,6 +278,17 @@ export function getArtists() {
 
 }
 
+export function formatArtistList(data) {
+  let artists = [];
+
+  data.forEach(function(item) {
+    let artist = item.val();
+    artist.id = item.key;
+    artists.push(artist);
+  });
+  
+  return artists;
+}
 
 
 /********** ALBUMS *********/

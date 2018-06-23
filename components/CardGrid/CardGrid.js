@@ -4,7 +4,7 @@ import Card from '../Card/Card';
 import Message from '../Message/Message';
 import Search from '../Search/Search';
 import SortBy from '../SortBy/SortBy';
-import { getAlbums, getArtists } from '../../helpers/FirebaseHelper';
+import { getAlbums, getArtists, formatArtistList } from '../../helpers/FirebaseHelper';
 require('./CardGrid.scss');
 
 class CardGrid extends React.Component {
@@ -61,20 +61,10 @@ class CardGrid extends React.Component {
 
   }
 
-  formatArtistList(data) {
-    let artists = [];
-    data.forEach(function(item) {
-      let artist = item.val();
-      artist.id = item.key;
-      artists.push(artist);
-    });
-    return artists;
-  }
-
   getArtistsList() {
 
     getArtists()
-      .then((data) => this.handleSuccess(this.formatArtistList(data)))
+      .then((data) => this.handleSuccess(formatArtistList(data)))
       .catch((error) => this.handleError());
 
   }
