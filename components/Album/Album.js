@@ -31,9 +31,11 @@ class Album extends React.Component {
   }
 
   handleGetAlbumSuccess(album) {
+    console.log(album);
     // Format date
     album.added_at = this.formatDate(album.added_at);
-    album.release_date = album.release_date.substr(0, 4);
+    console.log('allo', album.release_date.substr(0, 4));
+    // album.release_date = album.release_date.substr(0, 4);
 
     this.setState({
       hasAlbumData: true,
@@ -42,6 +44,7 @@ class Album extends React.Component {
   }
 
   handleGetAlbumError() {
+    console.log('coucou');
     this.setState({
       error: true
     });
@@ -56,7 +59,10 @@ class Album extends React.Component {
   renderAlbumCover() {
     let src = '';
 
-    if (!this.state.albumData.hasOwnProperty('images') || this.state.albumData.images.length == 0) {
+    if (!this.state.albumData.hasOwnProperty('images') ||
+        this.state.albumData.images.length == 0 ||
+        !this.state.albumData.images[0].url
+    ) {
       src = '/static/images/missing.jpg';
     } else {
       src = this.state.albumData.images[0].url;
@@ -66,7 +72,7 @@ class Album extends React.Component {
   }
 
   render() {
-
+    console.log(this.state);
     return (
       <div className='content-container'>
         <div className='album-wrapper'>

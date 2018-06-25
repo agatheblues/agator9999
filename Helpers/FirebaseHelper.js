@@ -27,7 +27,7 @@ export const formatDiscogsAlbum = ({ id, title, images, year, genres, resource_u
     id,
     name: title,
     images: formatDiscogsImages(images),
-    release_date: year,
+    release_date: '"' + year + '"',
     source,
     url,
     discogs_url: resource_url,
