@@ -38,7 +38,6 @@ class InputText extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    console.log(nextProps);
     if (nextProps.value != this.state.value) {
       this.setState({
         value: nextProps.value
@@ -47,7 +46,6 @@ class InputText extends React.Component {
   }
 
   render() {
-    console.log('input text', this.state);
     return (
       <div className='input-container'>
         <input

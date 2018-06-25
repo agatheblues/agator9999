@@ -21,6 +21,7 @@ class DiscogsCreateAlbum extends React.Component {
       selectedReleaseType: null,
       discogsUri: null,
       listeningUri: null,
+      existingArtist: null,
       artists: []
     };
 
@@ -144,6 +145,7 @@ class DiscogsCreateAlbum extends React.Component {
                 id={'id'}
                 value={'name'}
                 placeholder={'Select an artist in your library'}
+                handleValue={this.handleValueFor('existingArtist')}
               />
             </div>
 

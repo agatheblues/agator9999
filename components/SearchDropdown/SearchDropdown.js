@@ -46,6 +46,8 @@ class SearchDropdown extends React.Component {
       this.setState({
         labelItem: value
       });
+
+      this.props.handleValue(this.filterList(value)[0].id);
     }
   }
 
@@ -90,7 +92,8 @@ SearchDropdown.propTypes = {
   list: PropTypes.array.isRequired,
   id: PropTypes.string.isRequired,
   value: PropTypes.string.isRequired,
-  placeholder: PropTypes.string.isRequired
+  placeholder: PropTypes.string.isRequired,
+  handleValue: PropTypes.func.isRequired
 };
 
 export default SearchDropdown;
