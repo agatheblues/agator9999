@@ -114,7 +114,7 @@ class DiscogsCreateAlbum extends React.Component {
         ]);
       })
       .then(() => this.handleSuccess())
-      .catch((error) => this.handleError(error.message));
+      .catch((error) => {console.log(error); this.handleError(error.message);});
 
     // // Set album, artist, and artist images
     // api.getAlbum(this.accessToken, this.getSpotifyId(this.state.value))

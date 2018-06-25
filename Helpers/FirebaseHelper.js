@@ -12,17 +12,28 @@ export const formatAlbums = ({ added_at, album }) => (
   }
 );
 
+const formatDiscogsImages = (images) => images.map((image) => formatDiscogsImage(image));
+
+const formatDiscogsImage = ({ height, width, resource_url }) => (
+  {
+    height,
+    width,
+    url: resource_url
+  }
+);
+
 export const formatDiscogsAlbum = ({ id, title, images, year, genres, resource_url}, source, url) => (
   {
     id,
     name: title,
-    images,
+    images: formatDiscogsImages(images),
     release_date: year,
     source,
     url,
     discogs_url: resource_url,
     genres
-  });
+  }
+);
 
 export const formatAlbum = ({ id, name, external_urls: { spotify }, images, release_date }) => (
   {
@@ -32,26 +43,30 @@ export const formatAlbum = ({ id, name, external_urls: { spotify }, images, rele
     images,
     release_date,
     source: 'spotify'
-  });
+  }
+);
 
 export const formatAlbumSummary = ({ added_at, album: { id, tracks: { total }}}) => (
   {
     id,
     added_at,
     tracks: { total }
-  });
+  }
+);
 
 export const formatSingleAlbumSummary = ({ id, tracks: { total }}) => (
   {
     id,
     tracks: { total }
-  });
+  }
+);
 
 export const formatDiscogsSingleAlbumSummary = ({ id, tracklist}) => (
   {
     id,
     tracks: { total: tracklist.length }
-  });
+  }
+);
 
 export const formatArtist = ({ id, name, external_urls: { spotify } }) => (
   {
@@ -59,13 +74,15 @@ export const formatArtist = ({ id, name, external_urls: { spotify } }) => (
     name,
     url: spotify,
     source: 'spotify'
-  });
+  }
+);
 
 export const formatDiscogsArtist = ({ id, name }) => (
   {
     id,
     name
-  });
+  }
+);
 
 
 
@@ -286,7 +303,7 @@ export function formatArtistList(data) {
     artist.id = item.key;
     artists.push(artist);
   });
-  
+
   return artists;
 }
 
