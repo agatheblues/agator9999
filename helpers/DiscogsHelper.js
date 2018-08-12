@@ -34,3 +34,23 @@ export function getRelease(uri, releaseType) {
     .get('/' + releaseType + 's/' + id);
 
 }
+
+
+export function getArtistsImages(artistIds) {
+
+  const arrayOfImagePromises = artistIds.map((id) =>
+    getArtistImages(id)
+      .then((response) => {
+        console.log('images ', id, response);
+        // fb.updateArtistsImages(formatArtistsImages(response.data.artists)))
+      })
+  );
+
+  return Promise.all(arrayOfImagePromises);
+}
+
+
+function getArtistImages(id) {
+  return getInstance()
+    .get('/artists/' + id);
+}

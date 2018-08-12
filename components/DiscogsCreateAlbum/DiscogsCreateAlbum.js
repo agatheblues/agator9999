@@ -102,6 +102,10 @@ class DiscogsCreateAlbum extends React.Component {
 
   }
 
+  getArtistIds(artists) {
+    return artists.map(artist => artist.id);
+  }
+
   handleSubmit(event) {
     event.preventDefault();
 
@@ -111,6 +115,7 @@ class DiscogsCreateAlbum extends React.Component {
         return Promise.all([
           fb.setAlbumIfNotExists(fb.formatDiscogsAlbum(data, this.state.selectedSource, this.state.listeningUri)),
           fb.updateOrSetArtistsFromSingleAlbum(fb.formatArtists(data.artists, fb.formatDiscogsArtist), fb.formatDiscogsSingleAlbumSummary(data))
+            .then(() => dg.getArtistsImages(this.getArtistIds(data.artists)))
         ]);
       })
       .then(() => this.handleSuccess())
