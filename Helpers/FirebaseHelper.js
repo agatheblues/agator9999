@@ -22,7 +22,7 @@ const formatDiscogsImage = ({ height, width, resource_url }) => (
   }
 );
 
-export const formatDiscogsAlbum = ({ id, title, images, year, genres, resource_url}, source, url) => (
+export const formatDiscogsAlbum = ({ id, title, images, year, genres, styles, resource_url}, source, url) => (
   {
     id,
     name: title,
@@ -31,7 +31,8 @@ export const formatDiscogsAlbum = ({ id, title, images, year, genres, resource_u
     source,
     url,
     discogs_url: resource_url,
-    genres
+    genres,
+    styles
   }
 );
 
