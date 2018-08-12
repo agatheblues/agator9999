@@ -78,10 +78,11 @@ export const formatArtist = ({ id, name, external_urls: { spotify } }) => (
   }
 );
 
-export const formatDiscogsArtist = ({ id, name }) => (
+export const formatDiscogsArtist = ({ id, name, images }) => (
   {
     id,
-    name
+    name,
+    images
   }
 );
 
@@ -182,7 +183,7 @@ function omit(keys, obj) {
  */
 
 export function updateOrSetArtistsFromAlbums(items) {
-  return Promise.all(items.map((item) => updateOrSetArtistsFromSingleAlbum(formatArtists(item.album.artists), formatAlbumSummary(item))));
+  return Promise.all(items.map((item) => updateOrSetArtistsFromSingleAlbum(formatArtists(item.album.artists, formatArtist), formatAlbumSummary(item))));
 }
 
 /**
