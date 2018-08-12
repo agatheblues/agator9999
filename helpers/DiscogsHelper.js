@@ -1,5 +1,6 @@
 import axios from 'axios';
 import * as fb from './FirebaseHelper';
+import { discogsConfig } from '../discogs.config';
 
 /**
  * Create axios instance for Discogs API requests
@@ -8,7 +9,9 @@ import * as fb from './FirebaseHelper';
 function getInstance() {
   return axios.create({
     baseURL: 'https://api.discogs.com/',
-    headers: {'User-Agent' : 'Agator9999/1.0 +http://localhost:8888.com' }
+    headers: {
+      'User-Agent' : 'Agator9999/1.0 +http://localhost:8888.com',
+      'Authorization': 'Discogs key=' + discogsConfig.CONSUMER_KEY + ', secret=' + discogsConfig.CONSUMER_SECRET }
   });
 }
 
