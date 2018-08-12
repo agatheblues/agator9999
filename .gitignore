@@ -3,6 +3,7 @@ bundle.js
 style.css
 dist
 firebase.config.json
+discogs.config.js
 spotify.config.js
 
 ### Node ###
