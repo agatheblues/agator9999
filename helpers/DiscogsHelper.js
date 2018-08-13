@@ -15,6 +15,23 @@ function getInstance() {
   });
 }
 
+
+/**************** RELEASE ******************/
+
+/**
+ * Get a discogs release
+ * @param  {string} uri         Discogs url of the release
+ * @param  {string} releaseType 'release' or 'master'
+ * @return {Object}             Discogs release object
+ */
+export function getRelease(uri, releaseType) {
+  const id = getReleaseId(uri, releaseType);
+
+  return getInstance()
+    .get('/' + releaseType + 's/' + id);
+
+}
+
 /**
  * Extract Id of release or master release
  * @param  {String} uri  Discogs url of the album
@@ -26,19 +43,25 @@ function getReleaseId(uri, releaseType) {
 }
 
 
-export function getRelease(uri, releaseType) {
-  const id = getReleaseId(uri, releaseType);
+/**************** ARTIST ******************/
 
+/**
+ * Get artist from Discogs
+ * @param  {string} id Artist id
+ * @return {Object}    Discogs' artist object
+ */
+function getArtist(id) {
   return getInstance()
-    .get('/' + releaseType + 's/' + id);
-
+    .get('/artists/' + id);
 }
 
+
+/**************** ARTIST IMAGE ******************/
 
 export function getArtistsImages(artistIds) {
 
   const arrayOfImagePromises = artistIds.map((id) =>
-    getArtistImages(id)
+    getArtist(id)
       .then(({data}) => {
         fb.updateArtistsImages(formatArtistsImages(data));
       })
@@ -48,6 +71,11 @@ export function getArtistsImages(artistIds) {
 }
 
 
+/**
+ * Format an artist object into the artist image array expected by FB
+ * @param  {object} artist Artist object as sent back by Discogs
+ * @return {Array}        Array with one formatted artist object
+ */
 function formatArtistsImages(artist) {
   return [{
     id: artist.id,
@@ -55,10 +83,11 @@ function formatArtistsImages(artist) {
   }];
 }
 
+
 /**
  * For a given artist object, return its first image url or returned
  * default image
- * @param  {object} artist Spotify Artist
+ * @param  {object} artist Discogs Artist
  * @return {String}        Image url
  */
 function getArtistImageUrl(artist) {
@@ -66,10 +95,7 @@ function getArtistImageUrl(artist) {
     return artist.images[0].resource_url;
   }
 
-  return '/static/images/missing.jpg';
-}
 
-function getArtistImages(id) {
-  return getInstance()
-    .get('/artists/' + id);
+  // TODO: Return image from latest album from artist
+  return '/static/images/missing.jpg';
 }
