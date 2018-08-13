@@ -34,8 +34,7 @@ class Album extends React.Component {
     console.log(album);
     // Format date
     album.added_at = this.formatDate(album.added_at);
-    console.log('allo', album.release_date.substr(0, 4));
-    // album.release_date = album.release_date.substr(0, 4);
+    album.release_date = album.release_date.substr(0, 4);
 
     this.setState({
       hasAlbumData: true,

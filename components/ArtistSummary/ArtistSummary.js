@@ -39,7 +39,6 @@ const ArtistSummary = function({artist}) {
 };
 
 function getListeningUri(artist) {
-  console.log('coucou');
   if (artist.source && artist.url) {
     return <p><a href={artist.url}>&#9836; {`Listen on ${artist.source}`}</a></p>;
   }
