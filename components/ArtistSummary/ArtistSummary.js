@@ -15,7 +15,7 @@ const ArtistSummary = function({artist}) {
     <div className='artist-banner-container'>
       <div className='artist-banner-wrapper'>
 
-        <div className='artist-banner-image' style={{ 'backgroundImage': `url(${artist.imgUrl})`}}>
+        <div className='artist-banner-image' style={{ 'backgroundImage': `url('${artist.imgUrl}')`}}>
           <div className='artist-banner-image--overlay'/>
         </div>
 

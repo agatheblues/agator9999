@@ -27,7 +27,6 @@ function getReleaseId(uri, releaseType) {
 
 
 export function getRelease(uri, releaseType) {
-  console.log(uri, releaseType);
   const id = getReleaseId(uri, releaseType);
 
   return getInstance()
@@ -40,15 +39,35 @@ export function getArtistsImages(artistIds) {
 
   const arrayOfImagePromises = artistIds.map((id) =>
     getArtistImages(id)
-      .then((response) => {
-        console.log('images ', id, response);
-        // fb.updateArtistsImages(formatArtistsImages(response.data.artists)))
+      .then(({data}) => {
+        fb.updateArtistsImages(formatArtistsImages(data));
       })
   );
 
   return Promise.all(arrayOfImagePromises);
 }
 
+
+function formatArtistsImages(artist) {
+  return [{
+    id: artist.id,
+    imgUrl: getArtistImageUrl(artist)
+  }];
+}
+
+/**
+ * For a given artist object, return its first image url or returned
+ * default image
+ * @param  {object} artist Spotify Artist
+ * @return {String}        Image url
+ */
+function getArtistImageUrl(artist) {
+  if (artist.hasOwnProperty('images') && (artist.images.length > 0)) {
+    return artist.images[0].resource_url;
+  }
+
+  return '/static/images/missing.jpg';
+}
 
 function getArtistImages(id) {
   return getInstance()

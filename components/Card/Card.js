@@ -9,7 +9,7 @@ const Card = function({id, name, imgUrl, totalAlbums}) {
     <div className='card-container'>
       <Link to={'/artist/' + id} className='card-link'>
         <div className='card-wrapper'>
-          <div className='card-image' style={{ 'backgroundImage': `url(${imgUrl})`}}>
+          <div className='card-image' style={{ 'backgroundImage': `url('${imgUrl}')`}}>
           </div>
           <div className='card-details'>
             <p>{name}</p>

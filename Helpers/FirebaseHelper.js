@@ -78,11 +78,10 @@ export const formatArtist = ({ id, name, external_urls: { spotify } }) => (
   }
 );
 
-export const formatDiscogsArtist = ({ id, name, images }) => (
+export const formatDiscogsArtist = ({ id, name }) => (
   {
     id,
-    name,
-    images
+    name
   }
 );
 
