@@ -120,16 +120,6 @@ class DiscogsCreateAlbum extends React.Component {
       })
       .then(() => this.handleSuccess())
       .catch((error) => {console.log(error); this.handleError(error.message);});
-
-    // // Set album, artist, and artist images
-    // api.getAlbum(this.accessToken, this.getSpotifyId(this.state.value))
-    //   .then(({data}) => Promise.all([
-    //     fb.setAlbumIfNotExists(fb.formatAlbum(data)),
-    //     fb.updateOrSetArtistsFromSingleAlbum(fb.formatArtists(data.artists), fb.formatSingleAlbumSummary(data))
-    //       .then(() => api.getArtistsImages(this.accessToken, this.getArtistIds(data.artists)))
-    //   ]))
-    //   .then(() => this.handleSuccess())
-    //   .catch((error) => this.handleError(error.message));
   }
 
   componentDidMount() {

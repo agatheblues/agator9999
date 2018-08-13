@@ -29,7 +29,7 @@ const ArtistSummary = function({artist}) {
           <div className='artist-banner-content content-container'>
             <h1>{artist.name}</h1>
             <p>{`${Object.keys(artist.albums).length} albums, ${totalTracks} tracks`}</p>
-            <p><a href={artist.url}>&#9836; {`Listen on ${artist.source}`}</a></p>
+            {getListeningUri(artist)}
           </div>
         </div>
 
@@ -37,6 +37,15 @@ const ArtistSummary = function({artist}) {
     </div>
   );
 };
+
+function getListeningUri(artist) {
+  console.log('coucou');
+  if (artist.source && artist.url) {
+    return <p><a href={artist.url}>&#9836; {`Listen on ${artist.source}`}</a></p>;
+  }
+
+  return <p>&#9836; No listening URL</p>;
+}
 
 ArtistSummary.propTypes = {
   artist: PropTypes.object.isRequired
