@@ -7,7 +7,6 @@ class InputText extends React.Component {
     super();
 
     this.state= {
-      value: '',
       errorMessage: null
     };
 
@@ -32,17 +31,8 @@ class InputText extends React.Component {
     this.props.handleValue(event.target.value);
 
     this.setState({
-      value: event.target.value,
       errorMessage: message
     });
-  }
-
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.value != this.state.value) {
-      this.setState({
-        value: nextProps.value
-      });
-    }
   }
 
   render() {
@@ -51,7 +41,7 @@ class InputText extends React.Component {
         <input
           type='text'
           spellCheck='false'
-          value={this.state.value}
+          value={this.props.value}
           onChange={this.handleChange}
           onFocus={this.handleFocus}
           className='form-input-text'

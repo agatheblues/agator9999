@@ -8,8 +8,7 @@ class Dropdown extends React.Component {
     super(props);
 
     this.state = {
-      isOpen: false,
-      labelItem: props.placeholder
+      isOpen: false
     };
 
     this.renderDataDropDown = this.renderDataDropDown.bind(this);
@@ -28,16 +27,12 @@ class Dropdown extends React.Component {
   }
 
   chooseItem(id, value) {
-    if (this.state.labelItem !== value) {
-      this.setState({
-        labelItem: value
-      });
-
-      if (this.props.handleSelectedValue) { this.props.handleSelectedValue(id); }
-    }
+    if (this.props.handleSelectedValue) { this.props.handleSelectedValue(id); }
   }
 
   renderDataDropDown(item, index) {
+    if (item.hide) { return; }
+    
     return (
       <li
         key={index}
@@ -51,7 +46,7 @@ class Dropdown extends React.Component {
     return (
       <div className={`dropdown ${this.state.isOpen ? 'open' : ''}`}>
         <div className='dropdown-toggle' onClick={this.showDropdown}>
-          {this.state.labelItem}
+          {this.props.selectedValue}
           <span className='caret'></span>
         </div>
         <ul className='dropdown-menu'>
@@ -67,8 +62,8 @@ Dropdown.propTypes = {
   list: PropTypes.array.isRequired,
   id: PropTypes.string.isRequired,
   value: PropTypes.string.isRequired,
-  placeholder: PropTypes.string.isRequired,
-  handleSelectedValue: PropTypes.func
+  handleSelectedValue: PropTypes.func,
+  selectedValue: PropTypes.string
 };
 
 export default Dropdown;

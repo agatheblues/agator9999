@@ -93,6 +93,7 @@ class SpotifyCreateAlbum extends React.Component {
                   setErrorMessage={this.checkSpotifyUri}
                   placeholder='spotify:album:...'
                   handleValue={this.handleValue}
+                  value={this.state.value}
                 />
               </div>
 

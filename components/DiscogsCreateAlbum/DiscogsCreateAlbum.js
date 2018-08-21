@@ -17,20 +17,22 @@ class DiscogsCreateAlbum extends React.Component {
     this.state = {
       error: false,
       message: null,
-      selectedSource: null,
-      selectedReleaseType: null,
-      discogsUri: null,
-      listeningUri: null,
+      selectedSource: 'placeholder',
+      selectedReleaseType: 'placeholder',
+      discogsUri: '',
+      listeningUri: '',
       existingArtist: null,
       artists: []
     };
 
     this.sourceList = [
+      {'id': 'placeholder', 'name': 'Select source', 'hide': true},
       {'id': 'bandcamp', 'name': 'Bandcamp'},
       {'id': 'youtube', 'name': 'Youtube'}
     ];
 
     this.releaseTypeList = [
+      {'id': 'placeholder', 'name': 'Select type', 'hide': true},
       {'id': 'master', 'name': 'Master'},
       {'id': 'release', 'name': 'Release'}
     ];
@@ -39,6 +41,16 @@ class DiscogsCreateAlbum extends React.Component {
     this.checkDiscogsUri = this.checkDiscogsUri.bind(this);
     this.checkListeningUri = this.checkListeningUri.bind(this);
     this.handleValueFor = this.handleValueFor.bind(this);
+    this.getSource = this.getSource.bind(this);
+    this.getReleaseType = this.getReleaseType.bind(this);
+  }
+
+  getSource(id) {
+    return this.sourceList.filter((s) => (s.id == id))[0].name;
+  }
+
+  getReleaseType(id) {
+    return this.releaseTypeList.filter((s) => (s.id == id))[0].name;
   }
 
   checkDiscogsUri(s) {
@@ -85,7 +97,11 @@ class DiscogsCreateAlbum extends React.Component {
   handleSuccess() {
     this.setState({
       error: false,
-      message: 'Album successfully added to your library!'
+      message: 'Album successfully added to your library!',
+      selectedSource: 'placeholder',
+      selectedReleaseType: 'placeholder',
+      discogsUri: '',
+      listeningUri: ''
     });
   }
 
@@ -119,7 +135,10 @@ class DiscogsCreateAlbum extends React.Component {
         ]);
       })
       .then(() => this.handleSuccess())
-      .catch((error) => {console.log(error); this.handleError(error.message);});
+      .catch((error) => {
+        console.log(error);
+        this.handleError(error.message);
+      });
   }
 
   componentDidMount() {
@@ -150,13 +169,14 @@ class DiscogsCreateAlbum extends React.Component {
                 list={this.releaseTypeList}
                 id={'id'}
                 value={'name'}
-                placeholder={'Select type'}
+                selectedValue={this.getReleaseType(this.state.selectedReleaseType)}
                 handleSelectedValue={this.handleValueFor('selectedReleaseType')}
               />
               <InputText
                 placeholder={'https://discogs.com/...'}
                 setErrorMessage={this.checkDiscogsUri}
                 handleValue={this.handleValueFor('discogsUri')}
+                value={this.state.discogsUri}
               />
             </div>
 
@@ -167,12 +187,13 @@ class DiscogsCreateAlbum extends React.Component {
                 list={this.sourceList}
                 id={'id'}
                 value={'name'}
-                placeholder={'Select source'}
+                selectedValue={this.getSource(this.state.selectedSource)}
                 handleSelectedValue={this.handleValueFor('selectedSource')}
               />
               <InputText
                 setErrorMessage={this.checkListeningUri}
                 handleValue={this.handleValueFor('listeningUri')}
+                value={this.state.listeningUri}
               />
             </div>
 
