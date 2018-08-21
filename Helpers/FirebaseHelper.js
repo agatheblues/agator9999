@@ -182,7 +182,10 @@ function omit(keys, obj) {
  */
 
 export function updateOrSetArtistsFromAlbums(items) {
-  return Promise.all(items.map((item) => updateOrSetArtistsFromSingleAlbum(formatArtists(item.album.artists, formatArtist), formatAlbumSummary(item))));
+  return items.reduce(
+    (p, item) => p.then(() => updateOrSetArtistsFromSingleAlbum(formatArtists(item.album.artists, formatArtist), formatAlbumSummary(item))),
+    Promise.resolve()
+  );
 }
 
 /**
@@ -193,7 +196,10 @@ export function updateOrSetArtistsFromAlbums(items) {
  * @return {Promise}
  */
 export function updateOrSetArtistsFromSingleAlbum(artists, album) {
-  return Promise.all(artists.map((artist) => updateOrSetSingleArtistFromSingleAlbum(artist, album)));
+  return artists.reduce(
+    (p, artist) => p.then(() => updateOrSetSingleArtistFromSingleAlbum(artist, album)),
+    Promise.resolve()
+  );
 }
 
 
