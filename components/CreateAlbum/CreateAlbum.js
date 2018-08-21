@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import SpotifyCreateAlbum from '../SpotifyCreateAlbum/SpotifyCreateAlbum';
 import DiscogsCreateAlbum from '../DiscogsCreateAlbum/DiscogsCreateAlbum';
-import FormCreateAlbum from '../FormCreateAlbum/FormCreateAlbum';
 
 class CreateAlbum extends React.Component {
 
@@ -26,8 +25,6 @@ class CreateAlbum extends React.Component {
     switch (this.state.source) {
     case 'spotify':
       return <SpotifyCreateAlbum />;
-    case 'bandcamp':
-      return <FormCreateAlbum />;
     case 'discogs':
       return <DiscogsCreateAlbum />;
     default:
@@ -47,7 +44,6 @@ class CreateAlbum extends React.Component {
           <ul onClick={this.handleClick}>
             <li id='spotify' className={this.state.source == 'spotify' ? 'active' : ''}>From Spotify</li>
             <li id='discogs' className={this.state.source == 'discogs' ? 'active' : ''}>From Discogs</li>
-            <li id='bandcamp' className={this.state.source == 'bandcamp' ? 'active' : ''}>From Bandcamp</li>
           </ul>
         </nav>
 
