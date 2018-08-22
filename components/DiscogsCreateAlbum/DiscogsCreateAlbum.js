@@ -7,6 +7,7 @@ import InputText from '../InputText/InputText';
 import SearchDropdown from '../SearchDropdown/SearchDropdown';
 import * as dg from '../../helpers/DiscogsHelper';
 import * as fb from '../../helpers/FirebaseHelper';
+import * as er from '../../helpers/ErrorHelper';
 require('./DiscogsCreateAlbum.scss');
 
 class DiscogsCreateAlbum extends React.Component {
@@ -15,12 +16,14 @@ class DiscogsCreateAlbum extends React.Component {
 
     // set local state
     this.state = {
-      error: false,
-      message: null,
+      errorSubmit: false,
+      messageSubmit: null,
       selectedSource: 'placeholder',
       selectedReleaseType: 'placeholder',
       discogsUri: '',
       listeningUri: '',
+      errorDiscogsUri: null,
+      errorListeningUri: null,
       existingArtist: null,
       artists: []
     };
@@ -38,12 +41,15 @@ class DiscogsCreateAlbum extends React.Component {
     ];
 
     this.handleSubmit = this.handleSubmit.bind(this);
-    this.checkDiscogsUri = this.checkDiscogsUri.bind(this);
-    this.checkListeningUri = this.checkListeningUri.bind(this);
+    this.handleErrorDiscogsUri = this.handleErrorDiscogsUri.bind(this);
+    this.handleErrorListeningUri = this.handleErrorListeningUri.bind(this);
+    this.handleErrorReleaseType = this.handleErrorReleaseType.bind(this);
+    this.handleErrorSource = this.handleErrorSource.bind(this);
     this.handleValueFor = this.handleValueFor.bind(this);
     this.getSource = this.getSource.bind(this);
     this.getReleaseType = this.getReleaseType.bind(this);
   }
+
 
   getSource(id) {
     return this.sourceList.filter((s) => (s.id == id))[0].name;
@@ -53,27 +59,58 @@ class DiscogsCreateAlbum extends React.Component {
     return this.releaseTypeList.filter((s) => (s.id == id))[0].name;
   }
 
-  checkDiscogsUri(s) {
 
-    if (!this.state.selectedReleaseType) {
-      return 'Please provide a release type!';
-    } else if (s.indexOf('https://www.discogs.com/') != 0) {
-      return 'URI should start with https://discogs.com/...';
-    } else if (s.indexOf(this.state.selectedReleaseType) == -1) {
-      return 'URI should contain ' + this.state.selectedReleaseType + '.';
-    }
+  /** Form inputs **/
+  handleErrorDiscogsUri(s) {
+    const msg = er.checkDiscogsUri(s, this.state.selectedReleaseType);
 
-    return null;
+    this.setState({
+      errorDiscogsUri: msg
+    });
+
+    return msg;
   }
 
 
-  checkListeningUri(s) {
+  handleErrorReleaseType(type) {
+    const msg = er.checkDiscogsUri(this.state.discogsUri, type);
 
-    if (!this.state.selectedSource) {
-      return 'Please provide a source!';
-    }
+    this.setState({
+      errorDiscogsUri: msg
+    });
 
-    return (s.indexOf(this.state.selectedSource) == -1) ? 'URI should contain "' + this.state.selectedSource + '".' : null;
+    return msg;
+  }
+
+
+  handleErrorListeningUri(s) {
+    const msg = er.checkListeningUri(s, this.state.selectedSource);
+
+    this.setState({
+      errorListeningUri: msg
+    });
+
+    return msg;
+  }
+
+
+  handleErrorSource(source) {
+    const msg = er.checkListeningUri(this.state.listeningUri, source);
+
+    this.setState({
+      errorListeningUri: msg
+    });
+
+    return msg;
+  }
+
+  hasErrors() {
+    const source = this.handleErrorSource(this.state.selectedSource);
+    const release = this.handleErrorReleaseType(this.state.selectedReleaseType);
+    const discogs = this.handleErrorDiscogsUri(this.state.discogsUri);
+    const listening = this.handleErrorListeningUri(this.state.listeningUri);
+
+    return (source || release || discogs || listening);
   }
 
   handleValueFor(label) {
@@ -87,17 +124,19 @@ class DiscogsCreateAlbum extends React.Component {
     return handleValue;
   }
 
-  handleError(message) {
+
+  /** Form submit **/
+  handleSubmitError(message) {
     this.setState({
-      error: true,
-      message: message
+      errorSubmit: true,
+      messageSubmit: message
     });
   }
 
-  handleSuccess() {
+  handleSubmitSuccess() {
     this.setState({
-      error: false,
-      message: 'Album successfully added to your library!',
+      errorSubmit: false,
+      messageSubmit: 'Album successfully added to your library!',
       selectedSource: 'placeholder',
       selectedReleaseType: 'placeholder',
       discogsUri: '',
@@ -105,6 +144,8 @@ class DiscogsCreateAlbum extends React.Component {
     });
   }
 
+
+  /** Existing artists **/
   handleArtistsListSuccess(artists) {
     this.setState({
       artists: artists
@@ -114,7 +155,7 @@ class DiscogsCreateAlbum extends React.Component {
   getArtistsList() {
     fb.getArtists()
       .then((data) => this.handleArtistsListSuccess(fb.formatArtistList(data)))
-      .catch((error) => this.handleError('Oops! Something went wrong while retrieving the artists'));
+      .catch((error) => this.handleSubmitError('Oops! Something went wrong while retrieving the artists'));
 
   }
 
@@ -125,6 +166,22 @@ class DiscogsCreateAlbum extends React.Component {
   handleSubmit(event) {
     event.preventDefault();
 
+    // Check for errors
+    if (this.hasErrors()) {
+      this.setState({
+        errorSubmit: true,
+        messageSubmit: 'There are errors in the form!'
+      });
+
+      return;
+    }
+
+    // Reset error message
+    this.setState({
+      errorSubmit: false,
+      messageSubmit: null
+    });
+
     dg.getRelease(this.state.discogsUri, this.state.selectedReleaseType)
       .then(({data}) => {
         console.log('coucou', data);
@@ -134,10 +191,10 @@ class DiscogsCreateAlbum extends React.Component {
             .then(() => dg.getArtistsImages(this.getArtistIds(data.artists)))
         ]);
       })
-      .then(() => this.handleSuccess())
+      .then(() => this.handleSubmitSuccess())
       .catch((error) => {
         console.log(error);
-        this.handleError(error.message);
+        this.handleSubmitError(error.message);
       });
   }
 
@@ -146,22 +203,23 @@ class DiscogsCreateAlbum extends React.Component {
   }
 
   render() {
-    console.log(this.state);
+    console.log('render', this.state);
+    // <div className='form-row-container'>
+    //   <label>Existing artist:</label>
+    //   <SearchDropdown
+    //     list={this.state.artists}
+    //     id={'id'}
+    //     value={'name'}
+    //     placeholder={'Select an artist in your library'}
+    //     handleValue={this.handleValueFor('existingArtist')}
+    //   />
+    // </div>
     return (
       <div>
         <div>
           <p>To add an album from Discogs, copy the Url to the Id</p>
           <form onSubmit={this.handleSubmit}>
-            <div className='form-row-container'>
-              <label>Existing artist:</label>
-              <SearchDropdown
-                list={this.state.artists}
-                id={'id'}
-                value={'name'}
-                placeholder={'Select an artist in your library'}
-                handleValue={this.handleValueFor('existingArtist')}
-              />
-            </div>
+
 
             <div className='form-row-container'>
               <label>Discogs URI:</label>
@@ -171,14 +229,17 @@ class DiscogsCreateAlbum extends React.Component {
                 value={'name'}
                 selectedValue={this.getReleaseType(this.state.selectedReleaseType)}
                 handleSelectedValue={this.handleValueFor('selectedReleaseType')}
+                handleError={this.handleErrorReleaseType}
               />
               <InputText
                 placeholder={'https://discogs.com/...'}
-                setErrorMessage={this.checkDiscogsUri}
                 handleValue={this.handleValueFor('discogsUri')}
+                handleError={this.handleErrorDiscogsUri}
                 value={this.state.discogsUri}
               />
             </div>
+
+            <Message message={this.state.errorDiscogsUri} error={true} style={'input-msg'}/>
 
 
             <div className='form-row-container'>
@@ -189,16 +250,19 @@ class DiscogsCreateAlbum extends React.Component {
                 value={'name'}
                 selectedValue={this.getSource(this.state.selectedSource)}
                 handleSelectedValue={this.handleValueFor('selectedSource')}
+                handleError={this.handleErrorSource}
               />
               <InputText
-                setErrorMessage={this.checkListeningUri}
                 handleValue={this.handleValueFor('listeningUri')}
+                handleError={this.handleErrorListeningUri}
                 value={this.state.listeningUri}
               />
             </div>
 
-            {this.state.message &&
-              <Message message={this.state.message} error={this.state.error}/>
+            <Message message={this.state.errorListeningUri} error={true} style={'input-msg'}/>
+
+            {this.state.messageSubmit &&
+              <Message message={this.state.messageSubmit} error={this.state.errorSubmit}/>
             }
 
             <div className='submit-container'>
