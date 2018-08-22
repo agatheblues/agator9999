@@ -22,6 +22,8 @@ class Album extends React.Component {
         added_at: ''
       }
     };
+
+    this.getGenres = this.getGenres.bind(this);
   }
 
   formatDate(dateString) {
@@ -43,10 +45,37 @@ class Album extends React.Component {
   }
 
   handleGetAlbumError() {
-    console.log('coucou');
     this.setState({
       error: true
     });
+  }
+
+  genreStyleReducer(accumulator, currentValue, currentIndex, array) {
+    if (currentIndex == array.length - 1) {
+      return accumulator + ' ' + currentValue;
+    }
+
+    return accumulator + ' ' + currentValue + ',';
+  }
+
+  getGenres() {
+    let genres = 'Genres /';
+
+    if (!this.state.albumData.hasOwnProperty('genres') || (this.state.albumData.genres.length == 0)) {
+      return genres;
+    }
+
+    return this.state.albumData.genres.reduce(this.genreStyleReducer, genres);
+  }
+
+  getStyles() {
+    let styles = 'Styles /';
+
+    if (!this.state.albumData.hasOwnProperty('styles') || (this.state.albumData.styles.length == 0)) {
+      return styles;
+    }
+
+    return this.state.albumData.styles.reduce(this.genreStyleReducer, styles);
   }
 
   componentDidMount() {
@@ -88,7 +117,10 @@ class Album extends React.Component {
                 </div>
                 <div className='album-minor-details'>
                   <p>{`Added on ${this.state.albumData.added_at}`}</p>
-                  <p>Tags: </p>
+                </div>
+                <div className='album-minor-details'>
+                  <p>{this.getGenres()}</p>
+                  <p>{this.getStyles()}</p>
                 </div>
               </div>
             }
