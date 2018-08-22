@@ -32,3 +32,10 @@ export function checkListeningUri(uri, selectedSource) {
 
   return (uri.indexOf(selectedSource) == -1)  ? 'URI should contain "' + selectedSource + '".' : null;
 }
+
+
+/** Spotify **/
+
+export function checkSpotifyUri(s) {
+  return (s.indexOf('spotify:album:') != 0) ? 'URI should be formed as spotify:album:...' : null;
+}

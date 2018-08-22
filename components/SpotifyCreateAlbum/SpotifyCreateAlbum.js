@@ -6,6 +6,7 @@ import Message from '../Message/Message';
 import InputText from '../InputText/InputText';
 import * as api from '../../helpers/SpotifyHelper';
 import * as fb from '../../helpers/FirebaseHelper';
+import {checkSpotifyUri} from '../../helpers/ErrorHelper';
 
 class SpotifyCreateAlbum extends React.Component {
   constructor(props) {
@@ -16,43 +17,49 @@ class SpotifyCreateAlbum extends React.Component {
 
     // set local state
     this.state = {
-      value: '',
-      error: false,
-      messageForm: null,
-      message: null,
+      spotifyUri: '',
+      errorSubmit: false,
+      errorSpotifyUri: null,
+      messageSubmit: null,
       accessToken: this.accessToken
     };
 
-    this.checkSpotifyUri = this.checkSpotifyUri.bind(this);
+    this.handleErrorSpotifyUri = this.handleErrorSpotifyUri.bind(this);
     this.handleValue = this.handleValue.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
-  }
-
-  checkSpotifyUri(s) {
-    return (s.indexOf('spotify:album:') != 0) ? 'URI should be formed as spotify:album:...' : null;
   }
 
   getSpotifyId(s) {
     return s.substring(14);
   }
 
+  handleErrorSpotifyUri(s) {
+    const msg = checkSpotifyUri(s);
+
+    this.setState({
+      errorSpotifyUri: msg
+    });
+
+    return msg;
+  }
+
   handleError(message) {
     this.setState({
-      error: true,
-      message: message
+      errorSubmit: true,
+      messageSubmit: message
     });
   }
 
   handleSuccess() {
     this.setState({
-      error: false,
-      message: 'Album successfully added to your library!'
+      errorSubmit: false,
+      messageSubmit: 'Album successfully added to your library!'
     });
   }
 
   handleValue(value) {
     this.setState({
-      value: value
+      spotifyUri: value
     });
   }
 
@@ -63,8 +70,22 @@ class SpotifyCreateAlbum extends React.Component {
   handleSubmit(event) {
     event.preventDefault();
 
+    if (this.handleErrorSpotifyUri(this.state.spotifyUri)) {
+      this.setState({
+        errorSubmit: true,
+        messageSubmit: 'There are errors in the form!'
+      });
+
+      return;
+    }
+
+    this.setState({
+      errorSubmit: false,
+      messageSubmit: null
+    });
+
     // Set album, artist, and artist images
-    api.getAlbum(this.accessToken, this.getSpotifyId(this.state.value))
+    api.getAlbum(this.accessToken, this.getSpotifyId(this.state.spotifyUri))
       .then(({data}) => Promise.all([
         fb.setAlbumIfNotExists(fb.formatAlbum(data)),
         fb.updateOrSetArtistsFromSingleAlbum(fb.formatArtists(data.artists, fb.formatArtist), fb.formatSingleAlbumSummary(data))
@@ -90,21 +111,21 @@ class SpotifyCreateAlbum extends React.Component {
               <div className='form-row-container'>
                 <label>Spotify URI:</label>
                 <InputText
-                  setErrorMessage={this.checkSpotifyUri}
+                  handleError={this.handleErrorSpotifyUri}
                   placeholder='spotify:album:...'
                   handleValue={this.handleValue}
-                  value={this.state.value}
+                  value={this.state.spotifyUri}
                 />
               </div>
 
-              {this.state.message &&
-                <Message message={this.state.message} error={this.state.error}/>
+              {this.state.errorSpotifyUri &&
+                <Message message={this.state.errorSpotifyUri} error={true} style={'input-msg'} />
               }
-              {this.state.messageForm &&
-                <div className='input-error-container'>
-                  <p className='input-error'>{this.state.messageForm}</p>
-                </div>
+
+              {this.state.messageSubmit &&
+                <Message message={this.state.messageSubmit} error={this.state.errorSubmit}/>
               }
+
               <div className='submit-container'>
                 <Button label='OK' handleClick={this.handleSubmit}/>
               </div>
