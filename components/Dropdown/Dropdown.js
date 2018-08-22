@@ -27,12 +27,18 @@ class Dropdown extends React.Component {
   }
 
   chooseItem(id, value) {
-    if (this.props.handleSelectedValue) { this.props.handleSelectedValue(id); }
+    if (this.props.handleSelectedValue) {
+      this.props.handleSelectedValue(id);
+    }
+
+    if (this.props.handleError) {
+      this.props.handleError(id);
+    }
   }
 
   renderDataDropDown(item, index) {
     if (item.hide) { return; }
-    
+
     return (
       <li
         key={index}
@@ -62,7 +68,8 @@ Dropdown.propTypes = {
   list: PropTypes.array.isRequired,
   id: PropTypes.string.isRequired,
   value: PropTypes.string.isRequired,
-  handleSelectedValue: PropTypes.func,
+  handleSelectedValue: PropTypes.func.isRequired,
+  handleError: PropTypes.func,
   selectedValue: PropTypes.string
 };
 
