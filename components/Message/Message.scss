@@ -15,3 +15,12 @@
     color: $white;
   }
 }
+
+.msg-input-error-container {
+  text-align: right;
+}
+
+.msg-input-error {
+  font-size: 12px;
+  color: $orange;
+}

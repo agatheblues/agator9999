@@ -6,10 +6,6 @@ class InputText extends React.Component {
   constructor(props) {
     super();
 
-    this.state= {
-      errorMessage: null
-    };
-
     this.handleChange = this.handleChange.bind(this);
     this.handleFocus = this.handleFocus.bind(this);
   }
@@ -22,17 +18,10 @@ class InputText extends React.Component {
   }
 
   handleChange(event) {
-    let message = null;
-
-    if (this.props.setErrorMessage) {
-      message = this.props.setErrorMessage(event.target.value);
-    }
 
     this.props.handleValue(event.target.value);
+    this.props.handleError(event.target.value);
 
-    this.setState({
-      errorMessage: message
-    });
   }
 
   render() {
@@ -48,11 +37,6 @@ class InputText extends React.Component {
           placeholder={this.props.placeholder}
           id={this.props.id}
         />
-        {this.state.errorMessage &&
-          <div className='input-error-container'>
-            <p className='input-error'>{this.state.errorMessage}</p>
-          </div>
-        }
       </div>
     );
   }
@@ -61,8 +45,8 @@ class InputText extends React.Component {
 
 InputText.propTypes = {
   placeholder: PropTypes.string,
-  setErrorMessage: PropTypes.func,
   handleValue: PropTypes.func.isRequired,
+  handleError: PropTypes.func.isRequired,
   handleFocus: PropTypes.func,
   id: PropTypes.string,
   value: PropTypes.string
