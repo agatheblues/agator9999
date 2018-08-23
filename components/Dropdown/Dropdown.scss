@@ -3,6 +3,7 @@
 .dropdown {
   position: relative;
   cursor: pointer;
+  margin-right: 10px;
 
   &.open>.dropdown-menu {
     display: block;
