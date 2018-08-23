@@ -7,7 +7,7 @@ import InputText from '../InputText/InputText';
 import SearchDropdown from '../SearchDropdown/SearchDropdown';
 import * as dg from '../../helpers/DiscogsHelper';
 import * as fb from '../../helpers/FirebaseHelper';
-import * as er from '../../helpers/ErrorHelper';
+import {checkDiscogsUri, checkListeningUri} from '../../helpers/ErrorHelper';
 require('./DiscogsCreateAlbum.scss');
 
 class DiscogsCreateAlbum extends React.Component {
@@ -62,7 +62,7 @@ class DiscogsCreateAlbum extends React.Component {
 
   /** Form inputs **/
   handleErrorDiscogsUri(s) {
-    const msg = er.checkDiscogsUri(s, this.state.selectedReleaseType);
+    const msg = checkDiscogsUri(s, this.state.selectedReleaseType);
 
     this.setState({
       errorDiscogsUri: msg
@@ -73,7 +73,7 @@ class DiscogsCreateAlbum extends React.Component {
 
 
   handleErrorReleaseType(type) {
-    const msg = er.checkDiscogsUri(this.state.discogsUri, type);
+    const msg = checkDiscogsUri(this.state.discogsUri, type);
 
     this.setState({
       errorDiscogsUri: msg
@@ -84,7 +84,7 @@ class DiscogsCreateAlbum extends React.Component {
 
 
   handleErrorListeningUri(s) {
-    const msg = er.checkListeningUri(s, this.state.selectedSource);
+    const msg = checkListeningUri(s, this.state.selectedSource);
 
     this.setState({
       errorListeningUri: msg
@@ -95,7 +95,7 @@ class DiscogsCreateAlbum extends React.Component {
 
 
   handleErrorSource(source) {
-    const msg = er.checkListeningUri(this.state.listeningUri, source);
+    const msg = checkListeningUri(this.state.listeningUri, source);
 
     this.setState({
       errorListeningUri: msg
@@ -184,7 +184,6 @@ class DiscogsCreateAlbum extends React.Component {
 
     dg.getRelease(this.state.discogsUri, this.state.selectedReleaseType)
       .then(({data}) => {
-        console.log('coucou', data);
         return Promise.all([
           fb.setAlbumIfNotExists(fb.formatDiscogsAlbum(data, this.state.selectedSource, this.state.listeningUri)),
           fb.updateOrSetArtistsFromSingleAlbum(fb.formatArtists(data.artists, fb.formatDiscogsArtist), fb.formatDiscogsSingleAlbumSummary(data))
@@ -193,7 +192,6 @@ class DiscogsCreateAlbum extends React.Component {
       })
       .then(() => this.handleSubmitSuccess())
       .catch((error) => {
-        console.log(error);
         this.handleSubmitError(error.message);
       });
   }
@@ -203,7 +201,6 @@ class DiscogsCreateAlbum extends React.Component {
   }
 
   render() {
-    console.log('render', this.state);
     // <div className='form-row-container'>
     //   <label>Existing artist:</label>
     //   <SearchDropdown
@@ -217,12 +214,10 @@ class DiscogsCreateAlbum extends React.Component {
     return (
       <div>
         <div>
-          <p>To add an album from Discogs, copy the Url to the Id</p>
           <form onSubmit={this.handleSubmit}>
 
 
             <div className='form-row-container'>
-              <label>Discogs URI:</label>
               <Dropdown
                 list={this.releaseTypeList}
                 id={'id'}
@@ -232,7 +227,7 @@ class DiscogsCreateAlbum extends React.Component {
                 handleError={this.handleErrorReleaseType}
               />
               <InputText
-                placeholder={'https://discogs.com/...'}
+                placeholder={'Discogs URL of the master or release album'}
                 handleValue={this.handleValueFor('discogsUri')}
                 handleError={this.handleErrorDiscogsUri}
                 value={this.state.discogsUri}
@@ -243,7 +238,6 @@ class DiscogsCreateAlbum extends React.Component {
 
 
             <div className='form-row-container'>
-              <label>Listening URI:</label>
               <Dropdown
                 list={this.sourceList}
                 id={'id'}
@@ -253,6 +247,7 @@ class DiscogsCreateAlbum extends React.Component {
                 handleError={this.handleErrorSource}
               />
               <InputText
+                placeholder={'Bandcamp or Youtube URL of the album'}
                 handleValue={this.handleValueFor('listeningUri')}
                 handleError={this.handleErrorListeningUri}
                 value={this.state.listeningUri}
@@ -268,6 +263,8 @@ class DiscogsCreateAlbum extends React.Component {
             <div className='submit-container'>
               <Button label='OK' handleClick={this.handleSubmit}/>
             </div>
+
+            <p className='note'>To add an album from Discogs, fill in the release or master url of the album on Discogs, and the Youtube or Bandcamp url of where the album can be streamed.</p>
           </form>
         </div>
       </div>

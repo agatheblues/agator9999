@@ -106,13 +106,11 @@ class SpotifyCreateAlbum extends React.Component {
         }
         {this.accessToken &&
           <div>
-            <p>To add an album from Spotify, copy its Spotify URI.</p>
             <form onSubmit={this.handleSubmit}>
               <div className='form-row-container'>
-                <label>Spotify URI:</label>
                 <InputText
                   handleError={this.handleErrorSpotifyUri}
-                  placeholder='spotify:album:...'
+                  placeholder='Spotify URI of the album as spotify:album:...'
                   handleValue={this.handleValue}
                   value={this.state.spotifyUri}
                 />
@@ -130,6 +128,8 @@ class SpotifyCreateAlbum extends React.Component {
                 <Button label='OK' handleClick={this.handleSubmit}/>
               </div>
             </form>
+
+            <p className='note'>To add an album from Spotify, fill in the Spotify URI of the album.</p>
           </div>
         }
       </div>
