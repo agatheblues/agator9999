@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Message from '../Message/Message';
+import SpotifyUpdateAlbum from '../SpotifyUpdateAlbum/SpotifyUpdateAlbum';
 import { getAlbum } from '../../helpers/FirebaseHelper';
 require('./Album.scss');
 
@@ -20,10 +21,13 @@ class Album extends React.Component {
       albumData: {
         source: '',
         added_at: ''
-      }
+      },
+      showDiscogsForm: false
     };
 
     this.getGenres = this.getGenres.bind(this);
+    this.handleShowDiscogsClick = this.handleShowDiscogsClick.bind(this);
+    this.handleHideDiscogsClick = this.handleHideDiscogsClick.bind(this);
   }
 
   formatDate(dateString) {
@@ -33,7 +37,7 @@ class Album extends React.Component {
   }
 
   handleGetAlbumSuccess(album) {
-    console.log(album);
+
     // Format date
     album.added_at = this.formatDate(album.added_at);
     album.release_date = album.release_date.substr(0, 4);
@@ -49,6 +53,23 @@ class Album extends React.Component {
       error: true
     });
   }
+
+
+  handleShowDiscogsClick(event) {
+    event.preventDefault();
+    this.setState({
+      showDiscogsForm: true
+    });
+  }
+
+
+  handleHideDiscogsClick(event) {
+    event.preventDefault();
+    this.setState({
+      showDiscogsForm: false
+    });
+  }
+
 
   genreStyleReducer(accumulator, currentValue, currentIndex, array) {
     if (currentIndex == array.length - 1) {
@@ -100,7 +121,6 @@ class Album extends React.Component {
   }
 
   render() {
-    console.log(this.state);
     return (
       <div className='content-container'>
         <div className='album-wrapper'>
@@ -122,6 +142,26 @@ class Album extends React.Component {
                   <p>{this.getGenres()}</p>
                   <p>{this.getStyles()}</p>
                 </div>
+
+                { !this.state.albumData.discogs_id &&
+                  this.state.hasAlbumData &&
+                  !this.state.showDiscogsForm &&
+                  <div className='album-minor-details'>
+                    <p><a href='' onClick={this.handleShowDiscogsClick}>&#xFF0B; Link to Discogs</a></p>
+                  </div>
+                }
+
+                { !this.state.albumData.discogs_id &&
+                  this.state.hasAlbumData &&
+                  this.state.showDiscogsForm &&
+                  <div className='album-minor-details'>
+                    <p><a href='' onClick={this.handleHideDiscogsClick}>&#xFF0D; Link to Discogs</a></p>
+                  </div>
+                }
+
+                {this.state.showDiscogsForm &&
+                  <SpotifyUpdateAlbum spotify_id={this.state.albumData.spotify_id} />
+                }
               </div>
             }
             {this.state.error &&
