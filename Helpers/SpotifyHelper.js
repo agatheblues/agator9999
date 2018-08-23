@@ -207,7 +207,7 @@ export function getAndSetUserSavedAlbums(token, offset) {
   return getUserSavedAlbumsChunk(token, offset)
     .then(({data}) => {
       const arrayOfPromises = [
-        fb.setAlbums(data.items.map((item) => fb.formatAlbums(item))),
+        fb.setAlbums(data.items.map((item) => fb.formatSpotifyAlbums(item))),
         fb.updateOrSetArtistsFromAlbums(data.items)
           .then(() => getArtistsImages(token, getArtistsIds(data.items)))
       ];

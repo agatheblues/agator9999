@@ -5,10 +5,10 @@ import config from '../firebase.config.json';
 
 /******* FORMATTING *******/
 
-export const formatAlbums = ({ added_at, album }) => (
+export const formatSpotifyAlbums = ({ added_at, album }) => (
   {
     added_at,
-    ...formatAlbum(album)
+    ...formatSpotifyAlbum(album)
   }
 );
 
@@ -32,18 +32,20 @@ export const formatDiscogsAlbum = ({ id, title, images, year, genres, styles, re
     url,
     discogs_url: resource_url,
     genres,
-    styles
+    styles,
+    discogs_id: id
   }
 );
 
-export const formatAlbum = ({ id, name, external_urls: { spotify }, images, release_date }) => (
+export const formatSpotifyAlbum = ({ id, name, external_urls: { spotify }, images, release_date }) => (
   {
     id,
     name,
     url: spotify,
     images,
     release_date,
-    source: 'spotify'
+    source: 'spotify',
+    spotify_id: id
   }
 );
 
@@ -69,19 +71,21 @@ export const formatDiscogsSingleAlbumSummary = ({ id, tracklist}) => (
   }
 );
 
-export const formatArtist = ({ id, name, external_urls: { spotify } }) => (
+export const formatSpotifyArtist = ({ id, name, external_urls: { spotify } }) => (
   {
     id,
     name,
     url: spotify,
-    source: 'spotify'
+    source: 'spotify',
+    spotify_id: id
   }
 );
 
 export const formatDiscogsArtist = ({ id, name }) => (
   {
     id,
-    name
+    name,
+    discogs_id: id
   }
 );
 
@@ -183,7 +187,7 @@ function omit(keys, obj) {
 
 export function updateOrSetArtistsFromAlbums(items) {
   return items.reduce(
-    (p, item) => p.then(() => updateOrSetArtistsFromSingleAlbum(formatArtists(item.album.artists, formatArtist), formatAlbumSummary(item))),
+    (p, item) => p.then(() => updateOrSetArtistsFromSingleAlbum(formatArtists(item.album.artists, formatSpotifyArtist), formatAlbumSummary(item))),
     Promise.resolve()
   );
 }
