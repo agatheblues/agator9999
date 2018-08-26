@@ -133,7 +133,7 @@ class Album extends React.Component {
                 <h2>{this.state.albumData.name}</h2>
                 <div className='album-main-details'>
                   <p>{this.state.albumData.release_date}&emsp;/&emsp;{this.props.totalTracks} tracks</p>
-                  <p><a href={this.state.albumData.url}>&#9836; {`Listen on ${this.state.albumData.source}`}</a></p>
+                  <p><a href={this.state.albumData.url}>&#9836; Listen on <span className='capitalize'>{this.state.albumData.source}</span></a></p>
                 </div>
                 <div className='album-minor-details'>
                   <p>{`Added on ${this.state.albumData.added_at}`}</p>
