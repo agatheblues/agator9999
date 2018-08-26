@@ -9,7 +9,7 @@ class CreateAlbum extends React.Component {
   constructor(props) {
     super();
     this.state = {
-      source: 'discogs'
+      source: 'spotify'
     };
 
     this.handleClick = this.handleClick.bind(this);
