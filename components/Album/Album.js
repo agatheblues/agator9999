@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Message from '../Message/Message';
 import SpotifyUpdateAlbum from '../SpotifyUpdateAlbum/SpotifyUpdateAlbum';
-import { getAlbum } from '../../helpers/FirebaseHelper';
+import { getRef } from '../../helpers/FirebaseHelper';
 require('./Album.scss');
 
 class Album extends React.Component {
@@ -44,16 +44,10 @@ class Album extends React.Component {
 
     this.setState({
       hasAlbumData: true,
-      albumData: album
+      albumData: album,
+      showDiscogsForm: false
     });
   }
-
-  handleGetAlbumError() {
-    this.setState({
-      error: true
-    });
-  }
-
 
   handleShowDiscogsClick(event) {
     event.preventDefault();
@@ -100,9 +94,10 @@ class Album extends React.Component {
   }
 
   componentDidMount() {
-    getAlbum(this.props.id)
-      .then((snapshot) => this.handleGetAlbumSuccess(snapshot.val()))
-      .catch((error) => this.handleGetAlbumError());
+    getRef('albums/' + this.props.id)
+      .on('value', (snapshot) => {
+        this.handleGetAlbumSuccess(snapshot.val());
+      });
   }
 
   renderAlbumCover() {
@@ -160,7 +155,7 @@ class Album extends React.Component {
                 }
 
                 {this.state.showDiscogsForm &&
-                  <SpotifyUpdateAlbum spotify_id={this.state.albumData.spotify_id} />
+                  <SpotifyUpdateAlbum spotifyId={this.state.albumData.spotify_id} />
                 }
               </div>
             }

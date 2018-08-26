@@ -37,6 +37,15 @@ export const formatDiscogsAlbum = ({ id, title, images, year, genres, styles, re
   }
 );
 
+export const formatDiscogsUpdateAlbum = ({ id, genres, styles, resource_url}) => (
+  {
+    discogs_url: resource_url,
+    genres,
+    styles,
+    discogs_id: id
+  }
+);
+
 export const formatSpotifyAlbum = ({ id, name, external_urls: { spotify }, images, release_date }) => (
   {
     id,
@@ -146,7 +155,7 @@ export function getFbDb() {
  * @param  {String} path Path to ref
  * @return {object}      Firebase ref
  */
-function getRef(path) {
+export function getRef(path) {
   return getFbDb().ref(path);
 }
 
@@ -347,6 +356,11 @@ export function setAlbums(albums) {
   return Promise.all(flatten(albums.map((album) => setAlbum(album))));
 }
 
+
+/**
+ * If album already exists, do not update, else set album
+ * @param {object} album Album object
+ */
 export function setAlbumIfNotExists(album) {
   return getAlbum(album.id)
     .then((snapshot) => {
@@ -355,6 +369,21 @@ export function setAlbumIfNotExists(album) {
     });
 }
 
+/**
+ * Enrich a Spotify album with Discogs data
+ * @param  {String} spotifyId Id of Spotfify album as stored in FB
+ * @param  {Object} dgAlbum   Formatted discogs album with enriching fields
+ * @return {Promise}          Firebase update promise
+ */
+export function updateSpotifyAlbumWithDiscogsAlbum(spotifyId, dgAlbum) {
+  return getRef('albums/' + spotifyId)
+    .update({
+      ['/discogs_url']: dgAlbum.discogs_url,
+      ['/genres'] : dgAlbum.genres,
+      ['/styles']: dgAlbum.styles,
+      ['/discogs_id']: dgAlbum.discogs_id
+    });
+}
 
 /**
  * Get a single album from FB

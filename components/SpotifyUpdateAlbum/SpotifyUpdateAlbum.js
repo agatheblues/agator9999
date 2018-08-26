@@ -4,7 +4,7 @@ import Button from '../Button/Button';
 import Message from '../Message/Message';
 import InputText from '../InputText/InputText';
 import Dropdown from '../Dropdown/Dropdown';
-import * as api from '../../helpers/SpotifyHelper';
+import * as dg from '../../helpers/DiscogsHelper';
 import * as fb from '../../helpers/FirebaseHelper';
 import {checkDiscogsUri} from '../../helpers/ErrorHelper';
 
@@ -60,7 +60,7 @@ class SpotifyUpdateAlbum extends React.Component {
 
   handleErrorReleaseType(type) {
     const msg = checkDiscogsUri(this.state.discogsUri, type);
-    
+
     this.setState({
       errorDiscogsUri: msg
     });
@@ -101,10 +101,18 @@ class SpotifyUpdateAlbum extends React.Component {
       errorSubmit: false,
       messageSubmit: null
     });
+
+    dg.getRelease(this.state.discogsUri, this.state.selectedReleaseType)
+      .then(({data}) => {
+        return fb.updateSpotifyAlbumWithDiscogsAlbum(this.props.spotifyId, fb.formatDiscogsUpdateAlbum(data));
+      })
+      .then(() => this.handleSubmitSuccess())
+      .catch((error) => {
+        this.handleSubmitError(error.message);
+      });
   }
 
   render() {
-    console.log(this.state);
     return (
       <div className='form-container'>
         <form onSubmit={this.handleSubmit}>
@@ -144,7 +152,7 @@ class SpotifyUpdateAlbum extends React.Component {
 }
 
 SpotifyUpdateAlbum.propTypes = {
-  spotify_id: PropTypes.string.isRequired
+  spotifyId: PropTypes.string.isRequired
 };
 
 
