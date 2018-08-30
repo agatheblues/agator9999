@@ -33,10 +33,11 @@
     "axios": "^0.16.2",
     "classnames": "^2.2.5",
     "express": "^4.16.2",
-    "firebase": "^4.11.0",
+    "firebase": "5.4.1",
     "node-sass": "^4.5.3",
     "react": "^15.6.1",
     "react-dom": "^15.6.1",
+    "react-firebaseui": "^3.0.6",
     "react-router-dom": "^4.2.2"
   }
 }
