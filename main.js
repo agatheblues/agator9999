@@ -8,6 +8,7 @@ import CardGrid from './components/CardGrid/CardGrid';
 import CreateAlbum from './components/CreateAlbum/CreateAlbum';
 import Artist from './components/Artist/Artist';
 import FirebaseSignIn from './components/FirebaseSignIn/FirebaseSignIn';
+import Loading from './components/Loading/Loading';
 import Button from './components/Button/Button';
 import {init} from './helpers/FirebaseHelper.js';
 import firebase from 'firebase';
@@ -21,7 +22,8 @@ class App extends React.Component {
     init();
 
     this.state = {
-      user: null
+      user: null,
+      loaded: false
     };
 
     this.logout = this.logout.bind(this);
@@ -40,7 +42,14 @@ class App extends React.Component {
   componentDidMount() {
     firebase.auth().onAuthStateChanged((user) => {
       if (user) {
-        this.setState({ user });
+        this.setState({
+          user,
+          loaded: true
+        });
+      } else {
+        this.setState({
+          loaded:true
+        });
       }
     });
   }
@@ -51,7 +60,7 @@ class App extends React.Component {
     return (
       <div className='content-container'>
 
-        {this.state.user &&
+        {this.state.user && this.state.loaded &&
           <div>
             <div>
               <div className='user-profile'>
@@ -78,8 +87,12 @@ class App extends React.Component {
           </div>
         }
 
-        {!this.state.user &&
+        {!this.state.user && this.state.loaded &&
           <FirebaseSignIn />
+        }
+
+        {!this.state.loaded &&
+          <Loading />
         }
 
 
