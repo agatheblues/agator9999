@@ -445,3 +445,12 @@ function updateArtistImage(image) {
       ['/' + image.id + '/imgUrl/']: image.imgUrl
     });
 }
+
+
+/************ USERS ****************/
+export function getUser(email) {
+  return getRef('users')
+    .orderByChild('email')
+    .equalTo(email)
+    .once('value');
+}

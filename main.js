@@ -10,7 +10,7 @@ import Artist from './components/Artist/Artist';
 import FirebaseSignIn from './components/FirebaseSignIn/FirebaseSignIn';
 import Loading from './components/Loading/Loading';
 import Button from './components/Button/Button';
-import {init} from './helpers/FirebaseHelper.js';
+import {init, getUser} from './helpers/FirebaseHelper.js';
 import firebase from 'firebase';
 
 require('./main.scss');
@@ -23,11 +23,12 @@ class App extends React.Component {
 
     this.state = {
       user: null,
+      isAdmin: false,
       loaded: false
     };
 
     this.logout = this.logout.bind(this);
-
+    this.setUserToState = this.setUserToState.bind(this);
   }
 
   logout() {
@@ -39,19 +40,35 @@ class App extends React.Component {
       });
   }
 
-  componentDidMount() {
+  setUserToState(user, data) {
+    let isAdmin = false;
+
+    data.forEach(function(item) {
+      isAdmin = item.val().isAdmin;
+    });
+
+    this.setState({
+      user,
+      loaded: true,
+      isAdmin: isAdmin
+    });
+  }
+
+  persistUserAuth() {
     firebase.auth().onAuthStateChanged((user) => {
       if (user) {
-        this.setState({
-          user,
-          loaded: true
-        });
+        getUser(user.email)
+          .then((data) => this.setUserToState(user, data));
       } else {
         this.setState({
-          loaded:true
+          loaded: true
         });
       }
     });
+  }
+
+  componentDidMount() {
+    persistUserAuth();
   }
 
 
