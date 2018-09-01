@@ -10,11 +10,21 @@ body {
 
 h1 {
   color: $white;
-  font-size: 48px;
+  font-size: 32px;
   margin: 20px 0 20px 0;
   font-family: inherit;
   font-weight: 500;
   line-height: 1.1;
+
+  /* iPads (portrait and landscape) ----------- */
+  @media only screen and (min-width : 768px) {
+    font-size: 40px;
+  }
+
+  /* Desktops and laptops ----------- */
+  @media only screen  and (min-width : 1224px) {
+      font-size: 48px;
+  }
 }
 
 
@@ -46,6 +56,17 @@ a:hover {
   color: $orange;
   text-decoration: underline;
 }
+
+a.inverted {
+  color: $light-grey;
+  text-decoration: none;
+}
+
+a.inverted:hover {
+  color: $white;
+  text-decoration: underline;
+}
+
 
 .capitalize {
   text-transform: capitalize;
@@ -97,6 +118,11 @@ li.active {
   padding-top: 20px;
   margin: 0;
 }
+
+.note--light {
+  color: $bg-grey;
+}
+
 
 .menu-container {
   margin: 20px;

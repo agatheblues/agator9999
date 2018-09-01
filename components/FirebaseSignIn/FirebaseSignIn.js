@@ -3,6 +3,8 @@ import PropTypes from 'prop-types';
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
 import firebase from 'firebase';
 import {init} from '../../helpers/FirebaseHelper.js';
+import { config } from '../../config';
+require('./FirebaseSignIn.scss');
 
 class FirebaseSignIn extends React.Component {
 
@@ -34,7 +36,15 @@ class FirebaseSignIn extends React.Component {
 
   render() {
     return (
-      <StyledFirebaseAuth uiConfig={this.uiConfig} firebaseAuth={firebase.auth()}/>
+      <div className='signin-wrapper'>
+        <div className='signin-container'>
+          <div className='signin-content'>
+            <h1>Welcome to {`${config.owner}`}&#39;s music library.</h1>
+            <StyledFirebaseAuth uiConfig={this.uiConfig} firebaseAuth={firebase.auth()}/>
+            <p className='note note--light'>agator9999 is an open-source personal music library aggregator built with React + Firebase. Check it out on <a className='inverted' href='https://github.com/agatheblues/agator9999'>Github</a> and start your own library!</p>
+          </div>
+        </div>
+      </div>
     );
   }
 }
