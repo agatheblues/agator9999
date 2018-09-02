@@ -107,7 +107,7 @@ class Album extends React.Component {
     if (!this.state.albumData.hasOwnProperty('images') ||
         !this.state.albumData.images.imgUrl
     ) {
-      src = '/static/images/missing.jpg';
+      src = '/static/images/missing-album.jpg';
     } else {
       src = this.state.albumData.images.imgUrl;
     }
