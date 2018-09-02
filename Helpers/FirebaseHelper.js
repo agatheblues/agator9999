@@ -254,7 +254,7 @@ function updateOrSetSingleArtistFromSingleAlbum(artist, album) {
 function updateArtistAlbumsList(artist, album) {
   return getRef('artists')
     .update({
-      ['/' + artist.id + '/albums/' + album.id]: {
+      [`/${artist.id}/albums/${album.id}`]: {
         'totalTracks': album.tracks.total,
         'added_at': album.added_at
       },
@@ -442,7 +442,7 @@ function updateASingleArtistImage(image) {
 function updateArtistImage(image) {
   return getRef('artists')
     .update({
-      ['/' + image.id + '/imgUrl/']: image.imgUrl
+      [`/${image.id}/imgUrl/`]: image.imgUrl
     });
 }
 

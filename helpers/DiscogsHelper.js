@@ -10,7 +10,8 @@ function getInstance() {
   return axios.create({
     baseURL: 'https://api.discogs.com/',
     headers: {
-      'Authorization': 'Discogs key=' + discogsConfig.CONSUMER_KEY + ', secret=' + discogsConfig.CONSUMER_SECRET }
+      'Authorization': `Discogs key=${discogsConfig.CONSUMER_KEY}, secret=${discogsConfig.CONSUMER_SECRET}`
+    }
   });
 }
 
@@ -38,7 +39,7 @@ export function getRelease(uri, releaseType) {
  * @return {String}      Id of the master or the release
  */
 function getReleaseId(uri, releaseType) {
-  return uri.slice(uri.indexOf('/' + releaseType + '/') + releaseType.length + 2);
+  return uri.slice(uri.indexOf(`/${releaseType}/`) + releaseType.length + 2);
 }
 
 
@@ -51,7 +52,7 @@ function getReleaseId(uri, releaseType) {
  */
 function getArtist(id) {
   return getInstance()
-    .get('/artists/' + id);
+    .get(`/artists/${id}`);
 }
 
 
