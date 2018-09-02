@@ -18,7 +18,6 @@ class App extends React.Component {
   constructor(props){
     super(props);
 
-
     init();
 
     this.state = {
@@ -81,7 +80,6 @@ class App extends React.Component {
   }
 
   renderHome() {
-    // return <Loading />;
     return <Home user={this.state.user} logout={this.logout} isAdmin={this.state.isAdmin}/>;
   }
 

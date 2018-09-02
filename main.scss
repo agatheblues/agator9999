@@ -128,17 +128,8 @@ li.active {
   margin: 20px;
   display: flex;
   justify-content: space-between;
-  align-items: center;
-}
-
-.menu-item-container--icon {
-  display: flex;
-  align-items: center;
-}
-
-.menu-item {
-  display: inline-block;
-  padding: 0 10px 0 10px;
+  align-items: flex-start;
+  flex-wrap: wrap;
 }
 
 .menu-icon {
@@ -148,6 +139,28 @@ li.active {
 }
 
 
+.menu-wrapper {
+  flex-direction: column;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  margin-top: 10px;
+
+  /* iPads (portrait and landscape) ----------- */
+  @media only screen and (min-width : 768px) {
+    margin: 0;
+  }
+}
+
+.menu-wrapper li {
+  text-align: left;
+  padding: 5px 0 5px 0;
+
+  /* iPads (portrait and landscape) ----------- */
+  @media only screen and (min-width : 768px) {
+    text-align: right;
+  }
+
+}
 
 /** FORM **/
 
