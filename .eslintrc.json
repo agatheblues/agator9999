@@ -24,5 +24,10 @@
             "error",
             "always"
         ]
+    },
+    "settings": {
+      "react" : {
+        "version": "15.6"
+      }
     }
 }
