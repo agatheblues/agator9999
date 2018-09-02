@@ -1,19 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
 require('./Button.scss');
 
 const Button = function({id, label, handleClick, disabled}) {
 
-  const btnClass = classNames({
-    'btn': true,
-    'btn--disabled': !{disabled}
-  });
-
   return (
     <button
       id={id}
-      className={btnClass}
+      className='btn'
       onClick={handleClick}
       disabled={disabled}
     >{label}</button>
