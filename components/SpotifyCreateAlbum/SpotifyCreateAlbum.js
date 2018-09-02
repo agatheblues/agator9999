@@ -93,7 +93,10 @@ class SpotifyCreateAlbum extends React.Component {
   handleSuccess() {
     this.setState({
       errorSubmit: false,
-      messageSubmit: 'Album successfully added to your library!'
+      messageSubmit: 'Album successfully added to your library!',
+      discogsUri: '',
+      selectedReleaseType: 'placeholder',
+      spotifyUri: ''
     });
   }
 
