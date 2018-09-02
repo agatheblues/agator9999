@@ -42,7 +42,7 @@ class Artist extends React.Component {
           this.state.artistData.albums.map((album, index) => {
             return(
               <div key={index} >
-                <Album id={album.id} totalTracks={album.totalTracks}/>
+                <Album id={album.id} totalTracks={album.totalTracks} isAdmin={this.props.isAdmin}/>
               </div>
             );
           })
@@ -79,14 +79,15 @@ class Artist extends React.Component {
       </div>
     );
   }
-};
+}
 
 Artist.propTypes = {
   match: PropTypes.shape({
     params: PropTypes.shape({
       id: PropTypes.node,
     }).isRequired,
-  }).isRequired
+  }).isRequired,
+  isAdmin: PropTypes.bool.isRequired
 };
 
 export default Artist;
