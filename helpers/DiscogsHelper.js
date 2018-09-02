@@ -1,6 +1,6 @@
 import axios from 'axios';
 import * as fb from './FirebaseHelper';
-import { discogsConfig } from '../discogs.config';
+import { discogsConfig } from '../config';
 
 /**
  * Create axios instance for Discogs API requests

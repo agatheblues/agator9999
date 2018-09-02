@@ -1,6 +1,6 @@
 import axios from 'axios';
 import * as fb from './FirebaseHelper';
-import { spotifyConfig } from '../spotify.config';
+import { spotifyConfig } from '../config';
 
 
 /***** UTILS *****/

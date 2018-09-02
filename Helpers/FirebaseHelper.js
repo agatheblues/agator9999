@@ -1,6 +1,6 @@
 import axios from 'axios';
 import firebase from 'firebase';
-import config from '../firebase.config.json';
+import { firebaseConfig } from '../config';
 
 /******* FORMATTING *******/
 
@@ -135,7 +135,7 @@ export function init() {
   if (firebase.apps.length) {
     return;
   }
-  firebase.initializeApp(config);
+  firebase.initializeApp(firebaseConfig);
 }
 
 
