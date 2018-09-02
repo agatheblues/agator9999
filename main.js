@@ -114,9 +114,7 @@ class App extends React.Component {
   render() {
     if (!this.state.loaded) {
       return (
-        <div className='content-container'>
-          <Loading />
-        </div>
+        <Loading />
       );
     }
 

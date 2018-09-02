@@ -9,7 +9,7 @@ const PageNotFound = function() {
       <div className='back-to-library'>
         <Link to='/'>&#9839; Back to library</Link>
       </div>
-      <h1>Oops! This page does not exists.</h1>
+      <h1 className='title'>Oops! This page does not exists.</h1>
     </div>
   );
 };
