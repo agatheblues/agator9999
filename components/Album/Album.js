@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Message from '../Message/Message';
 import SpotifyUpdateAlbum from '../SpotifyUpdateAlbum/SpotifyUpdateAlbum';
+import CopyToClipboard from '../CopyToClipboard/CopyToClipboard';
 import { getRef } from '../../helpers/FirebaseHelper';
 require('./Album.scss');
 
@@ -114,6 +115,14 @@ class Album extends React.Component {
     return <a href={this.state.albumData.url}><img src={src} alt={'Album Cover'} className='album-cover'/></a>;
   }
 
+  renderCopyToClipboard() {
+    if (this.state.albumData.source == 'spotify') {
+      return <CopyToClipboard value={`spotify:album:${this.state.albumData.spotify_id}`}/>;
+    }
+
+    return null;
+  }
+
   render() {
     return (
       <div className='content-container'>
@@ -128,6 +137,7 @@ class Album extends React.Component {
                 <div className='album-main-details'>
                   <p>{this.state.albumData.release_date}&emsp;/&emsp;{this.props.totalTracks} tracks</p>
                   <p><a href={this.state.albumData.url}>&#9836; Listen on <span className='capitalize'>{this.state.albumData.source}</span></a></p>
+                  {this.renderCopyToClipboard()}
                 </div>
                 <div className='album-minor-details'>
                   <p>{`Added on ${this.state.albumData.added_at}`}</p>

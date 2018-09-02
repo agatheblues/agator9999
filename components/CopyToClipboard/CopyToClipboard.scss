@@ -1,0 +1,9 @@
+.copyclipboard-container {
+  display: flex;
+}
+
+.copyclipboard--hidden {
+  width: 1;
+  height: 0;
+  opacity: 0;
+}
