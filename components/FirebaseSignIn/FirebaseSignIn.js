@@ -25,8 +25,6 @@ class FirebaseSignIn extends React.Component {
       ],
       callbacks: {
         signInSuccessWithAuthResult : () => {
-          const user = firebase.auth().currentUser;
-          console.log('sign in', user);
           return false;
         }
       }
