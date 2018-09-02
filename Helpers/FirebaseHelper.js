@@ -4,7 +4,7 @@ import { firebaseConfig } from '../config';
 
 /******* FORMATTING *******/
 
-export const formatSpotifyAlbums = ({ added_at, album }) => (
+export const formatSpotifyAlbums = ({ added_at = '', album = {} }) => (
   {
     added_at,
     ...formatSpotifyAlbum(album)
@@ -13,7 +13,7 @@ export const formatSpotifyAlbums = ({ added_at, album }) => (
 
 const formatDiscogsImages = (images) => images.map((image) => formatDiscogsImage(image));
 
-const formatDiscogsImage = ({ height, width, resource_url }) => (
+const formatDiscogsImage = ({ height = null, width = null, resource_url = '' }) => (
   {
     height,
     width,
@@ -21,7 +21,7 @@ const formatDiscogsImage = ({ height, width, resource_url }) => (
   }
 );
 
-export const formatDiscogsAlbum = ({ id, title, images, year, genres, styles, resource_url}, source, url) => (
+export const formatDiscogsAlbum = ({ id, title = '', images = [], year = '', genres = [], styles = [], resource_url = ''}, source, url) => (
   {
     id,
     name: title,
@@ -36,7 +36,7 @@ export const formatDiscogsAlbum = ({ id, title, images, year, genres, styles, re
   }
 );
 
-export const formatDiscogsUpdateAlbum = ({ id, genres, styles, resource_url}) => (
+export const formatDiscogsUpdateAlbum = ({ id, genres = [], styles = [], resource_url = ''}) => (
   {
     discogs_url: resource_url,
     genres,
@@ -45,7 +45,7 @@ export const formatDiscogsUpdateAlbum = ({ id, genres, styles, resource_url}) =>
   }
 );
 
-export const formatSpotifyAlbum = ({ id, name, external_urls: { spotify }, images, release_date }) => (
+export const formatSpotifyAlbum = ({ id, name = '', external_urls: { spotify = '' }, images = [], release_date = '' }) => (
   {
     id,
     name,
@@ -57,7 +57,7 @@ export const formatSpotifyAlbum = ({ id, name, external_urls: { spotify }, image
   }
 );
 
-export const formatAlbumSummary = ({ added_at, album: { id, tracks: { total }}}) => (
+export const formatAlbumSummary = ({ added_at = '', album: { id, tracks: { total = 0 }}}) => (
   {
     id,
     added_at,
@@ -65,21 +65,21 @@ export const formatAlbumSummary = ({ added_at, album: { id, tracks: { total }}})
   }
 );
 
-export const formatSingleAlbumSummary = ({ id, tracks: { total }}) => (
+export const formatSingleAlbumSummary = ({ id, tracks: { total = 0 }}) => (
   {
     id,
     tracks: { total }
   }
 );
 
-export const formatDiscogsSingleAlbumSummary = ({ id, tracklist}) => (
+export const formatDiscogsSingleAlbumSummary = ({ id, tracklist = []}) => (
   {
     id,
     tracks: { total: tracklist.length }
   }
 );
 
-export const formatSpotifyArtist = ({ id, name, external_urls: { spotify } }) => (
+export const formatSpotifyArtist = ({ id, name = '', external_urls: { spotify = '' } }) => (
   {
     id,
     name,
@@ -89,7 +89,7 @@ export const formatSpotifyArtist = ({ id, name, external_urls: { spotify } }) =>
   }
 );
 
-export const formatDiscogsArtist = ({ id, name }) => (
+export const formatDiscogsArtist = ({ id, name = '' }) => (
   {
     id,
     name,
