@@ -141,6 +141,7 @@ class Album extends React.Component {
                 { !this.state.albumData.discogs_id &&
                   this.state.hasAlbumData &&
                   !this.state.showDiscogsForm &&
+                  this.props.isAdmin &&
                   <div className='album-minor-details'>
                     <p><a href='' onClick={this.handleShowDiscogsClick}>&#xFF0B; Link to Discogs</a></p>
                   </div>
@@ -149,12 +150,14 @@ class Album extends React.Component {
                 { !this.state.albumData.discogs_id &&
                   this.state.hasAlbumData &&
                   this.state.showDiscogsForm &&
+                  this.props.isAdmin &&
                   <div className='album-minor-details'>
                     <p><a href='' onClick={this.handleHideDiscogsClick}>&#xFF0D; Link to Discogs</a></p>
                   </div>
                 }
 
                 {this.state.showDiscogsForm &&
+                  this.props.isAdmin &&
                   <SpotifyUpdateAlbum spotifyId={this.state.albumData.spotify_id} />
                 }
               </div>
@@ -167,11 +170,12 @@ class Album extends React.Component {
       </div>
     );
   }
-};
+}
 
 Album.propTypes = {
   id: PropTypes.string.isRequired,
-  totalTracks: PropTypes.number.isRequired
+  totalTracks: PropTypes.number.isRequired,
+  isAdmin: PropTypes.bool.isRequired
 };
 
 export default Album;

@@ -2,7 +2,6 @@ import axios from 'axios';
 import firebase from 'firebase';
 import config from '../firebase.config.json';
 
-
 /******* FORMATTING *******/
 
 export const formatSpotifyAlbums = ({ added_at, album }) => (
@@ -132,7 +131,7 @@ export function convertAlbumSummaryToArray(item) {
 /**
  * Initialize Firebase app
  */
-function init() {
+export function init() {
   if (firebase.apps.length) {
     return;
   }
@@ -445,4 +444,13 @@ function updateArtistImage(image) {
     .update({
       ['/' + image.id + '/imgUrl/']: image.imgUrl
     });
+}
+
+
+/************ USERS ****************/
+export function getUser(email) {
+  return getRef('users')
+    .orderByChild('email')
+    .equalTo(email)
+    .once('value');
 }

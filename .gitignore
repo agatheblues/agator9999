@@ -5,6 +5,7 @@ dist
 firebase.config.json
 discogs.config.js
 spotify.config.js
+config.js
 
 ### Node ###
 # Logs
