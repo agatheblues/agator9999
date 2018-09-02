@@ -2,7 +2,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import ArtistSummary from '../ArtistSummary/ArtistSummary';
 import Album from '../Album/Album';
+import PageNotFound from '../PageNotFound/PageNotFound';
 import Message from '../Message/Message';
+import Loading from '../Loading/Loading';
 import { getArtist, convertAlbumSummaryToArray } from '../../helpers/FirebaseHelper';
 require('./Artist.scss');
 
@@ -13,20 +15,23 @@ class Artist extends React.Component {
 
     this.state = {
       error: false,
-      hasArtistData: false,
-      artistData: {}
+      loaded: false,
+      artistData: null
     };
   }
 
   handleGetArtistSuccess(artist) {
 
-    // Update albums structure in artist object
-    artist.albums = convertAlbumSummaryToArray(artist.albums);
+    if (artist && artist.hasOwnProperty('albums')) {
+      // Update albums structure in artist object
+      artist.albums = convertAlbumSummaryToArray(artist.albums);
+    }
 
     this.setState({
-      hasArtistData: true,
+      loaded: true,
       artistData: artist
     });
+
   }
 
   handleGetArtistError() {
@@ -40,8 +45,8 @@ class Artist extends React.Component {
       <div>
         {
           this.state.artistData.albums.map((album, index) => {
-            return(
-              <div key={index} >
+            return (
+              <div key={album.id} >
                 <Album id={album.id} totalTracks={album.totalTracks} isAdmin={this.props.isAdmin}/>
               </div>
             );
@@ -50,32 +55,44 @@ class Artist extends React.Component {
       </div>
     );
   }
-
-  componentDidMount() {
-    getArtist(this.props.match.params.id)
+  
+  getCurrentArtist(id) {
+    getArtist(id)
       .then((snapshot) => this.handleGetArtistSuccess(snapshot.val()))
       .catch((error) => this.handleGetArtistError());
   }
 
+  componentDidMount() {
+    this.getCurrentArtist(this.props.match.params.id);
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.match.params.id != this.props.match.params.id) {
+      this.getCurrentArtist(nextProps.match.params.id);
+    }
+  }
 
   render() {
+    if (!this.state.loaded) {
+      return <Loading />;
+    }
+
+    if (this.state.error) {
+      return (
+        <div className='content-container'>
+          <Message message='Oops! There was a problem while retrieving data for this artist.' error={this.state.error}/>
+        </div>
+      );
+    }
+
+    if (!this.state.artistData) {
+      return <PageNotFound />;
+    }
+
     return (
       <div>
-        {this.state.hasArtistData && !this.state.error &&
-            <div>
-              <ArtistSummary artist={this.state.artistData} />
-              {this.renderAlbums()}
-            </div>}
-        {!this.state.hasArtistData && !this.state.error &&
-            <div className='content-container'>
-              <p>Loading...</p>
-            </div>
-        }
-        {this.state.error &&
-          <div className='content-container'>
-            <Message message='Oops! There was a problem while retrieving data for this artist.' error={this.state.error}/>
-          </div>
-        }
+        <ArtistSummary artist={this.state.artistData} />
+        {this.renderAlbums()}
       </div>
     );
   }
