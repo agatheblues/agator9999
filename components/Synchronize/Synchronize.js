@@ -4,6 +4,7 @@ import Button from '../Button/Button';
 import Message from '../Message/Message.js';
 import SpotifyLogin from '../SpotifyLogin/SpotifyLogin.js';
 import SpotifyProfile from '../SpotifyProfile/SpotifyProfile';
+import Loading from '../../components/Loading/Loading';
 import { Link } from 'react-router-dom';
 import { getAccessToken } from '../../helpers/SpotifyHelper.js';
 require('./Synchronize.scss');
@@ -49,6 +50,10 @@ class Synchronize extends React.Component {
             <SpotifyLogin redirect='spotify/sync'/>
           }
 
+          {this.props.loadingMessage &&
+            <Loading fullPage={false} label={this.props.loadingMessage} />
+          }
+
           {this.props.message &&
             <Message message={this.props.message} error={this.props.error}/>}
           <p className='note'>Synchronize saves all of your Spotify saved albums, and all of their artists to the database. It does not erase your current library but completes it.</p>
@@ -62,7 +67,8 @@ class Synchronize extends React.Component {
 Synchronize.propTypes = {
   message: PropTypes.string,
   error: PropTypes.bool,
-  handleClick: PropTypes.func.isRequired
+  handleClick: PropTypes.func.isRequired,
+  loadingMessage: PropTypes.string
 };
 
 export default Synchronize;

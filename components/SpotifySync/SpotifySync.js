@@ -19,7 +19,8 @@ class SpotifySync extends React.Component {
     // set local state
     this.state = {
       error: false,
-      message: null
+      message: null,
+      loadingMessage: null
     };
 
     this.handleClick = this.handleClick.bind(this);
@@ -31,10 +32,11 @@ class SpotifySync extends React.Component {
    * @param  {Boolean} error   Has error
    * @param  {String} message  Message to display
    */
-  updateMessage(error, message) {
+  updateMessage(error, message, loadingMessage) {
     this.setState({
       error: error,
-      message: message
+      message: message,
+      loadingMessage: loadingMessage
     });
   }
 
@@ -42,7 +44,7 @@ class SpotifySync extends React.Component {
    * Start fetching first batch of albums
    */
   handleClick() {
-    this.updateMessage(false, 'Loading albums and artists...');
+    this.updateMessage(false, null, 'Loading albums and artists...');
 
     getAndSetUserSavedAlbums(this.accessToken, 0)
       .then(() => this.handleAlbumSyncSuccess())
@@ -57,7 +59,7 @@ class SpotifySync extends React.Component {
    * @param  {int} offset      Current pagination offset
    */
   handleAlbumSyncSuccess() {
-    this.updateMessage(false, 'Loading albums and artists successful!');
+    this.updateMessage(false, 'Loading albums and artists successful!', null);
   }
 
 
@@ -66,7 +68,7 @@ class SpotifySync extends React.Component {
    * @param  {String} message Error message
    */
   handleError(message) {
-    this.updateMessage(true, message);
+    this.updateMessage(true, message, null);
   }
 
 
@@ -76,6 +78,7 @@ class SpotifySync extends React.Component {
         message = { this.state.message }
         error = { this.state.error }
         handleClick={ this.handleClick }
+        loadingMessage = { this.state.loadingMessage }
       />
     );
   }

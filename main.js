@@ -81,6 +81,7 @@ class App extends React.Component {
   }
 
   renderHome() {
+    // return <Loading />;
     return <Home user={this.state.user} logout={this.logout} isAdmin={this.state.isAdmin}/>;
   }
 
@@ -114,15 +115,13 @@ class App extends React.Component {
   render() {
     if (!this.state.loaded) {
       return (
-        <Loading />
+        <Loading fullPage={true} label={'Loading...'}/>
       );
     }
 
     if (!this.state.user) {
       return (
-        <div className='content-container'>
-          <FirebaseSignIn />
-        </div>
+        <FirebaseSignIn />
       );
     }
 

@@ -55,7 +55,7 @@ class Artist extends React.Component {
       </div>
     );
   }
-  
+
   getCurrentArtist(id) {
     getArtist(id)
       .then((snapshot) => this.handleGetArtistSuccess(snapshot.val()))
@@ -74,7 +74,7 @@ class Artist extends React.Component {
 
   render() {
     if (!this.state.loaded) {
-      return <Loading />;
+      return <Loading fullPage={true} label={'Loading artist...'}/>;
     }
 
     if (this.state.error) {

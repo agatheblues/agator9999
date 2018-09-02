@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Card from '../Card/Card';
 import Message from '../Message/Message';
+import Loading from '../Loading/Loading';
 import Search from '../Search/Search';
 import SortBy from '../SortBy/SortBy';
 import { getAlbums, getArtists, formatArtistList } from '../../helpers/FirebaseHelper';
@@ -108,6 +109,7 @@ class CardGrid extends React.Component {
   }
 
   renderCards() {
+      
     if ((this.state.artists.length != 0) && this.state.loaded && !this.state.error && (this.state.visibleArtists.length != 0)) {
       return (
         <div className='grid-container'>
@@ -133,7 +135,7 @@ class CardGrid extends React.Component {
     }
 
     if (!this.state.loaded && !this.state.error) {
-      return (<p className='cardgrid-message'>Loading your library...</p>);
+      return <Loading fullPage={false} label={'Loading artists...'}/>;
     }
 
     if (this.state.loaded && this.state.error) {
