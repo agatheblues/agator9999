@@ -104,12 +104,11 @@ class Album extends React.Component {
     let src = '';
 
     if (!this.state.albumData.hasOwnProperty('images') ||
-        this.state.albumData.images.length == 0 ||
-        !this.state.albumData.images[0].url
+        !this.state.albumData.images.imgUrl
     ) {
       src = '/static/images/missing.jpg';
     } else {
-      src = this.state.albumData.images[0].url;
+      src = this.state.albumData.images.imgUrl;
     }
 
     return <a href={this.state.albumData.url}><img src={src} alt={'Album Cover'} className='album-cover'/></a>;

@@ -11,13 +11,35 @@ export const formatSpotifyAlbums = ({ added_at = '', album = {} }) => (
   }
 );
 
-const formatDiscogsImages = (images) => images.map((image) => formatDiscogsImage(image));
+function formatDiscogsImages(images) {
+  if (images.length > 0) {
+    return formatDiscogsImage(images[0]);
+  }
+
+  return null;
+};
+
+function formatSpotifyImages(images) {
+  if (images.length > 0) {
+    return formatSpotifyImage(images[0]);
+  }
+
+  return null;
+};
 
 const formatDiscogsImage = ({ height = null, width = null, resource_url = '' }) => (
   {
     height,
     width,
-    url: resource_url
+    imgUrl: resource_url
+  }
+);
+
+const formatSpotifyImage = ({ height = null, width = null, url = '' }) => (
+  {
+    height,
+    width,
+    imgUrl: url
   }
 );
 
@@ -50,7 +72,7 @@ export const formatSpotifyAlbum = ({ id, name = '', external_urls: { spotify = '
     id,
     name,
     url: spotify,
-    images,
+    images: formatSpotifyImages(images),
     release_date,
     source: 'spotify',
     spotify_id: id
