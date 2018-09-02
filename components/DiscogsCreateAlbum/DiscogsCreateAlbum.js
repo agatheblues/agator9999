@@ -4,7 +4,7 @@ import Button from '../Button/Button';
 import Message from '../Message/Message';
 import Dropdown from '../Dropdown/Dropdown';
 import InputText from '../InputText/InputText';
-import SearchDropdown from '../SearchDropdown/SearchDropdown';
+import Loading from '../Loading/Loading';
 import * as dg from '../../helpers/DiscogsHelper';
 import * as fb from '../../helpers/FirebaseHelper';
 import {checkDiscogsUri, checkListeningUri} from '../../helpers/ErrorHelper';
@@ -25,7 +25,8 @@ class DiscogsCreateAlbum extends React.Component {
       errorDiscogsUri: null,
       errorListeningUri: null,
       existingArtist: null,
-      artists: []
+      artists: [],
+      loaded: true
     };
 
     this.sourceList = [
@@ -129,7 +130,8 @@ class DiscogsCreateAlbum extends React.Component {
   handleSubmitError(message) {
     this.setState({
       errorSubmit: true,
-      messageSubmit: message
+      messageSubmit: message,
+      loaded: true
     });
   }
 
@@ -140,7 +142,8 @@ class DiscogsCreateAlbum extends React.Component {
       selectedSource: 'placeholder',
       selectedReleaseType: 'placeholder',
       discogsUri: '',
-      listeningUri: ''
+      listeningUri: '',
+      loaded: true
     });
   }
 
@@ -179,7 +182,8 @@ class DiscogsCreateAlbum extends React.Component {
     // Reset error message
     this.setState({
       errorSubmit: false,
-      messageSubmit: null
+      messageSubmit: null,
+      loaded: false
     });
 
     dg.getRelease(this.state.discogsUri, this.state.selectedReleaseType)
@@ -255,6 +259,10 @@ class DiscogsCreateAlbum extends React.Component {
             </div>
 
             <Message message={this.state.errorListeningUri} error={true} style={'input-msg'}/>
+
+            {!this.state.loaded &&
+              <Loading fullPage={false} label={'Creating album...'} />
+            }
 
             {this.state.messageSubmit &&
               <Message message={this.state.messageSubmit} error={this.state.errorSubmit}/>

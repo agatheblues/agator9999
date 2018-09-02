@@ -5,6 +5,7 @@ import SpotifyLogin from '../SpotifyLogin/SpotifyLogin';
 import Message from '../Message/Message';
 import InputText from '../InputText/InputText';
 import Dropdown from '../Dropdown/Dropdown';
+import Loading from '../Loading/Loading';
 import * as api from '../../helpers/SpotifyHelper';
 import * as dg from '../../helpers/DiscogsHelper';
 import * as fb from '../../helpers/FirebaseHelper';
@@ -26,7 +27,8 @@ class SpotifyCreateAlbum extends React.Component {
       selectedReleaseType: 'placeholder',
       errorDiscogsUri: null,
       messageSubmit: null,
-      accessToken: this.accessToken
+      accessToken: this.accessToken,
+      loaded: true
     };
 
     this.releaseTypeList = [
@@ -86,7 +88,8 @@ class SpotifyCreateAlbum extends React.Component {
   handleError(message) {
     this.setState({
       errorSubmit: true,
-      messageSubmit: message
+      messageSubmit: message,
+      loaded: true
     });
   }
 
@@ -96,7 +99,8 @@ class SpotifyCreateAlbum extends React.Component {
       messageSubmit: 'Album successfully added to your library!',
       discogsUri: '',
       selectedReleaseType: 'placeholder',
-      spotifyUri: ''
+      spotifyUri: '',
+      loaded: true
     });
   }
 
@@ -133,7 +137,8 @@ class SpotifyCreateAlbum extends React.Component {
 
     this.setState({
       errorSubmit: false,
-      messageSubmit: null
+      messageSubmit: null,
+      loaded: false
     });
 
     // Set album, artist, and artist images
@@ -194,6 +199,10 @@ class SpotifyCreateAlbum extends React.Component {
               </div>
 
               <Message message={this.state.errorDiscogsUri} error={true} style={'input-msg'}/>
+
+              {!this.state.loaded &&
+                <Loading fullPage={false} label={'Creating album...'} />
+              }
 
               {this.state.messageSubmit &&
                 <Message message={this.state.messageSubmit} error={this.state.errorSubmit}/>
