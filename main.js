@@ -1,15 +1,14 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { HashRouter, Route, Switch, Link, Redirect } from 'react-router-dom';
+import { HashRouter, Route, Switch, Redirect } from 'react-router-dom';
 import SpotifySync from './components/SpotifySync/SpotifySync';
+import Home from './components/Home/Home';
 import SpotifyLogin from './components/SpotifyLogin/SpotifyLogin';
-import SpotifyProfile from './components/SpotifyProfile/SpotifyProfile';
-import CardGrid from './components/CardGrid/CardGrid';
 import CreateAlbum from './components/CreateAlbum/CreateAlbum';
 import Artist from './components/Artist/Artist';
 import FirebaseSignIn from './components/FirebaseSignIn/FirebaseSignIn';
 import Loading from './components/Loading/Loading';
-import Button from './components/Button/Button';
+import PageNotFound from './components/PageNotFound/PageNotFound';
 import {init, getUser} from './helpers/FirebaseHelper.js';
 import firebase from 'firebase';
 
@@ -19,6 +18,7 @@ class App extends React.Component {
   constructor(props){
     super(props);
 
+
     init();
 
     this.state = {
@@ -27,18 +27,15 @@ class App extends React.Component {
       loaded: false
     };
 
-    this.logout = this.logout.bind(this);
     this.setUserToState = this.setUserToState.bind(this);
+    this.logout = this.logout.bind(this);
+    this.renderHome = this.renderHome.bind(this);
+    this.renderSpotifySync = this.renderSpotifySync.bind(this);
+    this.renderSpotifyLogin = this.renderSpotifyLogin.bind(this);
+    this.renderCreateAlbum = this.renderCreateAlbum.bind(this);
+    this.renderArtist = this.renderArtist.bind(this);
   }
 
-  logout() {
-    firebase.auth().signOut()
-      .then(() => {
-        this.setState({
-          user: null
-        });
-      });
-  }
 
   setUserToState(user, data) {
     let isAdmin = false;
@@ -54,6 +51,7 @@ class App extends React.Component {
     });
   }
 
+
   persistUserAuth() {
     firebase.auth().onAuthStateChanged((user) => {
       if (user) {
@@ -67,67 +65,88 @@ class App extends React.Component {
     });
   }
 
+
+  logout() {
+    firebase.auth().signOut()
+      .then(() => {
+        this.setState({
+          user: null
+        });
+      });
+  }
+
+
   componentDidMount() {
-    persistUserAuth();
+    this.persistUserAuth();
+  }
+
+  renderHome() {
+    return <Home user={this.state.user} logout={this.logout} isAdmin={this.state.isAdmin}/>;
+  }
+
+
+  renderSpotifySync() {
+    if (!this.state.isAdmin) {
+      return <Redirect to="/404" />;
+    }
+    return <SpotifySync />;
+  }
+
+  renderSpotifyLogin() {
+    if (!this.state.isAdmin) {
+      return <Redirect to="/404" />;
+    }
+    return <SpotifyLogin />;
+  }
+
+  renderCreateAlbum() {
+    if (!this.state.isAdmin) {
+      return <Redirect to="/404" />;
+    }
+    return <CreateAlbum />;
+  }
+
+  renderArtist(props) {
+    return <Artist {...props} isAdmin={this.state.isAdmin} />;
   }
 
 
   render() {
-    console.log('state', this.state);
-    return (
-      <div className='content-container'>
-
-        {this.state.user && this.state.loaded &&
-          <div>
-            <div>
-              <div className='user-profile'>
-                <img src={this.state.user.photoURL} />
-              </div>
-              <Button
-                id={'btn-fb-signout'}
-                label={'Sign out'}
-                handleClick={this.logout}
-              />
-            </div>
-            <nav className='menu-container'>
-              <div className='menu-item-container'>
-                <Link to='/spotify/sync'>Sync. Spotify Albums</Link>
-              </div>
-              <Link to='/album/create'>
-                <div className='menu-item-container menu-item-container--icon'>
-                  <p className='menu-item'>New album</p>
-                  <img className='menu-icon' src='../static/images/Add-New-32.png' alt='plus-button'/>
-                </div>
-              </Link>
-            </nav>
-            <CardGrid />
-          </div>
-        }
-
-        {!this.state.user && this.state.loaded &&
-          <FirebaseSignIn />
-        }
-
-        {!this.state.loaded &&
+    if (!this.state.loaded) {
+      return (
+        <div className='content-container'>
           <Loading />
-        }
+        </div>
+      );
+    }
 
+    if (!this.state.user) {
+      return (
+        <div className='content-container'>
+          <FirebaseSignIn />
+        </div>
+      );
+    }
 
-      </div>
+    return (
+      <HashRouter>
+        <Switch>
+          <Route exact path="/" render={this.renderHome}/>
+          <Route exact path="/spotify/sync" render={this.renderSpotifySync} />
+          <Route exact path="/spotify/login" render={this.renderSpotifyLogin} />
+          <Route path="/:access_token(access_token=.*)" render={this.renderSpotifyLogin} />
+          <Route exact path="/album/create" render={this.renderCreateAlbum} />
+          <Route exact path="/artist/:id" render={this.renderArtist}/>
+          <Route exact path="/404" component={PageNotFound} />
+          <Route component={PageNotFound} />
+        </Switch>
+      </HashRouter>
     );
   }
 }
 
+
 ReactDOM.render(
-  <HashRouter>
-    <Switch>
-      <Route exact path="/" component={App} />
-      <Route exact path="/spotify/sync" component={SpotifySync} />
-      <Route exact path="/spotify/login" component={SpotifyLogin} />
-      <Route path="/:access_token(access_token=.*)" component={SpotifyLogin} />
-      <Route exact path="/album/create" component={CreateAlbum} />
-      <Route exact path="/artist/:id" component={Artist} />
-    </Switch>
-  </HashRouter>,
+  <App />,
   document.getElementById('root')
 );
