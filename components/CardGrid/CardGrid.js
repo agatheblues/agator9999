@@ -5,6 +5,7 @@ import Message from '../Message/Message';
 import Loading from '../Loading/Loading';
 import Search from '../Search/Search';
 import SortBy from '../SortBy/SortBy';
+import CardGridEmpty from '../CardGridEmpty/CardGridEmpty';
 import { getAlbums, getArtists, formatArtistList } from '../../helpers/FirebaseHelper';
 require('./CardGrid.scss');
 
@@ -109,14 +110,14 @@ class CardGrid extends React.Component {
   }
 
   renderCards() {
-      
+
     if ((this.state.artists.length != 0) && this.state.loaded && !this.state.error && (this.state.visibleArtists.length != 0)) {
       return (
         <div className='grid-container'>
           {
             this.state.visibleArtists.map((artist, index) => {
               return(
-                <div key={index} >
+                <div key={artist.id} >
                   <Card id={artist.id} name={artist.name} imgUrl={artist.imgUrl} totalAlbums={Object.keys(artist.albums).length}/>
                 </div>
               );
@@ -127,11 +128,11 @@ class CardGrid extends React.Component {
     }
 
     if ((this.state.artists.length != 0) && this.state.loaded && !this.state.error && (this.state.visibleArtists.length == 0)) {
-      return (<p className='cardgrid-message'>No results!</p>);
+      return <CardGridEmpty message={'No results!'} />;
     }
 
     if ((this.state.artists.length == 0) && this.state.loaded && !this.state.error) {
-      return (<p className='cardgrid-message'>There is 0 artist in your library.</p>);
+      return <CardGridEmpty message={'There is 0 artist in your library.'} />;
     }
 
     if (!this.state.loaded && !this.state.error) {
