@@ -16,9 +16,11 @@ class CreateAlbum extends React.Component {
   }
 
   handleClick(e) {
-    this.setState({
-      source: e.target.id
-    });
+    if (e.target.id) {
+      this.setState({
+        source: e.target.id
+      });
+    }
   }
 
   renderForm() {
@@ -28,7 +30,7 @@ class CreateAlbum extends React.Component {
     case 'discogs':
       return <DiscogsCreateAlbum />;
     default:
-      return <p>Oops! This platform does not exist :(</p>;
+      return <p>Oops! This platform does not exist.</p>;
     }
   }
 
