@@ -6,7 +6,6 @@ import PageNotFound from '../PageNotFound/PageNotFound';
 import Message from '../Message/Message';
 import Loading from '../Loading/Loading';
 import { getArtist, convertAlbumSummaryToArray } from '../../helpers/FirebaseHelper';
-require('./Artist.scss');
 
 class Artist extends React.Component {
 
