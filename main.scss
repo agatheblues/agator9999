@@ -123,6 +123,11 @@ li.active {
   color: $bg-grey;
 }
 
+.note--big {
+  font-size: inherit;
+}
+
+
 .not-available {
   color: $light-grey !important;
 }
