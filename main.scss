@@ -123,6 +123,14 @@ li.active {
   color: $bg-grey;
 }
 
+.not-available {
+  color: $light-grey !important;
+}
+
+.not-available--line {
+  text-decoration: line-through;
+}
+
 
 .menu-container {
   margin: 20px;

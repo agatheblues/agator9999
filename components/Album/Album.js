@@ -76,7 +76,7 @@ class Album extends React.Component {
 
   getGenres() {
     if (!this.state.albumData.hasOwnProperty('genres') || (this.state.albumData.genres.length == 0)) {
-      return null;
+      return <p className='not-available'>Genres /</p>;
     }
 
     return this.state.albumData.genres.reduce(this.genreStyleReducer, 'Genres /');
@@ -84,7 +84,7 @@ class Album extends React.Component {
 
   getStyles() {
     if (!this.state.albumData.hasOwnProperty('styles') || (this.state.albumData.styles.length == 0)) {
-      return null;
+      return <p className='not-available'>Styles /</p>;
     }
 
     return this.state.albumData.styles.reduce(this.genreStyleReducer, 'Styles /');
@@ -132,7 +132,7 @@ class Album extends React.Component {
                 <h2>{this.state.albumData.name}</h2>
                 <div className='album-main-details'>
                   <p>{this.state.albumData.release_date}&emsp;/&emsp;{this.props.totalTracks} tracks</p>
-                  <p><a href={this.state.albumData.url}>&#9836; Open in <span className='capitalize'>{this.state.albumData.source}</span></a></p>
+                  <p className='album-open-link'><a href={this.state.albumData.url}>&#9836; Open in <span className='capitalize'>{this.state.albumData.source}</span></a></p>
                   {this.renderCopyToClipboard()}
                 </div>
                 <div className='album-minor-details'>

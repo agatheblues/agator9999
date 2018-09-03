@@ -43,7 +43,7 @@ function getListeningUri(artist) {
     return <p><a href={artist.url}>&#9836; Open in <span className='capitalize'>{artist.source}</span></a></p>;
   }
 
-  return <p>&#9836; No listening URL</p>;
+  return <p className='not-available not-available--line'>&#9836;</p>;
 }
 
 ArtistSummary.propTypes = {
