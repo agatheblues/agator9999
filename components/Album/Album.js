@@ -75,23 +75,19 @@ class Album extends React.Component {
   }
 
   getGenres() {
-    let genres = 'Genres /';
-
     if (!this.state.albumData.hasOwnProperty('genres') || (this.state.albumData.genres.length == 0)) {
-      return genres;
+      return null;
     }
 
-    return this.state.albumData.genres.reduce(this.genreStyleReducer, genres);
+    return this.state.albumData.genres.reduce(this.genreStyleReducer, 'Genres /');
   }
 
   getStyles() {
-    let styles = 'Styles /';
-
     if (!this.state.albumData.hasOwnProperty('styles') || (this.state.albumData.styles.length == 0)) {
-      return styles;
+      return null;
     }
 
-    return this.state.albumData.styles.reduce(this.genreStyleReducer, styles);
+    return this.state.albumData.styles.reduce(this.genreStyleReducer, 'Styles /');
   }
 
   componentDidMount() {
@@ -136,7 +132,7 @@ class Album extends React.Component {
                 <h2>{this.state.albumData.name}</h2>
                 <div className='album-main-details'>
                   <p>{this.state.albumData.release_date}&emsp;/&emsp;{this.props.totalTracks} tracks</p>
-                  <p><a href={this.state.albumData.url}>&#9836; Listen on <span className='capitalize'>{this.state.albumData.source}</span></a></p>
+                  <p><a href={this.state.albumData.url}>&#9836; Open in <span className='capitalize'>{this.state.albumData.source}</span></a></p>
                   {this.renderCopyToClipboard()}
                 </div>
                 <div className='album-minor-details'>

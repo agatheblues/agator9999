@@ -40,7 +40,7 @@ const ArtistSummary = function({artist}) {
 
 function getListeningUri(artist) {
   if (artist.source && artist.url) {
-    return <p><a href={artist.url}>&#9836; Listen on <span className='capitalize'>{artist.source}</span></a></p>;
+    return <p><a href={artist.url}>&#9836; Open in <span className='capitalize'>{artist.source}</span></a></p>;
   }
 
   return <p>&#9836; No listening URL</p>;
