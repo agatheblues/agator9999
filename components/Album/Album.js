@@ -79,7 +79,7 @@ class Album extends React.Component {
       return <p className='not-available'>Genres /</p>;
     }
 
-    return this.state.albumData.genres.reduce(this.genreStyleReducer, 'Genres /');
+    return <p>{this.state.albumData.genres.reduce(this.genreStyleReducer, 'Genres /')}</p>;
   }
 
   getStyles() {
@@ -87,7 +87,7 @@ class Album extends React.Component {
       return <p className='not-available'>Styles /</p>;
     }
 
-    return this.state.albumData.styles.reduce(this.genreStyleReducer, 'Styles /');
+    return <p>{this.state.albumData.styles.reduce(this.genreStyleReducer, 'Styles /')}</p>;
   }
 
   componentDidMount() {
@@ -132,15 +132,18 @@ class Album extends React.Component {
                 <h2>{this.state.albumData.name}</h2>
                 <div className='album-main-details'>
                   <p>{this.state.albumData.release_date}&emsp;/&emsp;{this.props.totalTracks} tracks</p>
-                  <p className='album-open-link'><a href={this.state.albumData.url}>&#9836; Open in <span className='capitalize'>{this.state.albumData.source}</span></a></p>
+                  <p className='album-open-link'>
+                    <a href={`https://open.spotify.com/go?uri=spotify:album:${this.state.albumData.spotify_id}`} target='_blank'>&#9836; Open in <span className='capitalize'>{this.state.albumData.source}</span>
+                    </a>
+                  </p>
                   {this.renderCopyToClipboard()}
                 </div>
                 <div className='album-minor-details'>
                   <p>{`Added on ${this.state.albumData.added_at}`}</p>
                 </div>
                 <div className='album-minor-details'>
-                  <p>{this.getGenres()}</p>
-                  <p>{this.getStyles()}</p>
+                  {this.getGenres()}
+                  {this.getStyles()}
                 </div>
 
                 { !this.state.albumData.discogs_id &&
