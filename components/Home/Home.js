@@ -13,7 +13,14 @@ import Button from '../../components/Button/Button';
 
 class Home extends React.Component {
   constructor(props){
-    super(props);
+    super();
+
+    this.handleClickLogout = this.handleClickLogout.bind(this);
+  }
+
+  handleClickLogout(e) {
+    e.preventDefault();
+    this.props.logout();
   }
 
   renderAdminMenu() {
@@ -39,7 +46,7 @@ class Home extends React.Component {
             <ProfileCard
               imgUrl={this.props.user.photoURL}
               name={this.props.user.displayName}
-              handleClick={this.props.logout}
+              handleClick={this.handleClickLogout}
             />
             {this.renderAdminMenu()}
           </div>
