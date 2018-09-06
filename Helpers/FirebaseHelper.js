@@ -166,7 +166,6 @@ export function init() {
  * @return {Object} FB database ref
  */
 export function getFbDb() {
-  init();
   return firebase.database();
 }
 
@@ -178,6 +177,25 @@ export function getFbDb() {
  */
 export function getRef(path) {
   return getFbDb().ref(path);
+}
+
+/**
+ * Get Firebase auth
+ */
+export function getAuth() {
+  return firebase.auth();
+}
+
+export function getFbSignOut() {
+  return getAuth().signOut();
+}
+/**
+ * Get Firebase available sign in options
+ */
+export function getSignInProviders() {
+  return [
+    firebase.auth.GoogleAuthProvider.PROVIDER_ID
+  ];
 }
 
 /**
