@@ -20,7 +20,7 @@ class CardGrid extends React.Component {
       loaded: false,
       error: false,
       albumCount: 0,
-      activeSort: ''
+      activeSort: 'recently'
     };
 
     this.filterList = this.filterList.bind(this);
@@ -66,7 +66,7 @@ class CardGrid extends React.Component {
   getArtistsList() {
 
     getArtists()
-      .then((data) => this.handleSuccess(formatArtistList(data)))
+      .then((data) => this.handleSuccess(this.sortListByDate(formatArtistList(data), 1)))
       .catch((error) => this.handleError());
 
   }
@@ -90,11 +90,15 @@ class CardGrid extends React.Component {
     });
   }
 
+  sortListByDate(artists, order) {
+    return artists.sort((a, b) => {
+      return order * (this.getMostRecentDate(b.albums) - this.getMostRecentDate(a.albums));
+    });
+  }
+
   sortListRecently(order) {
     this.setState({
-      visibleArtists: this.state.visibleArtists.sort((a, b) => {
-        return order * (this.getMostRecentDate(b.albums) - this.getMostRecentDate(a.albums));
-      }),
+      visibleArtists: this.sortListByDate(this.state.visibleArtists, order),
       activeSort: 'recently'
     });
   }
@@ -166,8 +170,8 @@ class CardGrid extends React.Component {
             <SortBy
               type='alphabetically'
               sort={this.sortListAlphabetically}
-              labelUp='A - Z'
-              labelDown='Z- A'
+              labelUp='Z - A'
+              labelDown='A - Z'
               activeSort={this.state.activeSort}
             />
           </div>
