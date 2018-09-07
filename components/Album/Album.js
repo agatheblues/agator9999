@@ -19,29 +19,34 @@ class Album extends React.Component {
     this.state = {
       error: false,
       hasAlbumData: false,
-      albumData: {
-        source: '',
-        added_at: ''
-      },
+      albumData: null,
       showDiscogsForm: false
     };
 
-    this.getGenres = this.getGenres.bind(this);
     this.handleShowDiscogsClick = this.handleShowDiscogsClick.bind(this);
     this.handleHideDiscogsClick = this.handleHideDiscogsClick.bind(this);
   }
 
+
+  /**
+   * Formats a date string to Month, YYYY
+   * @param  {String} dateString Date, as saved in FB
+   * @return {String}            Formatted date
+   */
   formatDate(dateString) {
     const date = new Date(dateString);
     let month = this.months[date.getMonth()];
     return month + ', ' + date.getFullYear();
   }
 
-  handleGetAlbumSuccess(album) {
 
-    // Format date
+  /**
+   * On successful album retrieval from firebase, set album to state
+   * @param  {Object} album Album, from Firebase
+   */
+  handleGetAlbumSuccess(album) {
     album.added_at = this.formatDate(album.added_at);
-    album.release_date = album.release_date.substr(0, 4);
+    album.release_date = album.release_date.substr(0, 4); // Get year only
 
     this.setState({
       hasAlbumData: true,
@@ -50,14 +55,23 @@ class Album extends React.Component {
     });
   }
 
+
+  /**
+   * On click, show the Link to Discogs form
+   * @param  {Event} event Click event
+   */
   handleShowDiscogsClick(event) {
     event.preventDefault();
+
     this.setState({
       showDiscogsForm: true
     });
   }
 
-
+  /**
+   * On click, hide the Link to Discogs form
+   * @param  {Event} event Click event
+   */
   handleHideDiscogsClick(event) {
     event.preventDefault();
     this.setState({
@@ -65,7 +79,15 @@ class Album extends React.Component {
     });
   }
 
-
+  /**
+   * Parses the Genre or Style array and generates a string in this form:
+   * MyAccumulator / Genre1, Genre2, Genre3
+   * @param  {string} accumulator  Label of the genre/style
+   * @param  {string} currentValue Value of genre or style
+   * @param  {int} currentIndex    Index of genre or style
+   * @param  {Array} array         Genres or styles array
+   * @return {String}              Concatenated genres or styles list
+   */
   genreStyleReducer(accumulator, currentValue, currentIndex, array) {
     if (currentIndex == array.length - 1) {
       return accumulator + ' ' + currentValue;
@@ -74,49 +96,109 @@ class Album extends React.Component {
     return accumulator + ' ' + currentValue + ',';
   }
 
-  getGenres() {
-    if (!this.state.albumData.hasOwnProperty('genres') || (this.state.albumData.genres.length == 0)) {
-      return <p className='not-available'>Genres /</p>;
+  /**
+   * Renders Genres or Styles tags details
+   * @param  {String} propertyName Name of the tag type in albumData object
+   * @param  {String} labelName    Title of the tags line
+   * @return {String}              Genres or Styles Paragraph
+   */
+  renderGenresOrStyles(propertyName, labelName) {
+    if (!this.state.albumData.hasOwnProperty(propertyName) ||
+       (this.state.albumData.genres.length == 0)) {
+      return <p className='not-available'>{`${labelName} /`}</p>;
     }
 
-    return <p>{this.state.albumData.genres.reduce(this.genreStyleReducer, 'Genres /')}</p>;
+    return <p>{this.state.albumData[propertyName].reduce(this.genreStyleReducer, labelName + ' /')}</p>;
   }
 
-  getStyles() {
-    if (!this.state.albumData.hasOwnProperty('styles') || (this.state.albumData.styles.length == 0)) {
-      return <p className='not-available'>Styles /</p>;
+  /**
+   * Renders Album cover image or placeholder
+   * @return {String} Album image markup
+   */
+  renderAlbumCover() {
+    if (!this.state.hasAlbumData) return null;
+    const hasImage = this.state.albumData.hasOwnProperty('images') && this.state.albumData.images.imgUrl;
+    let src = hasImage ? this.state.albumData.images.imgUrl :  '/static/images/missing-album.jpg';
+
+    return <img src={src} alt={'Album Cover'} className='album-cover'/>;
+  }
+
+  /**
+   * Renders a CopyToClipboard component to copy spotify URI
+   * @return {String} CopyToClipboard component
+   */
+  renderCopyToClipboard() {
+    if (this.state.albumData.source != 'spotify') return null;
+    return <CopyToClipboard value={`spotify:album:${this.state.albumData.spotify_id}`}/>;
+  }
+
+  /**
+   * Renders the Link to Discogs form is the user is admin, the album data has
+   * loaded, and the album is not yet linked to a Discogs id.
+   * @return {String} HTML Markup
+   */
+  renderDiscogsForm() {
+    if (!this.props.isAdmin) return null;
+    if (!this.state.hasAlbumData) return null;
+    if (this.state.albumData.discogs_id) return null;
+    if (!this.state.showDiscogsForm) {
+      return (
+        <div className='album-minor-details'>
+          <p><a href='' onClick={this.handleShowDiscogsClick}>&#xFF0B; Link to Discogs</a></p>
+        </div>
+      );
     }
 
-    return <p>{this.state.albumData.styles.reduce(this.genreStyleReducer, 'Styles /')}</p>;
+    return (
+      <div>
+        <div className='album-minor-details'>
+          <p><a href='' onClick={this.handleHideDiscogsClick}>&#xFF0D; Link to Discogs</a></p>
+        </div>
+        <SpotifyUpdateAlbum spotifyId={this.state.albumData.spotify_id} />
+      </div>
+    );
+  }
+
+  /**
+   * Renders an Error Message is the album data has not loaded properly,
+   * else render album details
+   * @return {String} HTML Markup
+   */
+  renderAlbumDetails() {
+    if (!this.state.hasAlbumData) return null;
+    if (this.state.error) return <Message
+      message='Oops! There was a problem while retrieving data for this album.'
+      error={this.state.error}
+    />;
+    
+    return (
+      <div>
+        <h2>{this.state.albumData.name}</h2>
+        <div className='album-main-details'>
+          <p>{this.state.albumData.release_date}&emsp;/&emsp;{this.props.totalTracks} tracks</p>
+          <p className='album-open-link'>
+            <a href={`https://open.spotify.com/go?uri=spotify:album:${this.state.albumData.spotify_id}`} target='_blank'>&#9836; Open in <span className='capitalize'>{this.state.albumData.source}</span>
+            </a>
+          </p>
+          { this.renderCopyToClipboard() }
+        </div>
+        <div className='album-minor-details'>
+          <p>{`Added on ${this.state.albumData.added_at}`}</p>
+        </div>
+        <div className='album-minor-details'>
+          { this.renderGenresOrStyles('genres', 'Genres') }
+          { this.renderGenresOrStyles('styles', 'Styles') }
+        </div>
+        { this.renderDiscogsForm() }
+      </div>
+    );
   }
 
   componentDidMount() {
-    getRef('albums/' + this.props.id)
-      .on('value', (snapshot) => {
+    getRef('albums/' + this.props.id)     // Fetch album data from fb
+      .on('value', (snapshot) => {        // Add listener for changes
         this.handleGetAlbumSuccess(snapshot.val());
       });
-  }
-
-  renderAlbumCover() {
-    let src = '';
-
-    if (!this.state.albumData.hasOwnProperty('images') ||
-        !this.state.albumData.images.imgUrl
-    ) {
-      src = '/static/images/missing-album.jpg';
-    } else {
-      src = this.state.albumData.images.imgUrl;
-    }
-
-    return <a href={this.state.albumData.url}><img src={src} alt={'Album Cover'} className='album-cover'/></a>;
-  }
-
-  renderCopyToClipboard() {
-    if (this.state.albumData.source == 'spotify') {
-      return <CopyToClipboard value={`spotify:album:${this.state.albumData.spotify_id}`}/>;
-    }
-
-    return null;
   }
 
   render() {
@@ -124,55 +206,10 @@ class Album extends React.Component {
       <div className='content-container'>
         <div className='album-wrapper'>
           <div className='album-cover-container'>
-            {this.renderAlbumCover()}
+            { this.renderAlbumCover() }
           </div>
           <div className='album-detail-container'>
-            {!this.state.error &&
-              <div>
-                <h2>{this.state.albumData.name}</h2>
-                <div className='album-main-details'>
-                  <p>{this.state.albumData.release_date}&emsp;/&emsp;{this.props.totalTracks} tracks</p>
-                  <p className='album-open-link'>
-                    <a href={`https://open.spotify.com/go?uri=spotify:album:${this.state.albumData.spotify_id}`} target='_blank'>&#9836; Open in <span className='capitalize'>{this.state.albumData.source}</span>
-                    </a>
-                  </p>
-                  {this.renderCopyToClipboard()}
-                </div>
-                <div className='album-minor-details'>
-                  <p>{`Added on ${this.state.albumData.added_at}`}</p>
-                </div>
-                <div className='album-minor-details'>
-                  {this.getGenres()}
-                  {this.getStyles()}
-                </div>
-
-                { !this.state.albumData.discogs_id &&
-                  this.state.hasAlbumData &&
-                  !this.state.showDiscogsForm &&
-                  this.props.isAdmin &&
-                  <div className='album-minor-details'>
-                    <p><a href='' onClick={this.handleShowDiscogsClick}>&#xFF0B; Link to Discogs</a></p>
-                  </div>
-                }
-
-                { !this.state.albumData.discogs_id &&
-                  this.state.hasAlbumData &&
-                  this.state.showDiscogsForm &&
-                  this.props.isAdmin &&
-                  <div className='album-minor-details'>
-                    <p><a href='' onClick={this.handleHideDiscogsClick}>&#xFF0D; Link to Discogs</a></p>
-                  </div>
-                }
-
-                {this.state.showDiscogsForm &&
-                  this.props.isAdmin &&
-                  <SpotifyUpdateAlbum spotifyId={this.state.albumData.spotify_id} />
-                }
-              </div>
-            }
-            {this.state.error &&
-              <Message message='Oops! There was a problem while retrieving data for this album.' error={this.state.error}/>
-            }
+            { this.renderAlbumDetails() }
           </div>
         </div>
       </div>
