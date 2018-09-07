@@ -45,8 +45,6 @@ class App extends React.Component {
   }
 
   setUserToState(user, data) {
-    console.log('set user');
-
     this.setState({
       user,
       loaded: true,
@@ -56,7 +54,6 @@ class App extends React.Component {
 
 
   persistUserAuth() {
-    console.log('persist');
     getAuth()
       .onAuthStateChanged((user) => {
         if (user) {
