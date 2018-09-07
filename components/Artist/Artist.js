@@ -1,11 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { getArtist, convertAlbumSummaryToArray } from '../../helpers/FirebaseHelper';
 import ArtistSummary from '../ArtistSummary/ArtistSummary';
 import Album from '../Album/Album';
 import PageNotFound from '../PageNotFound/PageNotFound';
 import Message from '../Message/Message';
 import Loading from '../Loading/Loading';
-import { getArtist, convertAlbumSummaryToArray } from '../../helpers/FirebaseHelper';
 
 class Artist extends React.Component {
 
@@ -19,8 +19,21 @@ class Artist extends React.Component {
     };
   }
 
-  handleGetArtistSuccess(artist) {
+  /**
+   * Fetch artist from Firebase
+   * @param  {String} id Artist Id
+   */
+  getCurrentArtist(id) {
+    getArtist(id)
+      .then((snapshot) => this.handleGetArtistSuccess(snapshot.val()))
+      .catch((error) => this.handleGetArtistError());
+  }
 
+  /**
+   * Format artist's albums if exist. Set artist data to state
+   * @param  {Object} artist Firebase artist object
+   */
+  handleGetArtistSuccess(artist) {
     if (artist && artist.hasOwnProperty('albums')) {
       // Update albums structure in artist object
       artist.albums = convertAlbumSummaryToArray(artist.albums);
@@ -30,20 +43,27 @@ class Artist extends React.Component {
       loaded: true,
       artistData: artist
     });
-
   }
 
+  /**
+   * Set fetching artist error to state
+   */
   handleGetArtistError() {
     this.setState({
-      error: true
+      error: true,
+      loaded: true
     });
   }
 
+  /**
+   * Renders an Album component for each artist' album
+   * @return {String} HTML Markup
+   */
   renderAlbums() {
     return (
       <div>
         {
-          this.state.artistData.albums.map((album, index) => {
+          this.state.artistData.albums.map((album) => {
             return (
               <div key={album.id} >
                 <Album id={album.id} totalTracks={album.totalTracks} isAdmin={this.props.isAdmin}/>
@@ -55,17 +75,12 @@ class Artist extends React.Component {
     );
   }
 
-  getCurrentArtist(id) {
-    getArtist(id)
-      .then((snapshot) => this.handleGetArtistSuccess(snapshot.val()))
-      .catch((error) => this.handleGetArtistError());
-  }
-
   componentDidMount() {
     this.getCurrentArtist(this.props.match.params.id);
   }
 
   componentWillReceiveProps(nextProps) {
+    // Handle page change: fetch new artist
     if (nextProps.match.params.id != this.props.match.params.id) {
       this.getCurrentArtist(nextProps.match.params.id);
     }
@@ -91,7 +106,7 @@ class Artist extends React.Component {
     return (
       <div>
         <ArtistSummary artist={this.state.artistData} />
-        {this.renderAlbums()}
+        { this.renderAlbums() }
       </div>
     );
   }
