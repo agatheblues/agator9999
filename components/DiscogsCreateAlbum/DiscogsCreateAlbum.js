@@ -1,13 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import * as dg from '../../helpers/DiscogsHelper';
+import * as fb from '../../helpers/FirebaseHelper';
+import {checkDiscogsUri, checkListeningUri} from '../../helpers/ErrorHelper';
 import Button from '../Button/Button';
 import Message from '../Message/Message';
 import Dropdown from '../Dropdown/Dropdown';
 import InputText from '../InputText/InputText';
 import Loading from '../Loading/Loading';
-import * as dg from '../../helpers/DiscogsHelper';
-import * as fb from '../../helpers/FirebaseHelper';
-import {checkDiscogsUri, checkListeningUri} from '../../helpers/ErrorHelper';
 require('./DiscogsCreateAlbum.scss');
 
 class DiscogsCreateAlbum extends React.Component {
@@ -51,17 +51,30 @@ class DiscogsCreateAlbum extends React.Component {
     this.getReleaseType = this.getReleaseType.bind(this);
   }
 
-
+  /**
+   * Get source from source array
+   * @param  {String} id id of source
+   * @return {Object}    Source item
+   */
   getSource(id) {
     return this.sourceList.filter((s) => (s.id == id))[0].name;
   }
 
+  /**
+   * Get release type from release type array
+   * @param  {String} id id of release type
+   * @return {Object}    Release type item
+   */
   getReleaseType(id) {
     return this.releaseTypeList.filter((s) => (s.id == id))[0].name;
   }
 
 
-  /** Form inputs **/
+  /**
+   * Handle input error of Discogs URI input text
+   * @param  {String} s Discogs uri
+   * @return {String}   Error message
+   */
   handleErrorDiscogsUri(s) {
     const msg = checkDiscogsUri(s, this.state.selectedReleaseType);
 
@@ -72,7 +85,11 @@ class DiscogsCreateAlbum extends React.Component {
     return msg;
   }
 
-
+  /**
+   * Handle input error of Discogs Release type dropdown
+   * @param  {String} type Discogs selected release type
+   * @return {String}   Error message
+   */
   handleErrorReleaseType(type) {
     const msg = checkDiscogsUri(this.state.discogsUri, type);
 
@@ -82,8 +99,16 @@ class DiscogsCreateAlbum extends React.Component {
 
     return msg;
   }
-
-
+  /**
+   * Handle input error of Discogs URI input text
+   * @param  {String} s Discogs uri
+   * @return {String}   Error message
+   */
+  /**
+   * Handle input error of Listening URI input text
+   * @param  {String} s listening uri
+   * @return {String}   Error message
+   */
   handleErrorListeningUri(s) {
     const msg = checkListeningUri(s, this.state.selectedSource);
 
@@ -94,7 +119,11 @@ class DiscogsCreateAlbum extends React.Component {
     return msg;
   }
 
-
+  /**
+   * Handle input error of Listening URI source dropdown
+   * @param  {String} source Listening URI source
+   * @return {String}   Error message
+   */
   handleErrorSource(source) {
     const msg = checkListeningUri(this.state.listeningUri, source);
 
@@ -105,6 +134,10 @@ class DiscogsCreateAlbum extends React.Component {
     return msg;
   }
 
+  /**
+   * Checks if the form has any user input errors
+   * @return {Boolean} True if has at least one error
+   */
   hasErrors() {
     const source = this.handleErrorSource(this.state.selectedSource);
     const release = this.handleErrorReleaseType(this.state.selectedReleaseType);
@@ -114,6 +147,11 @@ class DiscogsCreateAlbum extends React.Component {
     return (source || release || discogs || listening);
   }
 
+  /**
+   * Returns a function that handle value changes of forms inputs
+   * @param  {String} label input label
+   * @return {function}     handler for the given input
+   */
   handleValueFor(label) {
 
     const handleValue = (value) => {
@@ -125,8 +163,10 @@ class DiscogsCreateAlbum extends React.Component {
     return handleValue;
   }
 
-
-  /** Form submit **/
+  /**
+   * Handle form submit error
+   * @param  {String} message Error message
+   */
   handleSubmitError(message) {
     this.setState({
       errorSubmit: true,
@@ -135,6 +175,9 @@ class DiscogsCreateAlbum extends React.Component {
     });
   }
 
+  /**
+   * Handle form submit success
+   */
   handleSubmitSuccess() {
     this.setState({
       errorSubmit: false,
@@ -147,25 +190,36 @@ class DiscogsCreateAlbum extends React.Component {
     });
   }
 
-
-  /** Existing artists **/
-  handleArtistsListSuccess(artists) {
-    this.setState({
-      artists: artists
-    });
-  }
-
-  getArtistsList() {
-    fb.getArtists()
-      .then((data) => this.handleArtistsListSuccess(fb.formatArtistList(data)))
-      .catch((error) => this.handleSubmitError('Oops! Something went wrong while retrieving the artists'));
-
-  }
-
+  /**
+   * Get list of artist ids
+   * @param  {array} artists List of artists
+   * @return {array}         List of artists ids
+   */
   getArtistIds(artists) {
     return artists.map(artist => artist.id);
   }
 
+  /**
+   * Fetch Discogs Album, save it to firebase, save artist to Firebase
+   * Set artist images
+   */
+  saveDiscogsAlbumToFirebase() {
+    dg.getRelease(this.state.discogsUri, this.state.selectedReleaseType)
+      .then(({data}) => {
+        return Promise.all([
+          fb.setAlbumIfNotExists(fb.formatDiscogsAlbum(data, this.state.selectedSource, this.state.listeningUri)),
+          fb.updateOrSetArtistsFromSingleAlbum(fb.formatArtists(data.artists, fb.formatDiscogsArtist), fb.formatDiscogsSingleAlbumSummary(data))
+            .then(() => dg.getArtistsImages(this.getArtistIds(data.artists)))
+        ]);
+      })
+      .then(() => this.handleSubmitSuccess())
+      .catch((error) => { this.handleSubmitError(error.message); });
+  }
+
+  /**
+   * Handle Form Submit Event
+   * @param  {Event} event SUbmit event
+   */
   handleSubmit(event) {
     event.preventDefault();
 
@@ -186,35 +240,11 @@ class DiscogsCreateAlbum extends React.Component {
       loaded: false
     });
 
-    dg.getRelease(this.state.discogsUri, this.state.selectedReleaseType)
-      .then(({data}) => {
-        return Promise.all([
-          fb.setAlbumIfNotExists(fb.formatDiscogsAlbum(data, this.state.selectedSource, this.state.listeningUri)),
-          fb.updateOrSetArtistsFromSingleAlbum(fb.formatArtists(data.artists, fb.formatDiscogsArtist), fb.formatDiscogsSingleAlbumSummary(data))
-            .then(() => dg.getArtistsImages(this.getArtistIds(data.artists)))
-        ]);
-      })
-      .then(() => this.handleSubmitSuccess())
-      .catch((error) => {
-        this.handleSubmitError(error.message);
-      });
-  }
-
-  componentDidMount() {
-    this.getArtistsList();
+    // Save Album
+    this.saveDiscogsAlbumToFirebase();
   }
 
   render() {
-    // <div className='form-row-container'>
-    //   <label>Existing artist:</label>
-    //   <SearchDropdown
-    //     list={this.state.artists}
-    //     id={'id'}
-    //     value={'name'}
-    //     placeholder={'Select an artist in your library'}
-    //     handleValue={this.handleValueFor('existingArtist')}
-    //   />
-    // </div>
     return (
       <div>
         <div>

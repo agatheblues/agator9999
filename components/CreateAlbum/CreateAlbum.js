@@ -23,6 +23,10 @@ class CreateAlbum extends React.Component {
     }
   }
 
+  /**
+   * Depending on selected tab, render corresponding form
+   * @return {String} HTML Markup
+   */
   renderForm() {
     switch (this.state.source) {
     case 'spotify':
@@ -50,7 +54,7 @@ class CreateAlbum extends React.Component {
         </nav>
 
         <div className='form-container'>
-          {this.renderForm()}
+          { this.renderForm() }
         </div>
       </div>
     );
