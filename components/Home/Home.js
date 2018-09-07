@@ -1,15 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import SpotifySync from '../../components/SpotifySync/SpotifySync';
-import SpotifyLogin from '../../components/SpotifyLogin/SpotifyLogin';
-import SpotifyProfile from '../../components/SpotifyProfile/SpotifyProfile';
 import CardGrid from '../../components/CardGrid/CardGrid';
-import CreateAlbum from '../../components/CreateAlbum/CreateAlbum';
 import ProfileCard from '../../components/ProfileCard/ProfileCard';
-import Artist from '../../components/Artist/Artist';
-import Button from '../../components/Button/Button';
-
 
 class Home extends React.Component {
   constructor(props){

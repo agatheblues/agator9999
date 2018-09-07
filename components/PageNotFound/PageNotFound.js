@@ -5,7 +5,6 @@ require('./PageNotFound.scss');
 const PageNotFound = function() {
   return (
     <div className='content-container'>
-
       <div className='back-to-library'>
         <Link to='/'>&#9839; Back to library</Link>
       </div>

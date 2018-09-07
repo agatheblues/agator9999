@@ -10,7 +10,6 @@ class InputText extends React.Component {
     this.handleFocus = this.handleFocus.bind(this);
   }
 
-
   handleFocus(event) {
     if (this.props.handleFocus) {
       this.props.handleFocus(this.state.value);
@@ -18,10 +17,8 @@ class InputText extends React.Component {
   }
 
   handleChange(event) {
-
     this.props.handleValue(event.target.value);
     this.props.handleError(event.target.value);
-
   }
 
   render() {

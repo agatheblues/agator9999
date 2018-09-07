@@ -1,8 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import * as dg from '../../helpers/DiscogsHelper';
+import { getRelease, getArtistsImages } from '../../helpers/DiscogsHelper';
 import * as fb from '../../helpers/FirebaseHelper';
-import {checkDiscogsUri, checkListeningUri} from '../../helpers/ErrorHelper';
+import { checkDiscogsUri, checkListeningUri } from '../../helpers/ErrorHelper';
 import Button from '../Button/Button';
 import Message from '../Message/Message';
 import Dropdown from '../Dropdown/Dropdown';
@@ -204,12 +204,12 @@ class DiscogsCreateAlbum extends React.Component {
    * Set artist images
    */
   saveDiscogsAlbumToFirebase() {
-    dg.getRelease(this.state.discogsUri, this.state.selectedReleaseType)
+    getRelease(this.state.discogsUri, this.state.selectedReleaseType)
       .then(({data}) => {
         return Promise.all([
           fb.setAlbumIfNotExists(fb.formatDiscogsAlbum(data, this.state.selectedSource, this.state.listeningUri)),
           fb.updateOrSetArtistsFromSingleAlbum(fb.formatArtists(data.artists, fb.formatDiscogsArtist), fb.formatDiscogsSingleAlbumSummary(data))
-            .then(() => dg.getArtistsImages(this.getArtistIds(data.artists)))
+            .then(() => getArtistsImages(this.getArtistIds(data.artists)))
         ]);
       })
       .then(() => this.handleSubmitSuccess())

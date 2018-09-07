@@ -1,15 +1,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import * as api from '../../helpers/SpotifyHelper';
+import * as dg from '../../helpers/DiscogsHelper';
+import * as fb from '../../helpers/FirebaseHelper';
 import Button from '../Button/Button';
 import SpotifyLogin from '../SpotifyLogin/SpotifyLogin';
 import Message from '../Message/Message';
 import InputText from '../InputText/InputText';
 import Dropdown from '../Dropdown/Dropdown';
 import Loading from '../Loading/Loading';
-import * as api from '../../helpers/SpotifyHelper';
-import * as dg from '../../helpers/DiscogsHelper';
-import * as fb from '../../helpers/FirebaseHelper';
-import {checkSpotifyUri, checkDiscogsUri} from '../../helpers/ErrorHelper';
+import { checkSpotifyUri, checkDiscogsUri } from '../../helpers/ErrorHelper';
 
 class SpotifyCreateAlbum extends React.Component {
   constructor(props) {
