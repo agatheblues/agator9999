@@ -1,12 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { getAlbums, getArtists, formatArtistList } from '../../helpers/FirebaseHelper';
 import Card from '../Card/Card';
 import Message from '../Message/Message';
 import Loading from '../Loading/Loading';
 import Search from '../Search/Search';
 import SortBy from '../SortBy/SortBy';
 import CardGridEmpty from '../CardGridEmpty/CardGridEmpty';
-import { getAlbums, getArtists, formatArtistList } from '../../helpers/FirebaseHelper';
 require('./CardGrid.scss');
 
 class CardGrid extends React.Component {
@@ -28,21 +28,54 @@ class CardGrid extends React.Component {
     this.sortListRecently = this.sortListRecently.bind(this);
   }
 
+  /**
+   * Get total amount of albums in FB
+   */
+  getAlbumCount() {
+    getAlbums()
+      .then((data) => {
+        let i = 0;
+        data.forEach((item) => { i++; });
+        this.handleCountSuccess(i);
+      });
+  }
+
+  /**
+   * Get list of all artists in FB
+   */
+  getArtistsList() {
+    getArtists()
+      .then((data) => this.handleSuccess(formatArtistList(data)))
+      .catch((error) => this.handleError());
+  }
+
+  /**
+   * Callback for successful fetch of artists, set artists to state
+   * @param  {Array} artists  Array of FB artists
+   */
   handleSuccess(artists) {
+    const sortedArtists = this.sortListByDate(artists, 1);
     this.setState({
-      artists: artists,
-      visibleArtists: artists,
+      artists: sortedArtists,
+      visibleArtists: sortedArtists,
       loaded: true,
       error: false
     });
   }
 
+  /**
+   * Callback for counting total albums, set to state
+   * @param  {Integer} count Total number of albums
+   */
   handleCountSuccess(count) {
     this.setState({
       albumCount: count
     });
   }
 
+  /**
+   * Callback for errors.
+   */
   handleError() {
     this.setState({
       artists: [],
@@ -52,50 +85,51 @@ class CardGrid extends React.Component {
     });
   }
 
-  getAlbumCount() {
-
-    getAlbums()
-      .then((data) => {
-        let i = 0;
-        data.forEach((item) => { i++; });
-        this.handleCountSuccess(i);
-      });
-
-  }
-
-  getArtistsList() {
-
-    getArtists()
-      .then((data) => this.handleSuccess(this.sortListByDate(formatArtistList(data), 1)))
-      .catch((error) => this.handleError());
-
-  }
-
+  /**
+   * Filters list of artists by artist name
+   * @param  {String} input User search input
+   */
   filterList(input) {
-    let visibleArtists = this.state.artists.filter((artist) => {
+    const filteredArtists = this.state.artists.filter((artist) => {
       return artist.name.toLowerCase().startsWith(input.toLowerCase());
     });
 
     this.setState({
-      visibleArtists: visibleArtists
+      visibleArtists: filteredArtists
     });
   }
 
+  /**
+   * Sorts list of artists alphabetically
+   * @param  {Integer} order 1 or -1 (asc or desc)
+   */
   sortListAlphabetically(order) {
+    const sortedArtists = this.state.visibleArtists.sort((a, b) => {
+      return (a.name.toLowerCase() > b.name.toLowerCase()) ? order : -order;
+    });
+
     this.setState({
-      visibleArtists: this.state.visibleArtists.sort((a, b) => {
-        return (a.name.toLowerCase() > b.name.toLowerCase()) ? order : -order;
-      }),
+      visibleArtists: sortedArtists,
       activeSort: 'alphabetically'
     });
   }
 
+  /**
+   * Sorts list of artists by date
+   * @param  {array} artists  List of artists
+   * @param  {Integer} order  1 or -1 (asc or desc)
+   * @return {array}          Sorted list of artists
+   */
   sortListByDate(artists, order) {
     return artists.sort((a, b) => {
       return order * (this.getMostRecentDate(b.albums) - this.getMostRecentDate(a.albums));
     });
   }
 
+  /**
+   * Set sorted by date artists to state
+   * @param  {Integer} order  1 or -1 (asc or desc)
+   */
   sortListRecently(order) {
     this.setState({
       visibleArtists: this.sortListByDate(this.state.visibleArtists, order),
@@ -103,6 +137,11 @@ class CardGrid extends React.Component {
     });
   }
 
+  /**
+   * Get most recent date of album addition for an artist
+   * @param  {array} albums  artist's albums array
+   * @return {Date}          most recent date of addition for an artist's albums
+   */
   getMostRecentDate(albums) {
     let dates = Object.keys(albums).map((albumKey) => new Date(albums[albumKey].added_at));
     return new Date(Math.max.apply(null, dates));
