@@ -20,22 +20,12 @@ class SpotifyUpdateAlbum extends React.Component {
       messageSubmit: null
     };
 
-    this.releaseTypeList = [
-      {'id': 'placeholder', 'name': 'Select type', 'hide': true},
-      {'id': 'master', 'name': 'Master'},
-      {'id': 'release', 'name': 'Release'}
-    ];
-
     this.handleValueFor = this.handleValueFor.bind(this);
     this.handleErrorDiscogsUri = this.handleErrorDiscogsUri.bind(this);
     this.handleErrorReleaseType = this.handleErrorReleaseType.bind(this);
-    this.getReleaseType = this.getReleaseType.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
-  getReleaseType(id) {
-    return this.releaseTypeList.filter((s) => (s.id == id))[0].name;
-  }
 
   handleValueFor(label) {
 
@@ -82,6 +72,17 @@ class SpotifyUpdateAlbum extends React.Component {
     });
   }
 
+  updateSpotifyAlbum() {
+    dg.getRelease(this.state.discogsUri, this.state.selectedReleaseType)
+      .then(({data}) => {
+        return fb.updateSpotifyAlbumWithDiscogsAlbum(this.props.spotifyId, fb.formatDiscogsUpdateAlbum(data));
+      })
+      .then(() => this.handleSubmitSuccess())
+      .catch((error) => {
+        this.handleSubmitError(error.message);
+      });
+  }
+
   handleSubmit(event) {
     event.preventDefault();
 
@@ -102,14 +103,7 @@ class SpotifyUpdateAlbum extends React.Component {
       messageSubmit: null
     });
 
-    dg.getRelease(this.state.discogsUri, this.state.selectedReleaseType)
-      .then(({data}) => {
-        return fb.updateSpotifyAlbumWithDiscogsAlbum(this.props.spotifyId, fb.formatDiscogsUpdateAlbum(data));
-      })
-      .then(() => this.handleSubmitSuccess())
-      .catch((error) => {
-        this.handleSubmitError(error.message);
-      });
+    this.updateSpotifyAlbum();
   }
 
   render() {
@@ -118,10 +112,10 @@ class SpotifyUpdateAlbum extends React.Component {
         <form onSubmit={this.handleSubmit}>
           <div className='form-row-container'>
             <Dropdown
-              list={this.releaseTypeList}
+              list={dg.releaseTypeList}
               id={'id'}
               value={'name'}
-              selectedValue={this.getReleaseType(this.state.selectedReleaseType)}
+              selectedValue={dg.getReleaseType(this.state.selectedReleaseType)}
               handleSelectedValue={this.handleValueFor('selectedReleaseType')}
               handleError={this.handleErrorReleaseType}
             />

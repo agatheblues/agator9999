@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { getRelease, getArtistsImages } from '../../helpers/DiscogsHelper';
+import* as dg from '../../helpers/DiscogsHelper';
 import * as fb from '../../helpers/FirebaseHelper';
 import { checkDiscogsUri, checkListeningUri } from '../../helpers/ErrorHelper';
 import Button from '../Button/Button';
@@ -29,46 +29,13 @@ class DiscogsCreateAlbum extends React.Component {
       loaded: true
     };
 
-    this.sourceList = [
-      {'id': 'placeholder', 'name': 'Select source', 'hide': true},
-      {'id': 'bandcamp', 'name': 'Bandcamp'},
-      {'id': 'youtube', 'name': 'Youtube'}
-    ];
-
-    this.releaseTypeList = [
-      {'id': 'placeholder', 'name': 'Select type', 'hide': true},
-      {'id': 'master', 'name': 'Master'},
-      {'id': 'release', 'name': 'Release'}
-    ];
-
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleErrorDiscogsUri = this.handleErrorDiscogsUri.bind(this);
     this.handleErrorListeningUri = this.handleErrorListeningUri.bind(this);
     this.handleErrorReleaseType = this.handleErrorReleaseType.bind(this);
     this.handleErrorSource = this.handleErrorSource.bind(this);
     this.handleValueFor = this.handleValueFor.bind(this);
-    this.getSource = this.getSource.bind(this);
-    this.getReleaseType = this.getReleaseType.bind(this);
   }
-
-  /**
-   * Get source from source array
-   * @param  {String} id id of source
-   * @return {Object}    Source item
-   */
-  getSource(id) {
-    return this.sourceList.filter((s) => (s.id == id))[0].name;
-  }
-
-  /**
-   * Get release type from release type array
-   * @param  {String} id id of release type
-   * @return {Object}    Release type item
-   */
-  getReleaseType(id) {
-    return this.releaseTypeList.filter((s) => (s.id == id))[0].name;
-  }
-
 
   /**
    * Handle input error of Discogs URI input text
@@ -99,11 +66,7 @@ class DiscogsCreateAlbum extends React.Component {
 
     return msg;
   }
-  /**
-   * Handle input error of Discogs URI input text
-   * @param  {String} s Discogs uri
-   * @return {String}   Error message
-   */
+
   /**
    * Handle input error of Listening URI input text
    * @param  {String} s listening uri
@@ -191,25 +154,16 @@ class DiscogsCreateAlbum extends React.Component {
   }
 
   /**
-   * Get list of artist ids
-   * @param  {array} artists List of artists
-   * @return {array}         List of artists ids
-   */
-  getArtistIds(artists) {
-    return artists.map(artist => artist.id);
-  }
-
-  /**
    * Fetch Discogs Album, save it to firebase, save artist to Firebase
    * Set artist images
    */
   saveDiscogsAlbumToFirebase() {
-    getRelease(this.state.discogsUri, this.state.selectedReleaseType)
+    dg.getRelease(this.state.discogsUri, this.state.selectedReleaseType)
       .then(({data}) => {
         return Promise.all([
           fb.setAlbumIfNotExists(fb.formatDiscogsAlbum(data, this.state.selectedSource, this.state.listeningUri)),
           fb.updateOrSetArtistsFromSingleAlbum(fb.formatArtists(data.artists, fb.formatDiscogsArtist), fb.formatDiscogsSingleAlbumSummary(data))
-            .then(() => getArtistsImages(this.getArtistIds(data.artists)))
+            .then(() => dg.getArtistsImages(fb.getArtistIds(data.artists)))
         ]);
       })
       .then(() => this.handleSubmitSuccess())
@@ -253,10 +207,10 @@ class DiscogsCreateAlbum extends React.Component {
 
             <div className='form-row-container'>
               <Dropdown
-                list={this.releaseTypeList}
+                list={dg.releaseTypeList}
                 id={'id'}
                 value={'name'}
-                selectedValue={this.getReleaseType(this.state.selectedReleaseType)}
+                selectedValue={dg.getReleaseType(this.state.selectedReleaseType)}
                 handleSelectedValue={this.handleValueFor('selectedReleaseType')}
                 handleError={this.handleErrorReleaseType}
               />
@@ -273,10 +227,10 @@ class DiscogsCreateAlbum extends React.Component {
 
             <div className='form-row-container'>
               <Dropdown
-                list={this.sourceList}
+                list={dg.sourceList}
                 id={'id'}
                 value={'name'}
-                selectedValue={this.getSource(this.state.selectedSource)}
+                selectedValue={dg.getSource(this.state.selectedSource)}
                 handleSelectedValue={this.handleValueFor('selectedSource')}
                 handleError={this.handleErrorSource}
               />

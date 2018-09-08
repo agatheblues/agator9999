@@ -2,6 +2,18 @@ import axios from 'axios';
 import * as fb from './FirebaseHelper';
 import { discogsConfig } from '../config';
 
+export const releaseTypeList = [
+  {'id': 'placeholder', 'name': 'Select type', 'hide': true},
+  {'id': 'master', 'name': 'Master'},
+  {'id': 'release', 'name': 'Release'}
+];
+
+export const sourceList = [
+  {'id': 'placeholder', 'name': 'Select source', 'hide': true},
+  {'id': 'bandcamp', 'name': 'Bandcamp'},
+  {'id': 'youtube', 'name': 'Youtube'}
+];
+
 /**
  * Create axios instance for Discogs API requests
  * @return {func}              Axios instance
@@ -98,4 +110,23 @@ function getArtistImageUrl(artist) {
 
   // TODO: Return image from latest album from artist
   return '/static/images/missing.jpg';
+}
+
+
+/**
+ * Get source from source array
+ * @param  {String} id id of source
+ * @return {Object}    Source item
+ */
+export function getSource(id) {
+  return this.sourceList.filter((s) => (s.id == id))[0].name;
+}
+
+/**
+ * Get release type from release type array
+ * @param  {String} id id of release type
+ * @return {Object}    Release type item
+ */
+export function getReleaseType(id) {
+  return this.releaseTypeList.filter((s) => (s.id == id))[0].name;
 }

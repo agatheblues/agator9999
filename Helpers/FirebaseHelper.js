@@ -367,6 +367,16 @@ export function formatArtistList(data) {
 }
 
 
+/**
+ * Get list of artist ids
+ * @param  {array} artists List of artists
+ * @return {array}         List of artists ids
+ */
+export function getArtistIds(artists) {
+  return artists.map(artist => artist.id);
+}
+
+
 /********** ALBUMS *********/
 
 /**
