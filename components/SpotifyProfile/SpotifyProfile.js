@@ -10,10 +10,8 @@ class SpotifyProfile extends React.Component {
   constructor(props) {
     super();
 
-    // Get accessToken
     this.accessToken = getAccessToken();
 
-    // set local state
     this.state = {
       hasProfileData: false,
       userId: '',
@@ -23,8 +21,12 @@ class SpotifyProfile extends React.Component {
     };
   }
 
-
-  handleSuccess(id, url) {
+  /**
+   * Handle fetching Spotify Profile success
+   * @param  {String} id  User id
+   * @param  {String} url Profile image url
+   */
+  handleGetProfileSuccess(id, url) {
     this.setState({
       hasProfileData: true,
       userId: id,
@@ -32,7 +34,11 @@ class SpotifyProfile extends React.Component {
     });
   }
 
-  handleError(message) {
+  /**
+   * Handle fetching Spotify Profile error
+   * @param  {String} message Error message
+   */
+  handleGetProfileError(message) {
     this.setState({
       'error': true,
       'message': message
@@ -40,18 +46,16 @@ class SpotifyProfile extends React.Component {
   }
 
   componentDidMount() {
-
     if (this.accessToken) {
       getProfile(this.accessToken)
         .then((response) => {
           const url = (response.data.images.length == 0) ? '../static/images/missing.jpg' : response.data.images[0].url;
-          this.handleSuccess(response.data.id, url);
+          this.handleGetProfileSuccess(response.data.id, url);
         })
         .catch((error) => {
-          this.handleError(handleErrorMessage(error));
+          this.handleGetProfileError(handleErrorMessage(error));
         });
     }
-
   }
 
   render() {

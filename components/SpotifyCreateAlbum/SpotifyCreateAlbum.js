@@ -38,10 +38,20 @@ class SpotifyCreateAlbum extends React.Component {
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
+  /**
+   * Extract album Spotify Id from spotify URI
+   * @param  {String} s Spotify URI
+   * @return {String}   Spotify ID
+   */
   getSpotifyId(s) {
     return s.substring(14);
   }
 
+  /**
+   * Check that Spotify URI is correctly formatted
+   * @param  {String} s Spotify URI
+   * @return {String}   Error message
+   */
   handleErrorSpotifyUri(s) {
     const msg = checkSpotifyUri(s);
 
@@ -52,7 +62,11 @@ class SpotifyCreateAlbum extends React.Component {
     return msg;
   }
 
-
+  /**
+   * Check that Discogs URI is correctly formatted
+   * @param  {String} s Discogs URI
+   * @return {String}   Error message
+   */
   handleErrorDiscogsUri(s) {
     const msg = checkDiscogsUri(s, this.state.selectedReleaseType);
 
@@ -63,6 +77,11 @@ class SpotifyCreateAlbum extends React.Component {
     return msg;
   }
 
+  /**
+   * Check that Release Type is correctly formatted
+   * @param  {String} s Release type
+   * @return {String}   Error message
+   */
   handleErrorReleaseType(type) {
     const msg = checkDiscogsUri(this.state.discogsUri, type);
 
@@ -73,7 +92,11 @@ class SpotifyCreateAlbum extends React.Component {
     return msg;
   }
 
-  handleError(message) {
+  /**
+   * Handle Submit error
+   * @param  {String} message Error message
+   */
+  handleSubmitError(message) {
     this.setState({
       errorSubmit: true,
       messageSubmit: message,
@@ -81,7 +104,10 @@ class SpotifyCreateAlbum extends React.Component {
     });
   }
 
-  handleSuccess() {
+  /**
+   * Handle Submit Success
+   */
+  handleSubmitSuccess() {
     this.setState({
       errorSubmit: false,
       messageSubmit: 'Album successfully added to your library!',
@@ -92,6 +118,11 @@ class SpotifyCreateAlbum extends React.Component {
     });
   }
 
+  /**
+   * Factory of handlers for input changes
+   * @param  {String} label Input label
+   * @return {function}     Handler for given input
+   */
   handleValueFor(label) {
 
     const handleValue = (value) => {
@@ -103,8 +134,14 @@ class SpotifyCreateAlbum extends React.Component {
     return handleValue;
   }
 
+  /**
+   * Get album from Spotify, save it to firebase if does not exists
+   * Save or update artist to Firebase
+   * Get artist images
+   * Get Discogs Album
+   * Update Spotify album with Discogs metadata
+   */
   saveSpotifyAlbumToFirebase() {
-    // Set album, artist, and artist images
     api.getAlbum(this.accessToken, this.getSpotifyId(this.state.spotifyUri))
       .then(({data}) => Promise.all([
         fb.setAlbumIfNotExists(fb.formatSpotifyAlbum(data)),
@@ -115,10 +152,14 @@ class SpotifyCreateAlbum extends React.Component {
       .then(({data}) => {
         return fb.updateSpotifyAlbumWithDiscogsAlbum(this.getSpotifyId(this.state.spotifyUri), fb.formatDiscogsUpdateAlbum(data));
       })
-      .then(() => this.handleSuccess())
-      .catch((error) => this.handleError(error.message));
+      .then(() => this.handleSubmitSuccess())
+      .catch((error) => this.handleSubmitError(error.message));
   }
 
+  /**
+   * Handle submit and check for errors in form
+   * @param  {Event} event Submit event
+   */
   handleSubmit(event) {
     event.preventDefault();
 
@@ -145,7 +186,6 @@ class SpotifyCreateAlbum extends React.Component {
   }
 
   render() {
-
     if (!this.accessToken) {
       return (
         <div>

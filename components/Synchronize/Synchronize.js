@@ -14,10 +14,8 @@ class Synchronize extends React.Component {
   constructor(props) {
     super();
 
-    // Get accessToken
     this.accessToken = getAccessToken();
-
-    // set local state
+    
     this.state = {
       error: false,
       message: null

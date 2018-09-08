@@ -10,7 +10,6 @@ class SpotifyLogin extends React.Component {
   constructor(props) {
     super();
 
-    // set local state
     this.state = {
       error: false,
       message: null
@@ -28,6 +27,10 @@ class SpotifyLogin extends React.Component {
     window.location = getLoginUrl(this.props.redirect);
   }
 
+  /**
+   * Handle login error
+   * @param  {String} message Error message
+   */
   handleError(message) {
     this.setState({
       'error': true,
