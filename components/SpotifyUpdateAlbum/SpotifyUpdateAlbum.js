@@ -6,7 +6,7 @@ import InputText from '../InputText/InputText';
 import Dropdown from '../Dropdown/Dropdown';
 import * as dg from '../../helpers/DiscogsHelper';
 import * as fb from '../../helpers/FirebaseHelper';
-import {checkDiscogsUri} from '../../helpers/ErrorHelper';
+import { checkDiscogsUri } from '../../helpers/ErrorHelper';
 
 class SpotifyUpdateAlbum extends React.Component {
   constructor(props) {
@@ -26,7 +26,11 @@ class SpotifyUpdateAlbum extends React.Component {
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
-
+  /**
+   * Factory for input changes handler
+   * @param  {String} label label of input
+   * @return {function}     input change handler
+   */
   handleValueFor(label) {
 
     const handleValue = (value) => {
@@ -38,6 +42,11 @@ class SpotifyUpdateAlbum extends React.Component {
     return handleValue;
   }
 
+  /**
+   * Check that Discogs URI is correctly formatted
+   * @param  {String} s Discogs URI
+   * @return {String}   Error message
+   */
   handleErrorDiscogsUri(s) {
     const msg = checkDiscogsUri(s, this.state.selectedReleaseType);
 
@@ -48,6 +57,11 @@ class SpotifyUpdateAlbum extends React.Component {
     return msg;
   }
 
+  /**
+   * Check that Release Type is correctly formatted
+   * @param  {String} s Release type
+   * @return {String}   Error message
+   */
   handleErrorReleaseType(type) {
     const msg = checkDiscogsUri(this.state.discogsUri, type);
 
@@ -58,6 +72,10 @@ class SpotifyUpdateAlbum extends React.Component {
     return msg;
   }
 
+  /**
+   * Handle Submit error
+   * @param  {String} message Error message
+   */
   handleSubmitError(message) {
     this.setState({
       errorSubmit: true,
@@ -65,27 +83,28 @@ class SpotifyUpdateAlbum extends React.Component {
     });
   }
 
-  handleSubmitSuccess() {
-    this.setState({
-      errorSubmit: false,
-      messageSubmit: 'Album successfully updated!'
-    });
-  }
-
+  /**
+   * Get Discogs release
+   * Update album with Discogs metadata
+   */
   updateSpotifyAlbum() {
     dg.getRelease(this.state.discogsUri, this.state.selectedReleaseType)
       .then(({data}) => {
         return fb.updateSpotifyAlbumWithDiscogsAlbum(this.props.spotifyId, fb.formatDiscogsUpdateAlbum(data));
       })
-      .then(() => this.handleSubmitSuccess())
       .catch((error) => {
         this.handleSubmitError(error.message);
       });
   }
 
+  /**
+   * Handle Spotify Update submit
+   * @param  {Event} event Submit event
+   */
   handleSubmit(event) {
     event.preventDefault();
 
+    // Check for form errors
     const release = this.handleErrorReleaseType(this.state.selectedReleaseType);
     const discogs = this.handleErrorDiscogsUri(this.state.discogsUri);
 
@@ -98,6 +117,7 @@ class SpotifyUpdateAlbum extends React.Component {
       return;
     }
 
+    // If no errors, update album
     this.setState({
       errorSubmit: false,
       messageSubmit: null

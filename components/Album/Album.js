@@ -16,11 +16,14 @@ class Album extends React.Component {
       'July', 'August', 'September', 'October', 'November', 'December'
     ];
 
+    this.timer = null;
+
     this.state = {
       error: false,
       hasAlbumData: false,
       albumData: null,
-      showDiscogsForm: false
+      showDiscogsForm: false,
+      messageUpdateSuccess: null
     };
 
     this.handleShowDiscogsClick = this.handleShowDiscogsClick.bind(this);
@@ -74,6 +77,7 @@ class Album extends React.Component {
    */
   handleHideDiscogsClick(event) {
     event.preventDefault();
+
     this.setState({
       showDiscogsForm: false
     });
@@ -170,7 +174,7 @@ class Album extends React.Component {
       message='Oops! There was a problem while retrieving data for this album.'
       error={this.state.error}
     />;
-    
+
     return (
       <div>
         <h2>{this.state.albumData.name}</h2>
@@ -190,6 +194,9 @@ class Album extends React.Component {
           { this.renderGenresOrStyles('styles', 'Styles') }
         </div>
         { this.renderDiscogsForm() }
+        {this.state.messageUpdateSuccess &&
+          <Message message={this.state.messageUpdateSuccess} error={false}/>
+        }
       </div>
     );
   }
@@ -199,6 +206,32 @@ class Album extends React.Component {
       .on('value', (snapshot) => {        // Add listener for changes
         this.handleGetAlbumSuccess(snapshot.val());
       });
+  }
+
+  componentWillUpdate(nextProps, nextState) {
+    if (!this.state.hasAlbumData) return;
+
+    // If album has received a data update
+    if (!this.state.albumData.hasOwnProperty('discogs_id') &&
+        nextState.albumData.hasOwnProperty('discogs_id')) {
+
+      this.setState({
+        messageUpdateSuccess: 'Album successfully updated!'
+      });
+
+      // Timeout to hide success message
+      this.timer = setTimeout(() => {
+        this.setState({
+          messageUpdateSuccess: null
+        });
+      }, 2000);
+    }
+  }
+
+  componentWillUnmount() {
+    if (this.timer) {
+      clearTimeout(this.timer);
+    }
   }
 
   render() {
