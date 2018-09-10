@@ -4,8 +4,7 @@ export const config = {
 
 export const discogsConfig = {
   'DISCOGS_LOGIN_URL': 'https://www.discogs.com/oauth/authorize',
-  'CONSUMER_KEY': '',
-  'CONSUMER_SECRET': ''
+  'CONSUMER_KEY': ''
 };
 
 export const spotifyConfig = {
