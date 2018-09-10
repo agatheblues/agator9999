@@ -181,7 +181,9 @@ class Album extends React.Component {
         <div className='album-main-details'>
           <p>{this.state.albumData.release_date}&emsp;/&emsp;{this.props.totalTracks} tracks</p>
           <p className='album-open-link'>
-            <a href={`https://open.spotify.com/go?uri=spotify:album:${this.state.albumData.spotify_id}`} target='_blank'>&#9836; Open in <span className='capitalize'>{this.state.albumData.source}</span>
+            <a href={`https://open.spotify.com/go?uri=spotify:album:${this.state.albumData.spotify_id}`}
+              target='_blank'
+              rel='noopener noreferrer'>&#9836; Open in <span className='capitalize'>{this.state.albumData.source}</span>
             </a>
           </p>
           { this.renderCopyToClipboard() }
