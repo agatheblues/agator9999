@@ -8,10 +8,10 @@ It all started when Spotify told me: *"Epic collection, friend. Your library is 
 
 ## What can you do with agator9999?
 
-*Artists*
+**Artists**
 - View your artist library (Artists are derived from your saved albums.)
 
-*Albums*
+**Albums**
 - View your saved albums for a given artist
 - Synchronize your Spotify saved albums
 - Add an album by providing its Spotify URI (listening + metadata) and its Discogs URL (metadata)
@@ -21,7 +21,7 @@ It all started when Spotify told me: *"Epic collection, friend. Your library is 
 - Sort alphabetically and by recently added
 - Link to the corresponding listening platform.
 
-*Users*
+**Users**
 - Login / Logout of agator9999 via Google Authentication
 - Set yourself as admin from the Firebase UI (read+write).
 
@@ -36,7 +36,8 @@ It all started when Spotify told me: *"Epic collection, friend. Your library is 
 ## How to use it?
 agator9999 is a modest [React](https://reactjs.org/) web application which uses [Firebase](https://firebase.google.com/?authuser=0) as back-end.
 
-*Firebase Setup*
+**Firebase Setup**
+
 1. First, clone the project.
 2. Rename the file to `config.template.json` to `config.js`.
 2. Then, to use agator9999, you need to create a Firebase project. Go to the Firebase website, log in / sign in and select `Add Firebase to your web app`: a pop-up with your configuration will appear. Copy the values and replace them in `firebaseConfig` in the file `config.js`.
@@ -51,21 +52,25 @@ agator9999 is a modest [React](https://reactjs.org/) web application which uses 
 }
 ```
 
-*Spotify Setup*
+**Spotify Setup**
+
 4. Then, you need to create your Spotify application: go to the [Developer Dashboard](https://beta.developer.spotify.com/dashboard/login) and hit `Create an app`. You can name your application and select a non-commercial option.
 6. Go to `Edit Settings` and set a callback URI for your application. For example, `http://localhost:8888/#/callback`.
 7. Go to `config.js` at the root at the project, fill in the `spotifyConfig`: add the URI to the 'REDIRECT_URI' field and add your Spotify `CLIENT_ID` (that you can get from the Dashboard).
 
-*Discogs Setup*
+**Discogs Setup**
+
 8. Go to [Discogs](https://www.discogs.com/settings/developers) and create your Discogs application.
 9. Copy the Consumer key and secret to `discogsConfig` in `config.js`.
 
-*Run the application*
+**Run the application**
+
 10. To run the application locally:
 - Do `node app.js` at the root of the project in a terminal
 - Do `npm install` at the root of the project. Then `npm start`!
 
-*Setting your admin rights*
+**Setting your admin rights**
+
 The first time you access agator9999, login with your Google account. You should at this moment only have read access.
 
 11. In the Firebase Authentication Console, go to the `Users` tab.
