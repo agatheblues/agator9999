@@ -1,7 +1,7 @@
 # agator9999: A music albums library
 
 ## About
-agator9999 is a music library that lists your favourite albums from various streaming sources, in one place. It has a Spotify and a Discogs integration.
+agator9999 is a music library that lists your favourite albums from various streaming sources, in one place. It has a Spotify and a Discogs integration for enriched metadata.
 
 ## But why?
 It all started when Spotify told me: *"Epic collection, friend. Your library is all filled up. To save more, you'll need to remove some songs."*. Hitting the 'Save' button on an album has a limit: you can save 10 000 songs in your library. I am constantly seeking new music, but I cannot remember all of the artists and albums I listened to, so I use my Spotify library as my music *storage* place. Until now, because it's full. That's why I created agator9999: to have my own *storage* place where there can be albums from Spotify, as well as other streaming sources like Bandcamp.
@@ -32,7 +32,6 @@ It all started when Spotify told me: *"Epic collection, friend. Your library is 
 ## What agator9999 does not do?
 
 - Play music. It's a *storage* place. Like a shelf. Shelves don't play music. In the end it's just a nicer, browsable, nicely looking version of a library spreadsheet.
-- Link an artist added via Discogs to its Spotify equivalent.
 
 ## How to use it?
 agator9999 is a modest [React](https://reactjs.org/) web application which uses [Firebase](https://firebase.google.com/?authuser=0) as back-end.
@@ -76,10 +75,22 @@ The first time you access agator9999, login with your Google account. You should
 ```
 {
   "rules": {
-    ".read":"auth != null",
-    ".write": "root.child('users').child(auth.uid).child('isAdmin').val() == true",
-  	"users": {
+    "users": {
+      ".read":"auth != null",
+      ".write":"root.child('users').child(auth.uid).child('isAdmin').val() == true",
       ".indexOn": ["email"]
+    },
+    "artists": {
+      ".read":"auth != null",
+      ".write":"root.child('users').child(auth.uid).child('isAdmin').val() == true"
+    },
+    "albums": {
+    	".read":"auth != null",
+      ".write":"root.child('users').child(auth.uid).child('isAdmin').val() == true"
+    },
+    "secret": {
+      ".read":"root.child('users').child(auth.uid).child('isAdmin').val() == true",
+      ".write":false
     }
   }
 }
@@ -92,13 +103,21 @@ users:
   yourCopiedUID:
     email: "myGoogleEmailAddress@gmail.com",
     isAdmin: true
+secrets:
+    discogs_secret:  "yourDiscogsSecret"
 ```
 
 The `isAdmin` tag gives you rights to write to your Firebase database to the given UID. Would you want to have several admins, you can add another user to the list. `".read":"auth != null",` means that any authenticated user has read access to your database. You can of course change the rules settings as you wish (see [documentation](https://firebase.google.com/docs/database/security/)), and for example restrict the read rights to admin only.
 
+## How to deploy it?
+
+Read this: [Firebase Hosting](https://firebase.google.com/docs/hosting/). You can run `npm run build` that will generate your bundle, init a firebase hosting folder, link it to your firebase project and move there `index.html`, `bundle.js`, `style.css` and the `static` folder. Then hit `firebase deploy`!
 
 ## Disclaimer
-This tool has been created for personal use and not for commercial purposes. No artworks are stored in the database.
+This tool has been created for personal use and not for commercial purposes. No artworks are stored in the database. Also, this is *just* a codebase. You have to setup your own things!
+
+## Feedback
+Do you have any feedback? Do you want to contribute to the project? I would be more than happy!
 
 ## Kudos
 Thanks to [PierreGUI](https://github.com/PierreGUI) & [KtorZ](https://github.com/KtorZ) for their support :heart:!
