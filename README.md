@@ -3,6 +3,11 @@
 ## About
 agator9999 is a music library that lists your favourite albums from various streaming sources, in one place. It has a Spotify and a Discogs integration for enriched metadata.
 
+## Demo
+
+[DEMO](https://agator9999-demo.firebaseapp.com) 🔥🔥🔥
+
+
 ## But why?
 It all started when Spotify told me: *"Epic collection, friend. Your library is all filled up. To save more, you'll need to remove some songs."*. Hitting the 'Save' button on an album has a limit: you can save 10 000 songs in your library. I am constantly seeking new music, but I cannot remember all of the artists and albums I listened to, so I use my Spotify library as my music *storage* place. Until now, because it's full. That's why I created agator9999: to have my own *storage* place where there can be albums from Spotify, as well as other streaming sources like Bandcamp.
 
