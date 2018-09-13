@@ -506,3 +506,8 @@ export function getUser(email) {
     .equalTo(email)
     .once('value');
 }
+
+export function getDiscogsSecret() {
+  return getRef('secrets/discogs_secret')
+    .once('value');
+}

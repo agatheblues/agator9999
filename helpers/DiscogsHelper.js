@@ -19,12 +19,18 @@ export const sourceList = [
  * @return {func}              Axios instance
  */
 function getInstance() {
-  return axios.create({
-    baseURL: 'https://api.discogs.com/',
-    headers: {
-      'Authorization': `Discogs key=${discogsConfig.CONSUMER_KEY}, secret=${discogsConfig.CONSUMER_SECRET}`
-    }
-  });
+  return fb.getDiscogsSecret()
+    .then((data) => {
+      let secret = data.val();
+      
+      return axios.create({
+        baseURL: 'https://api.discogs.com/',
+        headers: {
+          'Authorization': `Discogs key=${discogsConfig.CONSUMER_KEY}, secret=${secret}`
+        }
+      });
+    })
+    .catch((error) => {console.log(error);});
 }
 
 
@@ -40,8 +46,7 @@ export function getRelease(uri, releaseType) {
   const id = getReleaseId(uri, releaseType);
 
   return getInstance()
-    .get('/' + releaseType + 's/' + id);
-
+    .then((instance) => instance.get('/' + releaseType + 's/' + id));
 }
 
 /**
@@ -64,7 +69,7 @@ function getReleaseId(uri, releaseType) {
  */
 function getArtist(id) {
   return getInstance()
-    .get(`/artists/${id}`);
+    .then((instance) => instance.get(`/artists/${id}`));
 }
 
 

@@ -113,7 +113,7 @@ The `isAdmin` tag gives you rights to write to your Firebase database to the giv
     	".read":"auth != null",
       ".write":"root.child('users').child(auth.uid).child('isAdmin').val() == true"
     },
-    "secret": {
+    "secrets": {
       ".read":"root.child('users').child(auth.uid).child('isAdmin').val() == true",
       ".write":false
     }
