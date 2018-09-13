@@ -129,6 +129,8 @@ If you now refresh your local page, you should see new features!
 
 Read this: [Firebase Hosting](https://firebase.google.com/docs/hosting/). You can run `npm run build` that will generate your bundle, init a firebase hosting folder, link it to your firebase project and move there `index.html`, `bundle.js`, `style.css` and the `static` folder. Then hit `firebase deploy`!
 
+Note: Don't forget to add your hosting URL to your Spotify application callback list, and in `config.js`.
+
 ## Disclaimer
 This tool has been created for personal use and not for commercial purposes. No artworks are stored in the database. Also, this is *just* a codebase. You have to setup your own things!
 
