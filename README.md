@@ -40,8 +40,8 @@ agator9999 is a modest [React](https://reactjs.org/) web application which uses 
 
 1. First, clone the project.
 2. Rename the file to `config.template.json` to `config.js`.
-2. Then, to use agator9999, you need to create a Firebase project. Go to the Firebase website, log in / sign in and select `Add Firebase to your web app`: a pop-up with your configuration will appear. Copy the values and replace them in `firebaseConfig` in the file `config.js`.
-3. Go to `Database`, select `Real-time Database` and set the `Rules` as follow (temporary):
+2. Then, to use agator9999, you need to create a Firebase project. Go to the Firebase website, log in / sign in and select `Add Firebase to your web app` (select the web option): a pop-up with your configuration will appear. Copy the configuration values and replace them in `firebaseConfig` in the file `config.js`.
+3. Go to `Database`, choose to create a `Real-time Database` and set the `Rules` as follow (temporary):
 
 ```
 {
@@ -60,22 +60,42 @@ agator9999 is a modest [React](https://reactjs.org/) web application which uses 
 
 **Discogs Setup**
 
-8. Go to [Discogs](https://www.discogs.com/settings/developers) and create your Discogs application.
-9. Copy the Consumer key and secret to `discogsConfig` in `config.js`.
+8. Go to [Discogs](https://www.discogs.com/settings/developers) and create your Discogs application. You don't need to fill the callback URL.
+9. Copy the Consumer key in `discogsConfig` in `config.js`. Keep secret aside for now.
+
+**Customize application name**
+
+You can change the `owner` value in `config.js` to customize the login page.
 
 **Run the application**
 
 10. To run the application locally:
-- Do `node app.js` at the root of the project in a terminal
-- Do `npm install` at the root of the project. Then `npm start`!
+- Do `npm install` at the root of the project.
+- Do `node app.js` at the root of the project in a terminal.
+- Open another terminal window, and do `npm start` at the root of the project.
+- Check out http://localhost:8888/ !
 
-**Setting your admin rights**
+**Setting your admin rights + Discogs secret**
 
-The first time you access agator9999, login with your Google account. You should at this moment only have read access.
+The first time you access agator9999, login with your Google account. You should at this moment only have read access. Once you have logged in once, you can go set yourself as an admin:
 
-11. In the Firebase Authentication Console, go to the `Users` tab.
-12. Copy the `User UID` next to your Google account
-13. Go to Database > Rules and change them to:
+11. Go to Firebase Authentication Page and go to Sign-in Method. Enable Google as an authentication provider.
+12. In the Firebase Authentication Console, go to the `Users` tab.
+13. Copy the `User UID` next to your Google account then go to `Data` and manually add a node at the root of your database as follow:
+
+```
+users:
+  yourCopiedUID:
+    email: "myGoogleEmailAddress@gmail.com",
+    isAdmin: true
+secrets:
+    discogs_secret:  "yourDiscogsSecret"
+```
+
+The `isAdmin` tag gives you rights to write to your Firebase database to the given UID. Would you want to have several admins, you can add another user to the list. `".read":"auth != null",` means that any authenticated user has read access to your database. You can of course change the rules settings as you wish (see [documentation](https://firebase.google.com/docs/database/security/)), and for example restrict the read rights to admin only.
+
+
+14. Go to Database > Rules and change them to:
 
 ```
 {
@@ -101,18 +121,9 @@ The first time you access agator9999, login with your Google account. You should
 }
 ```
 
-14. Then go to `Data` and manually add a node at the root of your database as follow:
 
-```
-users:
-  yourCopiedUID:
-    email: "myGoogleEmailAddress@gmail.com",
-    isAdmin: true
-secrets:
-    discogs_secret:  "yourDiscogsSecret"
-```
+If you now refresh your local page, you should see new features!
 
-The `isAdmin` tag gives you rights to write to your Firebase database to the given UID. Would you want to have several admins, you can add another user to the list. `".read":"auth != null",` means that any authenticated user has read access to your database. You can of course change the rules settings as you wish (see [documentation](https://firebase.google.com/docs/database/security/)), and for example restrict the read rights to admin only.
 
 ## How to deploy it?
 
