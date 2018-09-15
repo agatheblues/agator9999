@@ -114,9 +114,8 @@ export const formatAlbumSummary = ({ added_at = '', album: { id, tracks: { total
   }
 );
 
-export const formatSingleAlbumSummary = ({ id, tracks: { total = 0 }}) => (
+export const formatSpotifySingleAlbumSummary = ({ id, tracks: { total = 0 }}) => (
   {
-    id,
     tracks: { total }
   }
 );
@@ -130,7 +129,6 @@ export const formatDiscogsSingleAlbumSummary = ({ id, tracklist = []}) => (
 
 export const formatSpotifyArtist = ({ id, name = '', external_urls: { spotify = '' } }) => (
   {
-    id,
     name,
     url: spotify,
     source: 'spotify',
@@ -145,7 +143,6 @@ export const formatDiscogsArtist = ({ id, name = '' }) => (
     discogs_id: id
   }
 );
-
 
 
 /**
@@ -274,9 +271,10 @@ export function updateOrSetArtistsFromAlbums(items) {
  * @param  {object} album   Firebase album object
  * @return {Promise}
  */
-export function updateOrSetArtistsFromSingleAlbum(artists, album) {
+export function updateOrSetArtistsFromSingleAlbum(artists, album, albumSourceId, albumId) {
+  console.log(artists, album, albumSourceId, albumId);
   return artists.reduce(
-    (p, artist) => p.then(() => updateOrSetSingleArtistFromSingleAlbum(artist, album)),
+    (p, artist) => p.then(() => updateOrSetSingleArtistFromSingleAlbum(artist, album, albumSourceId, albumId)),
     Promise.resolve()
   );
 }
@@ -289,8 +287,8 @@ export function updateOrSetArtistsFromSingleAlbum(artists, album) {
  * @param  {object} album  Firebase album object
  * @return {Promise}
  */
-function updateOrSetSingleArtistFromSingleAlbum(artist, album) {
-
+function updateOrSetSingleArtistFromSingleAlbum(artist, album, albumSourceId, albumId) {
+  console.log('single', artist, album, albumSourceId, albumId);
   function mightUpdateArtist(snapshot) {
     if (!snapshot.exists()) { return true; /* did not update */ }
     updateArtistAlbumsList(artist, album);
@@ -298,7 +296,13 @@ function updateOrSetSingleArtistFromSingleAlbum(artist, album) {
 
   function mightSetArtist(didNotUpdate) {
     if (!didNotUpdate) { return; /* already updated */ }
-    setArtist(addFirstAlbumToArtist(artist, album));
+    getAlbumBySource(albumSourceId, albumId)
+      .then((snapshot) => {
+        snapshot.forEach((item) => {
+          const artistWithAlbum = addFirstAlbumToArtist(artist, album, item.key);
+          setArtist(artistWithAlbum);
+        });
+      });
   }
 
   if (!album.hasOwnProperty('added_at')) {
@@ -335,8 +339,8 @@ function updateArtistAlbumsList(artist, album) {
  */
 function setArtist(artist) {
   return getRef('artists')
-    .child(artist.id)
-    .set(omit(['id'], artist));
+    .push()
+    .set(artist);
 }
 
 
@@ -346,9 +350,9 @@ function setArtist(artist) {
  * @param {object} album  Firebase album object
  * @return {object}       Firebase artist object
  */
-function addFirstAlbumToArtist(artist, album) {
+function addFirstAlbumToArtist(artist, album, key) {
   artist['albums'] = {
-    [album.id]: {
+    [key]: {
       'totalTracks': album.tracks.total,
       'added_at': album.added_at
     }
@@ -437,10 +441,7 @@ export function setAlbums(albums) {
  * @return {Promise}        DataSnapshot of filter query
  */
 function checkIfAlbumExists(idName, idValue) {
-  return getRef('albums')
-    .orderByChild(idName)
-    .equalTo(idValue)
-    .once('value')
+  return getAlbumBySource(idName, idValue)
     .then(function(snapshot) {
       if (snapshot.exists()) { throw({ message : 'Oops! This album is already in your library!'});}
     });
@@ -483,6 +484,13 @@ export function getAlbum(id) {
   return getRef('albums/' + id)
     .once('value');
 
+}
+
+export function getAlbumBySource(sourceName, id) {
+  return getRef('albums')
+    .orderByChild(sourceName)
+    .equalTo(id)
+    .once('value');
 }
 
 

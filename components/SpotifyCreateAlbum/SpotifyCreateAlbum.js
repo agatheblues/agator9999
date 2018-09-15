@@ -152,7 +152,20 @@ class SpotifyCreateAlbum extends React.Component {
 
         // Add album
         const data = values.map(v => v.data);
-        return fb.setAlbumIfNotExists(fb.formatSpotifyDiscogsAlbum(data[0], data[1]));
+        return fb.setAlbumIfNotExists(fb.formatSpotifyDiscogsAlbum(data[0], data[1]))
+          .then(() => {
+            const artists = fb.formatArtists(data[0].artists, fb.formatSpotifyArtist);
+            const albumSummary = fb.formatSpotifySingleAlbumSummary(data[0]);
+            const id = data[0].id;
+            console.log(artists, albumSummary, id);
+            fb.updateOrSetArtistsFromSingleAlbum(artists, albumSummary, 'spotify_id', id);
+          });
+
+        // return Promise.all([
+        //   // fb.setAlbumIfNotExists(fb.formatSpotifyDiscogsAlbum(data[0], data[1])),
+        //   fb.updateOrSetArtistsFromSingleAlbum(fb.formatArtists(data[0].artists, fb.formatSpotifyArtist), fb.formatSingleAlbumSummary(data[0]))
+        //   // .then(() => api.getArtistsImages(this.accessToken, fb.getArtistIds(data[0].artists)))
+        // ]);
       })
       .then(() => this.handleSubmitSuccess())
       .catch((error) => this.handleSubmitError(error.message));
