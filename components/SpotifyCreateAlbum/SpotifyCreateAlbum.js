@@ -31,11 +31,11 @@ class SpotifyCreateAlbum extends React.Component {
 
     // set local state
     this.state = {
-      spotifyUri: 'spotify:album:2PVqtcY0gjunIwpcoJpjuZ',
+      spotifyUri: '',
       errorSubmit: false,
       errorSpotifyUri: null,
-      discogsUri: 'https://www.discogs.com/El-Huervo-Do-Not-Lay-Waste-To-Homes/master/1035759',
-      selectedReleaseType: 'master',
+      discogsUri: '',
+      selectedReleaseType: 'placeholder',
       errorDiscogsUri: null,
       messageSubmit: null,
       accessToken: this.accessToken,

@@ -45,18 +45,18 @@ const formatSpotifyImage = ({ height = null, width = null, url = '' }) => (
   }
 );
 
-export const formatDiscogsAlbum = ({ id, title = '', images = [], year = '', genres = [], styles = [], resource_url = ''}, source, url) => (
+export const formatDiscogsAlbum = ({ id, title = '', images = [], year = '', genres = [], styles = []}, source, url) => (
   {
-    id,
     name: title,
     images: formatDiscogsImages(images),
     release_date: year + '',
-    source,
+    streamingSource: source,
     url,
-    discogs_url: resource_url,
     genres,
     styles,
-    discogs_id: id
+    sources: {
+      discogs: id
+    }
   }
 );
 
@@ -116,15 +116,14 @@ export const formatAlbumSummary = ({ added_at = '', album: { id, tracks: { total
   }
 );
 
-export const formatSpotifySingleAlbumSummary = ({ id, tracks: { total = 0 }}) => (
+export const formatSpotifySingleAlbumSummary = ({ tracks: { total = 0 }}) => (
   {
     tracks: { total }
   }
 );
 
-export const formatDiscogsSingleAlbumSummary = ({ id, tracklist = []}) => (
+export const formatDiscogsSingleAlbumSummary = ({ tracklist = []}) => (
   {
-    id,
     tracks: { total: tracklist.length }
   }
 );
@@ -141,9 +140,8 @@ export const formatSpotifyArtist = ({ id, name = '', external_urls: { spotify = 
 
 export const formatDiscogsArtist = ({ id, name = '' }) => (
   {
-    id,
     name,
-    source: {
+    sources: {
       discogs: id
     }
   }
@@ -276,9 +274,9 @@ export function updateOrSetArtistsFromAlbums(items) {
  * @param  {object} album   Firebase album object
  * @return {Promise}
  */
-export function updateOrSetArtistsFromSingleAlbum(artists, album, albumSourceId, albumId) {
+export function updateOrSetArtistsFromSingleAlbum(artists, album, source, albumId) {
   return artists.reduce(
-    (p, artist) => p.then(() => updateOrSetSingleArtistFromSingleAlbum(artist, album, albumSourceId, albumId)),
+    (p, artist) => p.then(() => updateOrSetSingleArtistFromSingleAlbum(artist, album, source, albumId)),
     Promise.resolve()
   );
 }
@@ -316,7 +314,6 @@ function updateOrSetSingleArtistFromSingleAlbum(artist, album, source, albumId) 
   return getAlbumBySource(source, albumId)
     .then((filteredAlbums) => {
       filteredAlbums.forEach((item) => { albumKey = item.key;});
-
       return getArtistBySource(source, artist.sources[source])
         .then(mightUpdateArtist)
         .then(mightSetArtist);
@@ -456,8 +453,12 @@ export function setAlbums(albums) {
  * @param  {string} idValue Value of the id field to check against
  * @return {Promise}        DataSnapshot of filter query
  */
-function checkIfAlbumExists(idName, idValue) {
-  return getAlbumBySource(idName, idValue)
+function checkIfAlbumExists(source, pathToSource) {
+  if (!pathToSource.hasOwnProperty(source)) {
+    return;
+  }
+
+  return getAlbumBySource(source, pathToSource[source])
     .then(function(snapshot) {
       if (snapshot.exists()) { throw({ message : 'Oops! This album is already in your library!'});}
     });
@@ -469,8 +470,8 @@ function checkIfAlbumExists(idName, idValue) {
  */
 export function setAlbumIfNotExists(album) {
   return Promise.all([
-    checkIfAlbumExists('spotify', album.sources.spotify),
-    checkIfAlbumExists('discogs', album.sources.discogs)
+    checkIfAlbumExists('spotify', album.sources),
+    checkIfAlbumExists('discogs', album.sources)
   ]).then(() => setAlbum(album));
 }
 
@@ -542,7 +543,6 @@ export function updateArtistsImages(images) {
  * @return {Promise}
  */
 function updateASingleArtistImage(image) {
-
   return getArtistBySource(image.source, image.id)
     .then((filteredArtists) => {
       filteredArtists.forEach((item) => {

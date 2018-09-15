@@ -18,10 +18,10 @@ class DiscogsCreateAlbum extends React.Component {
     this.state = {
       errorSubmit: false,
       messageSubmit: null,
-      selectedSource: 'placeholder',
-      selectedReleaseType: 'placeholder',
-      discogsUri: '',
-      listeningUri: '',
+      selectedSource: 'youtube',
+      selectedReleaseType: 'release',
+      discogsUri: 'https://www.discogs.com/El-Huervo-Rust/release/7121314?ev=rr',
+      listeningUri: 'https://www.youtube.com/watch?v=TX1HxOF5evk',
       errorDiscogsUri: null,
       errorListeningUri: null,
       existingArtist: null,
@@ -160,14 +160,15 @@ class DiscogsCreateAlbum extends React.Component {
   saveDiscogsAlbumToFirebase() {
     dg.getRelease(this.state.discogsUri, this.state.selectedReleaseType)
       .then(({data}) => {
-        return Promise.all([
-          fb.setAlbumIfNotExists(fb.formatDiscogsAlbum(data, this.state.selectedSource, this.state.listeningUri)),
-          fb.updateOrSetArtistsFromSingleAlbum(fb.formatArtists(data.artists, fb.formatDiscogsArtist), fb.formatDiscogsSingleAlbumSummary(data))
-            .then(() => dg.getArtistsImages(fb.getArtistIds(data.artists)))
-        ]);
+        const artists = fb.formatArtists(data.artists, fb.formatDiscogsArtist);
+        const albumSummary = fb.formatDiscogsSingleAlbumSummary(data);
+
+        return fb.setAlbumIfNotExists(fb.formatDiscogsAlbum(data, this.state.selectedSource, this.state.listeningUri))
+          .then(() => fb.updateOrSetArtistsFromSingleAlbum(artists, albumSummary, 'discogs', data.id))
+          .then(() => dg.getArtistsImages(fb.getArtistIds(data.artists), 'discogs'));
       })
       .then(() => this.handleSubmitSuccess())
-      .catch((error) => { this.handleSubmitError(error.message); });
+      .catch((error) => this.handleSubmitError(error.message));
   }
 
   /**

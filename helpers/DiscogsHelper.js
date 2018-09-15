@@ -22,7 +22,7 @@ function getInstance() {
   return fb.getDiscogsSecret()
     .then((data) => {
       let secret = data.val();
-      
+
       return axios.create({
         baseURL: 'https://api.discogs.com/',
         headers: {
@@ -68,6 +68,11 @@ function getReleaseId(uri, releaseType) {
  * @return {Object}    Discogs' artist object
  */
 function getArtist(id) {
+  if (id == 194) { // PLaceholder for Various artists
+    return getInstance().then(() => {
+      return { data: { id: id, images: [] }};
+    });
+  }
   return getInstance()
     .then((instance) => instance.get(`/artists/${id}`));
 }
@@ -75,12 +80,11 @@ function getArtist(id) {
 
 /**************** ARTIST IMAGE ******************/
 
-export function getArtistsImages(artistIds) {
-
+export function getArtistsImages(artistIds, source) {
   const arrayOfImagePromises = artistIds.map((id) =>
     getArtist(id)
       .then(({data}) => {
-        fb.updateArtistsImages(formatArtistsImages(data));
+        fb.updateArtistsImages(formatArtistsImages(data, source));
       })
   );
 
@@ -93,9 +97,10 @@ export function getArtistsImages(artistIds) {
  * @param  {object} artist Artist object as sent back by Discogs
  * @return {Array}        Array with one formatted artist object
  */
-function formatArtistsImages(artist) {
+function formatArtistsImages(artist, source) {
   return [{
     id: artist.id,
+    source: source,
     imgUrl: getArtistImageUrl(artist)
   }];
 }
