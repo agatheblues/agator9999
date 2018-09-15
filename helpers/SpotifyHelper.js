@@ -255,14 +255,14 @@ export function getProfile(token) {
 
 /******** ARTIST IMAGES  *********/
 
-export function getArtistsImages(token, artistIds) {
+export function getArtistsImages(token, artistIds, source) {
 
   // Create batches of 50 ids
   const artistIdsChunks = splitArrayInChunks(artistIds, 50);
 
   const arrayOfImagePromises = artistIdsChunks.map((chunk) =>
     getArtistsChunkImages(token, chunk)
-      .then((response) => fb.updateArtistsImages(formatArtistsImages(response.data.artists)))
+      .then((response) => fb.updateArtistsImages(formatArtistsImages(response.data.artists, source)))
   );
 
   return Promise.all(arrayOfImagePromises);
@@ -303,12 +303,14 @@ function getArtistImageUrl(artist) {
 /**
  * Format the response of getting artists to extract images
  * @param  {array} artists  List of Spotify Artists
+ * @param  {String} source  Name of the source
  * @return {array}          List of object containing id and imgUrl of each artist
  */
-function formatArtistsImages(artists) {
+function formatArtistsImages(artists, source) {
   return artists.map((artist) => {
     return {
       id: artist.id,
+      source: source,
       imgUrl: getArtistImageUrl(artist)
     };
   });

@@ -11,6 +11,17 @@ import Dropdown from '../Dropdown/Dropdown';
 import Loading from '../Loading/Loading';
 import { checkSpotifyUri, checkDiscogsUri } from '../../helpers/ErrorHelper';
 
+
+function saveArtists(token, albumData) {
+  const artists = fb.formatArtists(albumData[0].artists, fb.formatSpotifyArtist);
+  const albumSummary = fb.formatSpotifySingleAlbumSummary(albumData[0]);
+  const id = albumData[0].id;
+
+  fb.updateOrSetArtistsFromSingleAlbum(artists, albumSummary, 'spotify', id)
+    .then(() => api.getArtistsImages(token, fb.getArtistIds(albumData[0].artists), 'spotify'));
+};
+
+
 class SpotifyCreateAlbum extends React.Component {
   constructor(props) {
     super();
@@ -141,47 +152,23 @@ class SpotifyCreateAlbum extends React.Component {
    * Get Discogs Album
    * Update Spotify album with Discogs metadata
    */
-  saveSpotifyAlbumToFirebase() {
+  saveSpotifyAlbumAndArtists() {
+    const token = this.accessToken;
+
     Promise.all([
-      api.getAlbum(this.accessToken, this.getSpotifyId(this.state.spotifyUri)),
+      api.getAlbum(token, this.getSpotifyId(this.state.spotifyUri)),
       dg.getRelease(this.state.discogsUri, this.state.selectedReleaseType)
     ])
       .then(function(values) {
         // Just in case
         if (values.length != 2) { throw({ message : 'Oops! Something went wrong while retrieving data from Spotify or Discogs.'});}
 
-        // Add album
-        const data = values.map(v => v.data);
-        return fb.setAlbumIfNotExists(fb.formatSpotifyDiscogsAlbum(data[0], data[1]))
-          .then(() => {
-            const artists = fb.formatArtists(data[0].artists, fb.formatSpotifyArtist);
-            const albumSummary = fb.formatSpotifySingleAlbumSummary(data[0]);
-            const id = data[0].id;
-            console.log(artists, albumSummary, id);
-            fb.updateOrSetArtistsFromSingleAlbum(artists, albumSummary, 'spotify_id', id);
-          });
-
-        // return Promise.all([
-        //   // fb.setAlbumIfNotExists(fb.formatSpotifyDiscogsAlbum(data[0], data[1])),
-        //   fb.updateOrSetArtistsFromSingleAlbum(fb.formatArtists(data[0].artists, fb.formatSpotifyArtist), fb.formatSingleAlbumSummary(data[0]))
-        //   // .then(() => api.getArtistsImages(this.accessToken, fb.getArtistIds(data[0].artists)))
-        // ]);
+        const albumData = values.map(v => v.data);
+        return fb.setAlbumIfNotExists(fb.formatSpotifyDiscogsAlbum(albumData[0], albumData[1]))
+          .then(() => saveArtists(token, albumData));
       })
       .then(() => this.handleSubmitSuccess())
       .catch((error) => this.handleSubmitError(error.message));
-
-    // api.getAlbum(this.accessToken, this.getSpotifyId(this.state.spotifyUri))
-    //   .then(({data}) => Promise.all([
-    //     fb.setAlbumIfNotExists(fb.formatSpotifyAlbum(data)),
-    //     fb.updateOrSetArtistsFromSingleAlbum(fb.formatArtists(data.artists, fb.formatSpotifyArtist), fb.formatSingleAlbumSummary(data))
-    //       .then(() => api.getArtistsImages(this.accessToken, fb.getArtistIds(data.artists)))
-    //   ]))
-    //   .then(() => dg.getRelease(this.state.discogsUri, this.state.selectedReleaseType))
-    //   .then(({data}) => {
-    //     return fb.updateSpotifyAlbumWithDiscogsAlbum(this.getSpotifyId(this.state.spotifyUri), fb.formatDiscogsUpdateAlbum(data));
-    //   })
-    //   .then(() => this.handleSubmitSuccess())
-    //   .catch((error) => this.handleSubmitError(error.message));
   }
 
   /**
@@ -210,7 +197,7 @@ class SpotifyCreateAlbum extends React.Component {
       loaded: false
     });
 
-    this.saveSpotifyAlbumToFirebase();
+    this.saveSpotifyAlbumAndArtists();
   }
 
   render() {

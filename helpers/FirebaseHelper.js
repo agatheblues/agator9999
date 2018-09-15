@@ -75,8 +75,9 @@ export const formatSpotifyAlbum = ({ id, name = '', external_urls: { spotify = '
     url: spotify,
     images: formatSpotifyImages(images),
     release_date,
-    source: 'spotify',
-    spotify_id: id
+    sources: {
+      spotify: id
+    }
   }
 );
 
@@ -97,12 +98,13 @@ export const formatSpotifyDiscogsAlbum = (
     url: spotify,
     images: formatSpotifyImages(images),
     release_date,
-    source: 'spotify',
-    spotify_id: spotify_id,
+    sources: {
+      spotify: spotify_id,
+      discogs: discogs_id
+    },
     discogs_url: resource_url,
     genres,
-    styles,
-    discogs_id: discogs_id
+    styles
   }
 );
 
@@ -131,8 +133,9 @@ export const formatSpotifyArtist = ({ id, name = '', external_urls: { spotify = 
   {
     name,
     url: spotify,
-    source: 'spotify',
-    spotify_id: id
+    sources: {
+      spotify: id
+    }
   }
 );
 
@@ -140,7 +143,9 @@ export const formatDiscogsArtist = ({ id, name = '' }) => (
   {
     id,
     name,
-    discogs_id: id
+    source: {
+      discogs: id
+    }
   }
 );
 
@@ -272,7 +277,6 @@ export function updateOrSetArtistsFromAlbums(items) {
  * @return {Promise}
  */
 export function updateOrSetArtistsFromSingleAlbum(artists, album, albumSourceId, albumId) {
-  console.log(artists, album, albumSourceId, albumId);
   return artists.reduce(
     (p, artist) => p.then(() => updateOrSetSingleArtistFromSingleAlbum(artist, album, albumSourceId, albumId)),
     Promise.resolve()
@@ -287,32 +291,36 @@ export function updateOrSetArtistsFromSingleAlbum(artists, album, albumSourceId,
  * @param  {object} album  Firebase album object
  * @return {Promise}
  */
-function updateOrSetSingleArtistFromSingleAlbum(artist, album, albumSourceId, albumId) {
-  console.log('single', artist, album, albumSourceId, albumId);
-  function mightUpdateArtist(snapshot) {
-    if (!snapshot.exists()) { return true; /* did not update */ }
-    updateArtistAlbumsList(artist, album);
-  }
-
-  function mightSetArtist(didNotUpdate) {
-    if (!didNotUpdate) { return; /* already updated */ }
-    getAlbumBySource(albumSourceId, albumId)
-      .then((snapshot) => {
-        snapshot.forEach((item) => {
-          const artistWithAlbum = addFirstAlbumToArtist(artist, album, item.key);
-          setArtist(artistWithAlbum);
-        });
-      });
-  }
+function updateOrSetSingleArtistFromSingleAlbum(artist, album, source, albumId) {
+  let albumKey;
 
   if (!album.hasOwnProperty('added_at')) {
     // Add album added date
     album.added_at = new Date().toUTCString();
   }
 
-  return getArtist(artist.id)
-    .then(mightUpdateArtist)
-    .then(mightSetArtist);
+  function mightUpdateArtist(artistsWithThisId) {
+    if (!artistsWithThisId.exists()) { return true; /* did not update */ }
+    artistsWithThisId.forEach((artist) => {
+      updateArtistAlbumsList(artist.key, album, albumKey);
+      return;
+    });
+  }
+
+  function mightSetArtist(didNotUpdate) {
+    if (!didNotUpdate) { return; /* already updated */ }
+    const artistWithAlbumProperty = addFirstAlbumToArtist(artist, album, albumKey);
+    return setArtist(artistWithAlbumProperty);
+  }
+
+  return getAlbumBySource(source, albumId)
+    .then((filteredAlbums) => {
+      filteredAlbums.forEach((item) => { albumKey = item.key;});
+
+      return getArtistBySource(source, artist.sources[source])
+        .then(mightUpdateArtist)
+        .then(mightSetArtist);
+    });
 }
 
 
@@ -322,10 +330,10 @@ function updateOrSetSingleArtistFromSingleAlbum(artist, album, albumSourceId, al
  * @param  {object} album  Firebase album object
  * @return {Promise}
  */
-function updateArtistAlbumsList(artist, album) {
+function updateArtistAlbumsList(artistId, album, albumKey) {
   return getRef('artists')
     .update({
-      [`/${artist.id}/albums/${album.id}`]: {
+      [`/${artistId}/albums/${albumKey}`]: {
         'totalTracks': album.tracks.total,
         'added_at': album.added_at
       },
@@ -371,6 +379,14 @@ export function getArtist(id) {
   return getRef('artists/' + id)
     .once('value');
 
+}
+
+export function getArtistBySource(source, id) {
+
+  return getRef('artists')
+    .orderByChild('sources/' + source)
+    .equalTo(id)
+    .once('value');
 }
 
 
@@ -453,8 +469,8 @@ function checkIfAlbumExists(idName, idValue) {
  */
 export function setAlbumIfNotExists(album) {
   return Promise.all([
-    checkIfAlbumExists('spotify_id', album.spotify_id),
-    checkIfAlbumExists('discogs_id', album.discogs_id)
+    checkIfAlbumExists('spotify', album.sources.spotify),
+    checkIfAlbumExists('discogs', album.sources.discogs)
   ]).then(() => setAlbum(album));
 }
 
@@ -476,7 +492,7 @@ export function updateSpotifyAlbumWithDiscogsAlbum(spotifyId, dgAlbum) {
 
 /**
  * Get a single album from FB
- * @param  {string} id        Album id
+ * @param  {string} id        Firebase Album id
  * @return {Promise}
  */
 export function getAlbum(id) {
@@ -486,9 +502,10 @@ export function getAlbum(id) {
 
 }
 
-export function getAlbumBySource(sourceName, id) {
+export function getAlbumBySource(source, id) {
+
   return getRef('albums')
-    .orderByChild(sourceName)
+    .orderByChild('sources/' + source)
     .equalTo(id)
     .once('value');
 }
@@ -526,8 +543,12 @@ export function updateArtistsImages(images) {
  */
 function updateASingleArtistImage(image) {
 
-  return getArtist(image.id)
-    .then(updateArtistImage(image));
+  return getArtistBySource(image.source, image.id)
+    .then((filteredArtists) => {
+      filteredArtists.forEach((item) => {
+        updateArtistImage(image, item.key);
+      });
+    });
 }
 
 
@@ -536,10 +557,10 @@ function updateASingleArtistImage(image) {
  * @param  {object} image Contains artist id and imgUrl
  * @return {Promise}
  */
-function updateArtistImage(image) {
+function updateArtistImage(image, artistId) {
   return getRef('artists')
     .update({
-      [`/${image.id}/imgUrl/`]: image.imgUrl
+      [`/${artistId}/imgUrl/`]: image.imgUrl
     });
 }
 
