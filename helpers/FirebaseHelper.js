@@ -71,13 +71,38 @@ export const formatDiscogsUpdateAlbum = ({ id, genres = [], styles = [], resourc
 
 export const formatSpotifyAlbum = ({ id, name = '', external_urls: { spotify = '' }, images = [], release_date = '' }) => (
   {
-    id,
     name,
     url: spotify,
     images: formatSpotifyImages(images),
     release_date,
     source: 'spotify',
     spotify_id: id
+  }
+);
+
+export const formatSpotifyDiscogsAlbum = (
+  { id: spotify_id,
+    name = '',
+    external_urls: { spotify = '' },
+    images = [],
+    release_date = ''
+  }, {
+    id: discogs_id,
+    genres = [],
+    styles = [],
+    resource_url = ''
+  }) => (
+  {
+    name,
+    url: spotify,
+    images: formatSpotifyImages(images),
+    release_date,
+    source: 'spotify',
+    spotify_id: spotify_id,
+    discogs_url: resource_url,
+    genres,
+    styles,
+    discogs_id: discogs_id
   }
 );
 
@@ -382,7 +407,7 @@ export function getArtistIds(artists) {
 /********** ALBUMS *********/
 
 /**
- * Save a single album in Firebase
+ * Save a single album in Firebase with an auto-generated key
  * @param  {objet} item       Spotify Album
  */
 function setAlbum(album) {
@@ -391,9 +416,7 @@ function setAlbum(album) {
     album.added_at = new Date().toUTCString();
   }
 
-  return getRef('albums')
-    .child(album.id)
-    .set(omit(['id'], album));
+  return getRef('albums').push().set(album);
 }
 
 /**
@@ -407,17 +430,31 @@ export function setAlbums(albums) {
   return Promise.all(flatten(albums.map((album) => setAlbum(album))));
 }
 
+/**
+ * Return a list of albums with a given id in DB
+ * @param  {String} idName  Name of the id field
+ * @param  {string} idValue Value of the id field to check against
+ * @return {Promise}        DataSnapshot of filter query
+ */
+function checkIfAlbumExists(idName, idValue) {
+  return getRef('albums')
+    .orderByChild(idName)
+    .equalTo(idValue)
+    .once('value')
+    .then(function(snapshot) {
+      if (snapshot.exists()) { throw({ message : 'Oops! This album is already in your library!'});}
+    });
+}
 
 /**
  * If album already exists, do not update, else set album
  * @param {object} album Album object
  */
 export function setAlbumIfNotExists(album) {
-  return getAlbum(album.id)
-    .then((snapshot) => {
-      if (snapshot.exists()) { throw({ message : 'Oops! This album is already in your library!'});}
-      setAlbum(album);
-    });
+  return Promise.all([
+    checkIfAlbumExists('spotify_id', album.spotify_id),
+    checkIfAlbumExists('discogs_id', album.discogs_id)
+  ]).then(() => setAlbum(album));
 }
 
 /**
