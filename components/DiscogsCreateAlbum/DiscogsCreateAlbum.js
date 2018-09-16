@@ -163,7 +163,7 @@ class DiscogsCreateAlbum extends React.Component {
         const artists = fb.formatArtists(data.artists, fb.formatDiscogsArtist);
         const albumSummary = fb.formatDiscogsSingleAlbumSummary(data);
 
-        return fb.setAlbumIfNotExists(fb.formatDiscogsAlbum(data, this.state.selectedSource, this.state.listeningUri, this.state.selectedReleaseType))
+        return fb.setAlbumIfNotExists(fb.formatDiscogsAlbum(data, this.state.selectedSource, this.state.listeningUri, this.state.selectedReleaseType), true)
           .then(() => fb.updateOrSetArtistsFromSingleAlbum(artists, albumSummary, 'discogs', data.id))
           .then(() => dg.getArtistsImages(fb.getArtistIds(data.artists), 'discogs'));
       })

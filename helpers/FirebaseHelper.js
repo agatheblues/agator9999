@@ -441,7 +441,7 @@ function setAlbum(album) {
  * @return {Promise}
  */
 export function setAlbums(albums) {
-  return Promise.all(flatten(albums.map((album) => setAlbumIfNotExists(album))));
+  return Promise.all(flatten(albums.map((album) => setAlbumIfNotExists(album, false))));
 }
 
 /**
@@ -452,24 +452,28 @@ export function setAlbums(albums) {
  */
 function checkIfAlbumExists(source, pathToSource) {
   if (!pathToSource.hasOwnProperty(source)) {
-    return;
+    return false;
   }
 
   return getAlbumBySource(source, pathToSource[source])
-    .then(function(snapshot) {
-      if (snapshot.exists()) { throw({ message : 'Oops! This album is already in your library!'});}
-    });
+    .then((snapshot) => snapshot.exists());
 }
 
 /**
  * If album already exists, do not update, else set album
  * @param {object} album Album object
  */
-export function setAlbumIfNotExists(album) {
+export function setAlbumIfNotExists(album, throwDuplicateError) {
   return Promise.all([
-    checkIfAlbumExists('spotify', album.sources),
-    checkIfAlbumExists('discogs', album.sources)
-  ]).then(() => setAlbum(album));
+    checkIfAlbumExists('spotify', album.sources, throwDuplicateError),
+    checkIfAlbumExists('discogs', album.sources, throwDuplicateError)
+  ]).then((existsArray) => {
+    const exists = existsArray.some((item) => item == true);
+
+    if (exists && throwDuplicateError) throw({ message : 'Oops! This album is already in your library!'});
+    if (exists) return;
+    setAlbum(album);
+  });
 }
 
 /**

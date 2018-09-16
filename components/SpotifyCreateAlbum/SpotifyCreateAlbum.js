@@ -165,7 +165,7 @@ class SpotifyCreateAlbum extends React.Component {
         if (values.length != 2) { throw({ message : 'Oops! Something went wrong while retrieving data from Spotify or Discogs.'});}
 
         const albumData = values.map(v => v.data);
-        return fb.setAlbumIfNotExists(fb.formatSpotifyDiscogsAlbum(albumData[0], albumData[1], releaseType))
+        return fb.setAlbumIfNotExists(fb.formatSpotifyDiscogsAlbum(albumData[0], albumData[1], releaseType), true)
           .then(() => saveArtists(token, albumData));
       })
       .then(() => this.handleSubmitSuccess())
