@@ -17,10 +17,11 @@ const reducer = (totalTracks, album) => totalTracks + album.totalTracks;
  * @return {String}        HTML Markup
  */
 const renderListeningUri = function(artist) {
-  if (artist.source && artist.url) {
+  if (artist.sources.hasOwnProperty('spotify')) {
+    const url = 'https://open.spotify.com/artist/' + artist.sources.spotify;
     return (
       <p>
-        <a href={artist.url}>&#9836; Open in <span className='capitalize'>{artist.source}</span>
+        <a href={url}>&#9836; Open in <span className='capitalize'>Spotify</span>
         </a>
       </p>);
   }

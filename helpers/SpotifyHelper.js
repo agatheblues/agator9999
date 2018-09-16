@@ -207,9 +207,9 @@ export function getAndSetUserSavedAlbums(token, offset) {
   return getUserSavedAlbumsChunk(token, offset)
     .then(({data}) => {
       const arrayOfPromises = [
-        fb.setAlbums(data.items.map((item) => fb.formatSpotifyAlbums(item))),
-        fb.updateOrSetArtistsFromAlbums(data.items)
-          .then(() => getArtistsImages(token, getArtistsIds(data.items)))
+        fb.setAlbums(data.items.map((item) => fb.formatSpotifyAlbums(item)))
+          .then(() => fb.updateOrSetArtistsFromAlbums(data.items, 'spotify'))
+          .then(() => getArtistsImages(token, getArtistsIds(data.items), 'spotify'))
       ];
 
       // If there is a next page, push next promise to array

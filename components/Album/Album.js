@@ -132,8 +132,8 @@ class Album extends React.Component {
    * @return {String} CopyToClipboard component
    */
   renderCopyToClipboard() {
-    if (this.state.albumData.source != 'spotify') return null;
-    return <CopyToClipboard value={`spotify:album:${this.state.albumData.spotify_id}`}/>;
+    if (!this.state.albumData.sources.hasOwnProperty('spotify')) return null;
+    return <CopyToClipboard value={`spotify:album:${this.state.albumData.sources.spotify}`}/>;
   }
 
   /**
@@ -144,7 +144,7 @@ class Album extends React.Component {
   renderDiscogsForm() {
     if (!this.props.isAdmin) return null;
     if (!this.state.hasAlbumData) return null;
-    if (this.state.albumData.discogs_id) return null;
+    if (this.state.albumData.sources.hasOwnProperty('discogs')) return null;
     if (!this.state.showDiscogsForm) {
       return (
         <div className='album-minor-details'>
@@ -158,9 +158,32 @@ class Album extends React.Component {
         <div className='album-minor-details'>
           <p><a href='' onClick={this.handleHideDiscogsClick}>&#xFF0D; Link to Discogs</a></p>
         </div>
-        <SpotifyUpdateAlbum spotifyId={this.state.albumData.spotify_id} />
+        <SpotifyUpdateAlbum spotifyId={this.state.albumData.sources.spotify} />
       </div>
     );
+  }
+
+  renderOpenLink() {
+    if (this.state.albumData.sources.hasOwnProperty('spotify')) {
+      return (
+        <p className='album-open-link'>
+          <a href={`https://open.spotify.com/go?uri=spotify:album:${this.state.albumData.sources.spotify}`}
+            target='_blank'
+            rel='noopener noreferrer'>&#9836; Open in <span className='capitalize'>spotify</span>
+          </a>
+        </p>
+      );
+    }
+
+    return (
+      <p className='album-open-link'>
+        <a href={this.state.albumData.url}
+          target='_blank'
+          rel='noopener noreferrer'>&#9836; Open in <span className='capitalize'>{this.state.albumData.streamingSource}</span>
+        </a>
+      </p>
+    );
+
   }
 
   /**
@@ -180,12 +203,7 @@ class Album extends React.Component {
         <h2>{this.state.albumData.name}</h2>
         <div className='album-main-details'>
           <p>{this.state.albumData.release_date}&emsp;/&emsp;{this.props.totalTracks} tracks</p>
-          <p className='album-open-link'>
-            <a href={`https://open.spotify.com/go?uri=spotify:album:${this.state.albumData.spotify_id}`}
-              target='_blank'
-              rel='noopener noreferrer'>&#9836; Open in <span className='capitalize'>{this.state.albumData.source}</span>
-            </a>
-          </p>
+          { this.renderOpenLink() }
           { this.renderCopyToClipboard() }
         </div>
         <div className='album-minor-details'>

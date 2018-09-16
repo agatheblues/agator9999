@@ -72,7 +72,6 @@ export const formatDiscogsUpdateAlbum = ({ id, genres = [], styles = [], resourc
 export const formatSpotifyAlbum = ({ id, name = '', external_urls: { spotify = '' }, images = [], release_date = '' }) => (
   {
     name,
-    url: spotify,
     images: formatSpotifyImages(images),
     release_date,
     sources: {
@@ -95,7 +94,6 @@ export const formatSpotifyDiscogsAlbum = (
   }) => (
   {
     name,
-    url: spotify,
     images: formatSpotifyImages(images),
     release_date,
     sources: {
@@ -260,9 +258,9 @@ function omit(keys, obj) {
  * @return {object}      artist object for DB: { id: {}}
  */
 
-export function updateOrSetArtistsFromAlbums(items) {
+export function updateOrSetArtistsFromAlbums(items, source) {
   return items.reduce(
-    (p, item) => p.then(() => updateOrSetArtistsFromSingleAlbum(formatArtists(item.album.artists, formatSpotifyArtist), formatAlbumSummary(item))),
+    (p, item) => p.then(() => updateOrSetArtistsFromSingleAlbum(formatArtists(item.album.artists, formatSpotifyArtist), formatAlbumSummary(item), source, item.album.id)),
     Promise.resolve()
   );
 }
@@ -444,7 +442,7 @@ function setAlbum(album) {
  * @return {Promise}
  */
 export function setAlbums(albums) {
-  return Promise.all(flatten(albums.map((album) => setAlbum(album))));
+  return Promise.all(flatten(albums.map((album) => setAlbumIfNotExists(album))));
 }
 
 /**
@@ -482,12 +480,18 @@ export function setAlbumIfNotExists(album) {
  * @return {Promise}          Firebase update promise
  */
 export function updateSpotifyAlbumWithDiscogsAlbum(spotifyId, dgAlbum) {
-  return getRef('albums/' + spotifyId)
-    .update({
-      ['/discogs_url']: dgAlbum.discogs_url,
-      ['/genres'] : dgAlbum.genres,
-      ['/styles']: dgAlbum.styles,
-      ['/discogs_id']: dgAlbum.discogs_id
+  console.log(spotifyId, dgAlbum);
+  return getAlbumBySource('spotify', spotifyId)
+    .then((snapshot) => {
+      snapshot.forEach((album) => {
+        getRef('albums/' + album.key)
+          .update({
+            ['/discogs_url']: dgAlbum.discogs_url,
+            ['/genres'] : dgAlbum.genres,
+            ['/styles']: dgAlbum.styles,
+            ['/sources/discogs']: dgAlbum.discogs_id
+          });
+      });
     });
 }
 
