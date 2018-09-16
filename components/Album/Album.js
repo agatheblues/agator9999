@@ -179,7 +179,7 @@ class Album extends React.Component {
       <p className='album-open-link'>
         <a href={this.state.albumData.url}
           target='_blank'
-          rel='noopener noreferrer'>&#9836; Open in <span className='capitalize'>{this.state.albumData.streamingSource}</span>
+          rel='noopener noreferrer'>&#9836; Open in <span className='capitalize'>{this.state.albumData.streaming_source}</span>
         </a>
       </p>
     );

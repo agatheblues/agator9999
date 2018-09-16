@@ -45,24 +45,25 @@ const formatSpotifyImage = ({ height = null, width = null, url = '' }) => (
   }
 );
 
-export const formatDiscogsAlbum = ({ id, title = '', images = [], year = '', genres = [], styles = []}, source, url) => (
+export const formatDiscogsAlbum = ({ id, title = '', images = [], year = '', genres = [], styles = []}, source, url, release_type) => (
   {
     name: title,
     images: formatDiscogsImages(images),
     release_date: year + '',
-    streamingSource: source,
+    streaming_source: source,
     url,
     genres,
     styles,
+    release_type,
     sources: {
       discogs: id
     }
   }
 );
 
-export const formatDiscogsUpdateAlbum = ({ id, genres = [], styles = [], resource_url = ''}) => (
+export const formatDiscogsUpdateAlbum = ({ id, genres = [], styles = []}, release_type) => (
   {
-    discogs_url: resource_url,
+    release_type,
     genres,
     styles,
     discogs_id: id
@@ -83,15 +84,14 @@ export const formatSpotifyAlbum = ({ id, name = '', external_urls: { spotify = '
 export const formatSpotifyDiscogsAlbum = (
   { id: spotify_id,
     name = '',
-    external_urls: { spotify = '' },
     images = [],
     release_date = ''
   }, {
     id: discogs_id,
     genres = [],
-    styles = [],
-    resource_url = ''
-  }) => (
+    styles = []
+  },
+  release_type) => (
   {
     name,
     images: formatSpotifyImages(images),
@@ -100,9 +100,9 @@ export const formatSpotifyDiscogsAlbum = (
       spotify: spotify_id,
       discogs: discogs_id
     },
-    discogs_url: resource_url,
     genres,
-    styles
+    styles,
+    release_type
   }
 );
 
@@ -126,10 +126,9 @@ export const formatDiscogsSingleAlbumSummary = ({ tracklist = []}) => (
   }
 );
 
-export const formatSpotifyArtist = ({ id, name = '', external_urls: { spotify = '' } }) => (
+export const formatSpotifyArtist = ({ id, name = ''}) => (
   {
     name,
-    url: spotify,
     sources: {
       spotify: id
     }
@@ -480,13 +479,12 @@ export function setAlbumIfNotExists(album) {
  * @return {Promise}          Firebase update promise
  */
 export function updateSpotifyAlbumWithDiscogsAlbum(spotifyId, dgAlbum) {
-  console.log(spotifyId, dgAlbum);
   return getAlbumBySource('spotify', spotifyId)
     .then((snapshot) => {
       snapshot.forEach((album) => {
         getRef('albums/' + album.key)
           .update({
-            ['/discogs_url']: dgAlbum.discogs_url,
+            ['/release_type']: dgAlbum.release_type,
             ['/genres'] : dgAlbum.genres,
             ['/styles']: dgAlbum.styles,
             ['/sources/discogs']: dgAlbum.discogs_id

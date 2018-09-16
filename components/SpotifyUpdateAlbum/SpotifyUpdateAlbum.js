@@ -88,9 +88,11 @@ class SpotifyUpdateAlbum extends React.Component {
    * Update album with Discogs metadata
    */
   updateSpotifyAlbum() {
-    dg.getRelease(this.state.discogsUri, this.state.selectedReleaseType)
+    const releaseType = this.state.selectedReleaseType;
+
+    dg.getRelease(this.state.discogsUri, releaseType)
       .then(({data}) => {
-        return fb.updateSpotifyAlbumWithDiscogsAlbum(this.props.spotifyId, fb.formatDiscogsUpdateAlbum(data));
+        return fb.updateSpotifyAlbumWithDiscogsAlbum(this.props.spotifyId, fb.formatDiscogsUpdateAlbum(data, releaseType));
       })
       .catch((error) => {
         this.handleSubmitError(error.message);

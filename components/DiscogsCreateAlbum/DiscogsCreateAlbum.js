@@ -18,10 +18,10 @@ class DiscogsCreateAlbum extends React.Component {
     this.state = {
       errorSubmit: false,
       messageSubmit: null,
-      selectedSource: 'youtube',
-      selectedReleaseType: 'release',
-      discogsUri: 'https://www.discogs.com/El-Huervo-Rust/release/7121314?ev=rr',
-      listeningUri: 'https://www.youtube.com/watch?v=TX1HxOF5evk',
+      selectedSource: 'placeholder',
+      selectedReleaseType: 'placeholder',
+      discogsUri: '',
+      listeningUri: '',
       errorDiscogsUri: null,
       errorListeningUri: null,
       existingArtist: null,
@@ -163,7 +163,7 @@ class DiscogsCreateAlbum extends React.Component {
         const artists = fb.formatArtists(data.artists, fb.formatDiscogsArtist);
         const albumSummary = fb.formatDiscogsSingleAlbumSummary(data);
 
-        return fb.setAlbumIfNotExists(fb.formatDiscogsAlbum(data, this.state.selectedSource, this.state.listeningUri))
+        return fb.setAlbumIfNotExists(fb.formatDiscogsAlbum(data, this.state.selectedSource, this.state.listeningUri, this.state.selectedReleaseType))
           .then(() => fb.updateOrSetArtistsFromSingleAlbum(artists, albumSummary, 'discogs', data.id))
           .then(() => dg.getArtistsImages(fb.getArtistIds(data.artists), 'discogs'));
       })

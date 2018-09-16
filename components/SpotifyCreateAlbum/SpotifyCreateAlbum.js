@@ -154,17 +154,18 @@ class SpotifyCreateAlbum extends React.Component {
    */
   saveSpotifyAlbumAndArtists() {
     const token = this.accessToken;
+    const releaseType = this.state.selectedReleaseType;
 
     Promise.all([
       api.getAlbum(token, this.getSpotifyId(this.state.spotifyUri)),
-      dg.getRelease(this.state.discogsUri, this.state.selectedReleaseType)
+      dg.getRelease(this.state.discogsUri, releaseType)
     ])
       .then(function(values) {
         // Just in case
         if (values.length != 2) { throw({ message : 'Oops! Something went wrong while retrieving data from Spotify or Discogs.'});}
 
         const albumData = values.map(v => v.data);
-        return fb.setAlbumIfNotExists(fb.formatSpotifyDiscogsAlbum(albumData[0], albumData[1]))
+        return fb.setAlbumIfNotExists(fb.formatSpotifyDiscogsAlbum(albumData[0], albumData[1], releaseType))
           .then(() => saveArtists(token, albumData));
       })
       .then(() => this.handleSubmitSuccess())

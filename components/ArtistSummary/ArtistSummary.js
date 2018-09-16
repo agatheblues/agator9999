@@ -21,7 +21,11 @@ const renderListeningUri = function(artist) {
     const url = 'https://open.spotify.com/artist/' + artist.sources.spotify;
     return (
       <p>
-        <a href={url}>&#9836; Open in <span className='capitalize'>Spotify</span>
+        <a
+          href={url}
+          target='_blank'
+          rel='noopener noreferrer'
+        >&#9836; Open in <span className='capitalize'>Spotify</span>
         </a>
       </p>);
   }
