@@ -105,7 +105,7 @@ class Artist extends React.Component {
 
     return (
       <div>
-        <ArtistSummary artist={this.state.artistData} />
+        <ArtistSummary id={this.props.match.params.id} artist={this.state.artistData} />
         { this.renderAlbums() }
       </div>
     );

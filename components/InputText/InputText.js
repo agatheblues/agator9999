@@ -12,13 +12,13 @@ class InputText extends React.Component {
 
   handleFocus(event) {
     if (this.props.handleFocus) {
-      this.props.handleFocus(this.state.value);
+      this.props.handleFocus();
     }
   }
 
   handleChange(event) {
     this.props.handleValue(event.target.value);
-    this.props.handleError(event.target.value);
+    if (this.props.handleError) this.props.handleError(event.target.value);
   }
 
   render() {
@@ -43,7 +43,7 @@ class InputText extends React.Component {
 InputText.propTypes = {
   placeholder: PropTypes.string,
   handleValue: PropTypes.func.isRequired,
-  handleError: PropTypes.func.isRequired,
+  handleError: PropTypes.func,
   handleFocus: PropTypes.func,
   id: PropTypes.string,
   value: PropTypes.string

@@ -3,8 +3,12 @@ import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 require('./Card.scss');
 
-const Card = function({id, name, imgUrl, totalAlbums}) {
-  let albums = (totalAlbums > 1) ? totalAlbums + ' albums' : totalAlbums + ' album';
+const Card = function({id, name, imgUrl, totalAlbums, source}) {
+  let albums;
+  if (totalAlbums) {
+    albums = (totalAlbums > 1) ? totalAlbums + ' albums' : totalAlbums + ' album';
+  }
+
   return (
     <div className='card-container'>
       <Link to={'/artist/' + id} className='card-link'>
@@ -13,7 +17,12 @@ const Card = function({id, name, imgUrl, totalAlbums}) {
           </div>
           <div className='card-details'>
             <p>{name}</p>
-            <p>{albums}</p>
+            {albums &&
+              <p>{albums}</p>
+            }
+            {source &&
+              <p>Source: <span className='capitalize'>{source}</span></p>
+            }
           </div>
         </div>
       </Link>
@@ -25,7 +34,8 @@ Card.propTypes = {
   id: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   totalAlbums: PropTypes.number,
-  imgUrl: PropTypes.string
+  imgUrl: PropTypes.string,
+  source: PropTypes.string
 };
 
 export default Card;
