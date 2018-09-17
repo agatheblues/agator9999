@@ -9,7 +9,7 @@ class SortBy extends React.Component {
     super(props);
 
     this.state = {
-      order: -1,
+      order: 1,
       orderLabel: this.props.labelDown,
       orderIcon: '../static/images/Arrowhead-Down-01-32.png'
     };
@@ -18,16 +18,22 @@ class SortBy extends React.Component {
   }
 
   handleClick() {
-    const orderLabel = (this.state.order == 1) ? this.props.labelDown : this.props.labelUp;
-    const orderIcon = (this.state.order == 1) ? '../static/images/Arrowhead-Down-01-32.png' : '../static/images/Arrowhead-01-32.png';
+    let order = this.state.order;
+
+    if (this.props.type === this.props.activeSort) {
+      order = -order;
+    };
+
+    const orderLabel = (order == -1) ? this.props.labelUp : this.props.labelDown;
+    const orderIcon = (order == -1) ? '../static/images/Arrowhead-01-32.png' : '../static/images/Arrowhead-Down-01-32.png';
+
+    this.props.sort(order);
 
     this.setState({
-      order: -this.state.order,
+      order,
       orderLabel: orderLabel,
       orderIcon: orderIcon
     });
-
-    this.props.sort(this.state.order);
   }
 
   render() {
