@@ -1,5 +1,17 @@
+.artist-banner-container {
+  background-position: center;
+  background-size: cover;
+}
+
 .artist-banner-wrapper {
+  background-color: rgba(0, 0, 0, 0.2);
+  height: 300px;
   position: relative;
+  transition: background-color .2s linear;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.4);
+  }
 }
 
 .artist-banner-wrapper p {
@@ -28,15 +40,4 @@
 
 .artist-banner-content {
   padding-bottom: 30px;
-}
-
-.artist-banner-image {
-  height: 300px;
-  background-position: center;
-  background-size: cover;
-}
-
-.artist-banner-image--overlay {
-  background-color: rgba(0, 0, 0, 0.1);
-  height: 100%;
 }

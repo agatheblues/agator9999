@@ -27,7 +27,8 @@ const renderListeningUri = function(artist) {
           rel='noopener noreferrer'
         >&#9836; Open in <span className='capitalize'>Spotify</span>
         </a>
-      </p>);
+      </p>
+    );
   }
 
   return <p className='not-available not-available--line'>&#9836;</p>;
@@ -39,13 +40,8 @@ const ArtistSummary = function({ artist }) {
   let totalTracks = artist.albums.reduce(reducer, 0);
 
   return (
-    <div className='artist-banner-container'>
+    <div className='artist-banner-container' style={{ 'backgroundImage': `url('${artist.imgUrl}')`}}>
       <div className='artist-banner-wrapper'>
-
-        <div className='artist-banner-image' style={{ 'backgroundImage': `url('${artist.imgUrl}')`}}>
-          <div className='artist-banner-image--overlay'/>
-        </div>
-
         <div className='artist-banner-back-wrapper'>
           <div className='artist-banner-back content-container'>
             <Link to='/'>&#9839; Back to library</Link>
@@ -59,7 +55,6 @@ const ArtistSummary = function({ artist }) {
             { renderListeningUri(artist) }
           </div>
         </div>
-
       </div>
     </div>
   );
