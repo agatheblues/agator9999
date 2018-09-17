@@ -7,6 +7,7 @@ import Button from '../Button/Button';
 import Message from '../Message/Message';
 import Card from '../Card/Card';
 import SearchDropdown from '../SearchDropdown/SearchDropdown';
+import classNames from 'classnames';
 require('./ArtistMerge.scss');
 
 class ArtistMerge extends React.Component {
@@ -26,11 +27,21 @@ class ArtistMerge extends React.Component {
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
-  handleGetOriginArtistSuccess(artist) {
-    artist.id = this.props.match.params.id;
+  handleGetOriginArtistSuccess(artist, hasMerged) {
+    if (!hasMerged) {
+      artist.id = this.props.match.params.id;
+      this.setState({
+        originArtist: artist
+      });
+    }
+
     this.setState({
+      error: false,
+      message: 'Merge was successful!',
+      artistToMergeWith: null,
       originArtist: artist
     });
+
   }
 
   handleGetArtistError() {
@@ -69,10 +80,9 @@ class ArtistMerge extends React.Component {
   }
 
   handleSuccessMerge() {
-    this.setState({
-      error: false,
-      message: 'Merge was successful!'
-    });
+    fb.getArtist(this.props.match.params.id)
+      .then((snapshot) => this.handleGetOriginArtistSuccess(snapshot.val(), true))
+      .catch((error) => this.handleGetArtistError());
   }
 
   handleErrorMerge() {
@@ -84,7 +94,7 @@ class ArtistMerge extends React.Component {
 
   handleSubmit(e) {
     e.preventDefault();
-    
+
     fb.mergeArtists(this.state.originArtist.id, this.state.artistToMergeWith)
       .then(() => fb.removeArtist(this.state.artistToMergeWith.id))
       .then(() => this.handleSuccessMerge())
@@ -98,7 +108,6 @@ class ArtistMerge extends React.Component {
   }
 
   componentDidMount() {
-    // Get artist data
     fb.getArtist(this.props.match.params.id)
       .then((snapshot) => this.handleGetOriginArtistSuccess(snapshot.val()))
       .then(() => fb.getArtists()
@@ -109,7 +118,11 @@ class ArtistMerge extends React.Component {
   }
 
   render() {
-    // console.log(this.state);
+    const cardClass = classNames({
+      'form-row-container form-row--center': true,
+      'form-row--space-between': this.state.artistToMergeWith,
+      'form-row--space-around': !this.state.artistToMergeWith
+    });
 
     return (
       <div className='content-container'>
@@ -120,14 +133,14 @@ class ArtistMerge extends React.Component {
 
         <div className='form-container'>
           <form onSubmit={this.handleSubmit}>
-            <div className='form-row-container form-row--center form-row--space-between'>
+            <div className={cardClass}>
               { this.state.originArtist &&
                 <Card
                   id={this.props.match.params.id}
                   name={this.state.originArtist.name}
                   imgUrl={this.state.originArtist.imgUrl}
                   totalAlbums={Object.keys(this.state.originArtist.albums).length}
-                  source={Object.keys(this.state.originArtist.sources)[0]}
+                  sources={this.state.originArtist.sources}
                 />
               }
               { this.state.artistToMergeWith &&
@@ -139,7 +152,7 @@ class ArtistMerge extends React.Component {
                   name={this.state.artistToMergeWith.name}
                   imgUrl={this.state.artistToMergeWith.imgUrl}
                   totalAlbums={Object.keys(this.state.artistToMergeWith.albums).length}
-                  source={Object.keys(this.state.artistToMergeWith.sources)[0]}
+                  sources={this.state.artistToMergeWith.sources}
                 />
               }
             </div>

@@ -3,10 +3,24 @@ import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 require('./Card.scss');
 
-const Card = function({id, name, imgUrl, totalAlbums, source}) {
+
+function sourcesReducer(accumulator, currentValue, currentIndex, array) {
+  if (currentIndex == array.length - 1) {
+    return accumulator + ' ' + currentValue;
+  }
+
+  return accumulator + ' ' + currentValue + ',';
+}
+
+const Card = function({id, name, imgUrl, totalAlbums, sources}) {
   let albums;
   if (totalAlbums) {
     albums = (totalAlbums > 1) ? totalAlbums + ' albums' : totalAlbums + ' album';
+  }
+
+  let sourceString;
+  if (sources) {
+    sourceString = Object.keys(sources).reduce(sourcesReducer, 'Sources: ');
   }
 
   return (
@@ -20,8 +34,8 @@ const Card = function({id, name, imgUrl, totalAlbums, source}) {
             {albums &&
               <p>{albums}</p>
             }
-            {source &&
-              <p>Source: <span className='capitalize'>{source}</span></p>
+            {sources &&
+              <p>{sourceString}</p>
             }
           </div>
         </div>
@@ -35,7 +49,7 @@ Card.propTypes = {
   name: PropTypes.string.isRequired,
   totalAlbums: PropTypes.number,
   imgUrl: PropTypes.string,
-  source: PropTypes.string
+  sources: PropTypes.object
 };
 
 export default Card;
