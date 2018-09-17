@@ -42,12 +42,12 @@ class SearchDropdown extends React.Component {
   }
 
   chooseItem(value) {
+    this.props.handleValue(this.filterList(value)[0].id);
+
     if (this.state.labelItem !== value) {
       this.setState({
         labelItem: value
       });
-
-      this.props.handleValue(this.filterList(value)[0].id);
     }
   }
 

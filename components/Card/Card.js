@@ -3,8 +3,26 @@ import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 require('./Card.scss');
 
-const Card = function({id, name, imgUrl, totalAlbums}) {
-  let albums = (totalAlbums > 1) ? totalAlbums + ' albums' : totalAlbums + ' album';
+
+function sourcesReducer(accumulator, currentValue, currentIndex, array) {
+  if (currentIndex == array.length - 1) {
+    return accumulator + ' ' + currentValue;
+  }
+
+  return accumulator + ' ' + currentValue + ',';
+}
+
+const Card = function({id, name, imgUrl, totalAlbums, sources}) {
+  let albums;
+  if (totalAlbums) {
+    albums = (totalAlbums > 1) ? totalAlbums + ' albums' : totalAlbums + ' album';
+  }
+
+  let sourceString;
+  if (sources) {
+    sourceString = Object.keys(sources).reduce(sourcesReducer, 'Sources: ');
+  }
+
   return (
     <div className='card-container'>
       <Link to={'/artist/' + id} className='card-link'>
@@ -13,7 +31,12 @@ const Card = function({id, name, imgUrl, totalAlbums}) {
           </div>
           <div className='card-details'>
             <p>{name}</p>
-            <p>{albums}</p>
+            {albums &&
+              <p>{albums}</p>
+            }
+            {sources &&
+              <p>{sourceString}</p>
+            }
           </div>
         </div>
       </Link>
@@ -25,7 +48,8 @@ Card.propTypes = {
   id: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   totalAlbums: PropTypes.number,
-  imgUrl: PropTypes.string
+  imgUrl: PropTypes.string,
+  sources: PropTypes.object
 };
 
 export default Card;

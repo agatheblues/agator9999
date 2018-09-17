@@ -1,0 +1,19 @@
+@import "variables";
+
+
+.merge-plus {
+  font-size: 40px;
+  color: $orange;
+}
+
+.form-row--center {
+  align-items: center;
+}
+
+.form-row--space-between {
+  justify-content: space-between;
+}
+
+.form-row--space-around {
+  justify-content: space-around;
+}

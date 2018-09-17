@@ -34,7 +34,20 @@ const renderListeningUri = function(artist) {
   return <p className='not-available not-available--line'>&#9836;</p>;
 };
 
-const ArtistSummary = function({ artist }) {
+const renderMergeButton = function(artist, id) {
+  if (artist.sources.hasOwnProperty('spotify') && artist.sources.hasOwnProperty('discogs')) {
+    return (
+      <p><a href=''>Unmerge artist</a></p>
+    );
+  }
+
+  return (
+    <Link to={`/artist/${id}/merge`}>Merge artist</Link>
+  );
+};
+
+
+const ArtistSummary = function({ artist, id }) {
 
   // Get artist total amount of tracks
   let totalTracks = artist.albums.reduce(reducer, 0);
@@ -53,6 +66,7 @@ const ArtistSummary = function({ artist }) {
             <h1>{artist.name}</h1>
             <p>{`${Object.keys(artist.albums).length} albums, ${totalTracks} tracks`}</p>
             { renderListeningUri(artist) }
+            { renderMergeButton(artist, id) }
           </div>
         </div>
       </div>
@@ -61,7 +75,8 @@ const ArtistSummary = function({ artist }) {
 };
 
 ArtistSummary.propTypes = {
-  artist: PropTypes.object.isRequired
+  artist: PropTypes.object.isRequired,
+  id: PropTypes.string.isRequired
 };
 
 export default ArtistSummary;

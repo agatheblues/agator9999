@@ -110,19 +110,19 @@ export const formatAlbumSummary = ({ added_at = '', album: { id, tracks: { total
   {
     id,
     added_at,
-    tracks: { total }
+    totalTracks: total
   }
 );
 
 export const formatSpotifySingleAlbumSummary = ({ tracks: { total = 0 }}) => (
   {
-    tracks: { total }
+    totalTracks: total
   }
 );
 
 export const formatDiscogsSingleAlbumSummary = ({ tracklist = []}) => (
   {
-    tracks: { total: tracklist.length }
+    totalTracks: tracklist.length
   }
 );
 
@@ -328,10 +328,27 @@ function updateArtistAlbumsList(artistId, album, albumKey) {
   return getRef('artists')
     .update({
       [`/${artistId}/albums/${albumKey}`]: {
-        'totalTracks': album.tracks.total,
+        'totalTracks': album.totalTracks,
         'added_at': album.added_at
       },
     });
+}
+
+function updateMergeArtist(artist0_Id, artist1) {
+  let updates = {};
+
+  // Update albums
+  Object.keys(artist1.albums).forEach((albumKey) => {
+    return updates[`/${artist0_Id}/albums/${albumKey}`] = artist1.albums[albumKey];
+  });
+
+  // UPdate sources
+  Object.keys(artist1.sources).forEach((sourceKey) => {
+    return updates[`/${artist0_Id}/sources/${sourceKey}`] = artist1.sources[sourceKey];
+  });
+
+  return getRef('artists')
+    .update(updates);
 }
 
 /**
@@ -345,6 +362,9 @@ function setArtist(artist) {
     .set(artist);
 }
 
+export function removeArtist(id) {
+  return getRef('artists/' + id).remove();
+}
 
 /**
  * Add the album property to the artist object
@@ -355,7 +375,7 @@ function setArtist(artist) {
 function addFirstAlbumToArtist(artist, album, key) {
   artist['albums'] = {
     [key]: {
-      'totalTracks': album.tracks.total,
+      'totalTracks': album.totalTracks,
       'added_at': album.added_at
     }
   };
@@ -374,6 +394,7 @@ export function getArtist(id) {
     .once('value');
 
 }
+
 
 export function getArtistBySource(source, id) {
 
@@ -405,6 +426,11 @@ export function formatArtistList(data) {
   });
 
   return artists;
+}
+
+
+export function mergeArtists(artist0Id, artist1) {
+  return updateMergeArtist(artist0Id, artist1);
 }
 
 
