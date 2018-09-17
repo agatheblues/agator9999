@@ -20,7 +20,9 @@ class ArtistMerge extends React.Component {
       artistToMergeWith: null,
       error: false,
       message: null,
-      artists: []
+      showForm: false,
+      artists: [],
+      loaded: false
     };
 
     this.handleSelectedArtist = this.handleSelectedArtist.bind(this);
@@ -38,7 +40,8 @@ class ArtistMerge extends React.Component {
         error: false,
         message: 'Merge was successful!',
         artistToMergeWith: null,
-        originArtist: artist
+        originArtist: artist,
+        showForm: false
       });
     }
   }
@@ -58,8 +61,20 @@ class ArtistMerge extends React.Component {
     const mergeSource = Object.keys(this.state.originArtist.sources)[0];
     const filteredArtistsBySource = artists.filter((artist) => !artist.sources.hasOwnProperty(mergeSource));
 
+    if (filteredArtistsBySource.length == 0) {
+      this.setState({
+        error: false,
+        showForm: false,
+        loaded: true,
+        message: 'There are no artists from a different source to merge with!'
+      });
+      return;
+    }
+
     this.setState({
-      artists: filteredArtistsBySource
+      artists: filteredArtistsBySource,
+      showForm: true,
+      loaded: true
     });
   }
 
@@ -94,6 +109,8 @@ class ArtistMerge extends React.Component {
   handleSubmit(e) {
     e.preventDefault();
 
+    if (!this.state.showForm) return;
+
     fb.mergeArtists(this.state.originArtist.id, this.state.artistToMergeWith)
       .then(() => fb.removeArtist(this.state.artistToMergeWith.id))
       .then(() => this.handleSuccessMerge())
@@ -116,13 +133,66 @@ class ArtistMerge extends React.Component {
       .catch((error) => this.handleGetArtistError());
   }
 
-  render() {
+  renderCards() {
     const cardClass = classNames({
       'form-row-container form-row--center': true,
       'form-row--space-between': this.state.artistToMergeWith,
       'form-row--space-around': !this.state.artistToMergeWith
     });
 
+    return (
+      <div className={cardClass}>
+        { this.state.originArtist &&
+          <Card
+            id={this.props.match.params.id}
+            name={this.state.originArtist.name}
+            imgUrl={this.state.originArtist.imgUrl}
+            totalAlbums={Object.keys(this.state.originArtist.albums).length}
+            sources={this.state.originArtist.sources}
+          />
+        }
+        { this.state.artistToMergeWith &&
+          <p className='merge-plus'>+</p>
+        }
+        { this.state.artistToMergeWith &&
+          <Card
+            id={this.state.artistToMergeWith.id}
+            name={this.state.artistToMergeWith.name}
+            imgUrl={this.state.artistToMergeWith.imgUrl}
+            totalAlbums={Object.keys(this.state.artistToMergeWith.albums).length}
+            sources={this.state.artistToMergeWith.sources}
+          />
+        }
+      </div>
+    );
+  }
+
+  renderForm() {
+    if (!this.state.loaded) return <Loading fullPage={false} label={'Loading available artists to merge with...'}/>;
+    if (this.state.showForm) return (
+      <div>
+        <SearchDropdown
+          list={this.state.artists}
+          id={'id'}
+          value={'name'}
+          placeholder={'Find an artist to merge with'}
+          handleValue={this.handleSelectedArtist}
+        />
+
+        { this.state.message &&
+            <Message message={this.state.message} error={this.state.error}/>
+        }
+
+        <div className='submit-container'>
+          <Button label='OK' handleClick={this.handleSubmit}/>
+        </div>
+      </div>
+    );
+
+    if (this.state.message) return <Message message={this.state.message} error={this.state.error}/>;
+  }
+
+  render() {
     return (
       <div className='content-container'>
         <div className='back-to-library'>
@@ -132,46 +202,8 @@ class ArtistMerge extends React.Component {
 
         <div className='form-container'>
           <form onSubmit={this.handleSubmit}>
-            <div className={cardClass}>
-              { this.state.originArtist &&
-                <Card
-                  id={this.props.match.params.id}
-                  name={this.state.originArtist.name}
-                  imgUrl={this.state.originArtist.imgUrl}
-                  totalAlbums={Object.keys(this.state.originArtist.albums).length}
-                  sources={this.state.originArtist.sources}
-                />
-              }
-              { this.state.artistToMergeWith &&
-                <p className='merge-plus'>+</p>
-              }
-              { this.state.artistToMergeWith &&
-                <Card
-                  id={this.state.artistToMergeWith.id}
-                  name={this.state.artistToMergeWith.name}
-                  imgUrl={this.state.artistToMergeWith.imgUrl}
-                  totalAlbums={Object.keys(this.state.artistToMergeWith.albums).length}
-                  sources={this.state.artistToMergeWith.sources}
-                />
-              }
-            </div>
-
-            <SearchDropdown
-              list={this.state.artists}
-              id={'id'}
-              value={'name'}
-              placeholder={'Find an artist to merge with'}
-              handleValue={this.handleSelectedArtist}
-            />
-
-            { this.state.message &&
-                <Message message={this.state.message} error={this.state.error}/>
-            }
-
-            <div className='submit-container'>
-              <Button label='OK' handleClick={this.handleSubmit}/>
-            </div>
-
+            { this.renderCards() }
+            { this.renderForm() }
             <p className='note'>You can only merge two artists with different sources. Merging two artists creates one artist with both sources combined, and all the albums will be stored under one artist.</p>
           </form>
         </div>
