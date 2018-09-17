@@ -30,7 +30,7 @@ class SearchDropdown extends React.Component {
 
   filterList(value) {
     return this.props.list.filter((item) => {
-      return item.name.toLowerCase().startsWith(value.toLowerCase());
+      return item.name.toLowerCase().indexOf(value.toLowerCase()) != -1;
     });
   }
 

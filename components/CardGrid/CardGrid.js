@@ -91,7 +91,7 @@ class CardGrid extends React.Component {
    */
   filterList(input) {
     const filteredArtists = this.state.artists.filter((artist) => {
-      return artist.name.toLowerCase().startsWith(input.toLowerCase());
+      return artist.name.toLowerCase().indexOf(input.toLowerCase()) != -1;
     });
 
     this.setState({
