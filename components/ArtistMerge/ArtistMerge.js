@@ -23,9 +23,11 @@ class ArtistMerge extends React.Component {
     };
 
     this.handleSelectedArtist = this.handleSelectedArtist.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
   }
 
   handleGetOriginArtistSuccess(artist) {
+    artist.id = this.props.match.params.id;
     this.setState({
       originArtist: artist
     });
@@ -66,8 +68,27 @@ class ArtistMerge extends React.Component {
     });
   }
 
-  handleSubmit() {
-    console.log('submit');
+  handleSuccessMerge() {
+    this.setState({
+      error: false,
+      message: 'Merge was successful!'
+    });
+  }
+
+  handleErrorMerge() {
+    this.setState({
+      error: true,
+      message: 'Oops! Something went wrong while merging artists.'
+    });
+  }
+
+  handleSubmit(e) {
+    e.preventDefault();
+    
+    fb.mergeArtists(this.state.originArtist.id, this.state.artistToMergeWith)
+      .then(() => fb.removeArtist(this.state.artistToMergeWith.id))
+      .then(() => this.handleSuccessMerge())
+      .catch((error) => this.handleErrorMerge(error));
   }
 
   handleSelectedArtist(artistId) {
@@ -88,7 +109,7 @@ class ArtistMerge extends React.Component {
   }
 
   render() {
-    console.log(this.state);
+    // console.log(this.state);
 
     return (
       <div className='content-container'>
@@ -131,7 +152,7 @@ class ArtistMerge extends React.Component {
               handleValue={this.handleSelectedArtist}
             />
 
-            { this.state.error &&
+            { this.state.message &&
                 <Message message={this.state.message} error={this.state.error}/>
             }
 
@@ -139,7 +160,7 @@ class ArtistMerge extends React.Component {
               <Button label='OK' handleClick={this.handleSubmit}/>
             </div>
 
-            <p className='note'>You can only merge two artists with different sources (Spotify and Discogs).</p>
+            <p className='note'>You can only merge two artists with different sources. Merging two artists creates one artist with both sources combined, and all the albums will be stored under one artist.</p>
           </form>
         </div>
       </div>
