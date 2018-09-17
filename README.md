@@ -82,19 +82,24 @@ You can change the `owner` value in `config.js` to customize the login page.
 
 **Setting your admin rights + Discogs secret**
 
-The first time you access agator9999, login with your Google account. You should at this moment only have read access. Once you have logged in once, you can go set yourself as an admin:
+The first time you access agator9999, you won't be able to login. Enable login with your Google account and you should at this moment only have read access. After you have logged in once, you can go set yourself as an admin:
 
 11. Go to Firebase Authentication Page and go to Sign-in Method. Enable Google as an authentication provider.
 12. In the Firebase Authentication Console, go to the `Users` tab.
 13. Copy the `User UID` next to your Google account then go to `Data` and manually add a node at the root of your database as follow:
 
-```
-users:
-  yourCopiedUID:
-    email: "myGoogleEmailAddress@gmail.com",
-    isAdmin: true
-secrets:
-    discogs_secret:  "yourDiscogsSecret"
+```json
+{
+	"users": {
+		"yourCopiedUID": {
+			"email": "myGoogleEmailAddress@gmail.com",
+			"isAdmin": true
+		}
+	},
+	"secrets": {
+		"discogs_secret": "yourDiscogsSecret"
+	}
+}
 ```
 
 The `isAdmin` tag gives you rights to write to your Firebase database to the given UID. Would you want to have several admins, you can add another user to the list. `".read":"auth != null",` means that any authenticated user has read access to your database. You can of course change the rules settings as you wish (see [documentation](https://firebase.google.com/docs/database/security/)), and for example restrict the read rights to admin only.
