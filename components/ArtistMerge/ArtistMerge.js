@@ -33,15 +33,14 @@ class ArtistMerge extends React.Component {
       this.setState({
         originArtist: artist
       });
+    } else {
+      this.setState({
+        error: false,
+        message: 'Merge was successful!',
+        artistToMergeWith: null,
+        originArtist: artist
+      });
     }
-
-    this.setState({
-      error: false,
-      message: 'Merge was successful!',
-      artistToMergeWith: null,
-      originArtist: artist
-    });
-
   }
 
   handleGetArtistError() {
@@ -109,7 +108,7 @@ class ArtistMerge extends React.Component {
 
   componentDidMount() {
     fb.getArtist(this.props.match.params.id)
-      .then((snapshot) => this.handleGetOriginArtistSuccess(snapshot.val()))
+      .then((snapshot) => this.handleGetOriginArtistSuccess(snapshot.val(), false))
       .then(() => fb.getArtists()
         .then((data) => this.handleGetArtistsSuccess(fb.formatArtistList(data)))
         .catch((error) => this.handleGetArtistsError())

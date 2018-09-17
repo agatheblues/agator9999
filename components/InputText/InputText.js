@@ -12,7 +12,7 @@ class InputText extends React.Component {
 
   handleFocus(event) {
     if (this.props.handleFocus) {
-      this.props.handleFocus();
+      this.props.handleFocus(event.target.value);
     }
   }
 
@@ -27,7 +27,7 @@ class InputText extends React.Component {
         <input
           type='text'
           spellCheck='false'
-          value={this.props.value}
+          value={this.props.value || ''}
           onChange={this.handleChange}
           onFocus={this.handleFocus}
           className='form-input-text'
