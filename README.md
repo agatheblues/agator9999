@@ -15,6 +15,7 @@ It all started when Spotify told me: *"Epic collection, friend. Your library is 
 
 **Artists**
 - View your artist library (Artists are derived from your saved albums.)
+- Merge a duplicate artist into one (Artists might come from different sources like Spotify and Discogs)
 
 **Albums**
 - View your saved albums for a given artist
@@ -45,7 +46,7 @@ agator9999 is a modest [React](https://reactjs.org/) web application which uses 
 
 1. First, clone the project.
 2. Rename the file to `config.template.json` to `config.js`.
-2. Then, to use agator9999, you need to create a Firebase project. Go to the Firebase website, log in / sign in and select `Add Firebase to your web app` (select the web option): a pop-up with your configuration will appear. Copy the configuration values and replace them in `firebaseConfig` in the file `config.js`.
+2. Then, to use agator9999, you need to create a Firebase project. Go to the Firebase website, log in / sign in and select `Add Project` (web): a pop-up with your configuration will appear. Copy the configuration values and replace them in `firebaseConfig` in the file `config.js`.
 3. Go to `Database`, choose to create a `Real-time Database` and set the `Rules` as follow (temporary):
 
 ```
@@ -60,8 +61,8 @@ agator9999 is a modest [React](https://reactjs.org/) web application which uses 
 **Spotify Setup**
 
 4. Then, you need to create your Spotify application: go to the [Developer Dashboard](https://beta.developer.spotify.com/dashboard/login) and hit `Create an app`. You can name your application and select a non-commercial option.
-6. Go to `Edit Settings` and set a callback URI for your application. For example, `http://localhost:8888/#/callback`.
-7. Go to `config.js` at the root at the project, fill in the `spotifyConfig`: add the URI to the 'REDIRECT_URI' field and add your Spotify `CLIENT_ID` (that you can get from the Dashboard).
+6. Go to `Edit Settings` and set a callback URI for your application. For example, `http://localhost:8888/#/callback`. The callback URL is used to login to Spotify.
+7. Go to `config.js` at the root at the project, fill in the `spotifyConfig` with the same callback URI in 'REDIRECT_URI' and add your Spotify `CLIENT_ID` (that you can get from the Dashboard).
 
 **Discogs Setup**
 
@@ -82,7 +83,7 @@ You can change the `owner` value in `config.js` to customize the login page.
 
 **Setting your admin rights + Discogs secret**
 
-The first time you access agator9999, you won't be able to login. Enable login with your Google account and you should at this moment only have read access. After you have logged in once, you can go set yourself as an admin:
+The first time you start agator9999, you won't be able to login. Enable login with your Google account and you should at this moment only have read access. After you have logged in once, you can go set yourself as an admin:
 
 11. Go to Firebase Authentication Page and go to Sign-in Method. Enable Google as an authentication provider.
 12. In the Firebase Authentication Console, go to the `Users` tab.
@@ -102,7 +103,7 @@ The first time you access agator9999, you won't be able to login. Enable login w
 }
 ```
 
-The `isAdmin` tag gives you rights to write to your Firebase database to the given UID. Would you want to have several admins, you can add another user to the list. `".read":"auth != null",` means that any authenticated user has read access to your database. You can of course change the rules settings as you wish (see [documentation](https://firebase.google.com/docs/database/security/)), and for example restrict the read rights to admin only.
+The `isAdmin` tag gives you rights to write to your Firebase database to the given UID. Would you want to have several admins, you can add another user to the list. `".read":"auth != null",` means that *any authenticated user has read access to your database*. You can of course change the rules settings as you wish (see [documentation](https://firebase.google.com/docs/database/security/)), and for example restrict the read rights to admin only.
 
 
 14. Go to Database > Rules and change them to:
@@ -139,9 +140,16 @@ If you now refresh your local page, you should see new features!
 
 ## How to deploy it?
 
-Read this: [Firebase Hosting](https://firebase.google.com/docs/hosting/). You can run `npm run build` that will generate your bundle, init a firebase hosting folder, link it to your firebase project and move there `index.html`, `bundle.js`, `style.css` and the `static` folder. Then hit `firebase deploy`!
+Read this: [Firebase Hosting](https://firebase.google.com/docs/hosting/).
 
-Note: Don't forget to add your hosting URL to your Spotify application callback list, and in `config.js`.
+* Update your `config.js` file with the callback URI of your firebase hosting URI
+* Update your Spotify application with the same callback REDIRECT_UR
+* Run `npm run build`, that will generate your bundle.
+* Do `firebase login` and then `firebase init`, choose the hosting feature and your firebase project
+* Move there `index.html`, `dist/bundle.js`, `dist/style.css` and the `static` folder to the `public` folder of your hosting repo.
+* Then hit `firebase deploy`!
+
+Note: some adblockers might be blocking your calls to the Spotify API when you deploy to Firebase.
 
 ## Disclaimer
 This tool has been created for personal use and not for commercial purposes. No artworks are stored in the database. Also, this is *just* a codebase. You have to setup your own things!
