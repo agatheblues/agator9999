@@ -37,6 +37,17 @@ h2 {
   line-height: 1.1;
 }
 
+h3 {
+  color: $black;
+  font-size: 14px;
+  margin: 0 0 20px 10px;
+  padding-bottom: 10px;
+  border-bottom: solid 1px $orange;
+  font-family: inherit;
+  font-weight: 600;
+  line-height: 1.1;
+}
+
 p {
   margin: 5px 0 5px 0;
 }
@@ -67,6 +78,14 @@ a.inverted:hover {
   text-decoration: underline;
 }
 
+a.not-available:hover {
+  text-decoration: none;
+  cursor: default;
+}
+
+a.link-button {
+  padding: 10px 30px 10px 30px;
+}
 
 .capitalize {
   text-transform: capitalize;
@@ -110,6 +129,17 @@ li {
 li.active {
   border-top: solid 2px $orange;
   background-color: $white;
+}
+
+ul.vertical-list {
+  display: block;
+
+  li {
+    padding: 10px;
+    cursor: default;
+    border-top: none;
+    border-bottom: solid 1px $bg-grey;
+  }
 }
 
 .note {
@@ -193,6 +223,23 @@ li.active {
     padding: 6px 0 6px 0;
   }
 }
+
+.form-row--center {
+  align-items: center;
+}
+
+.form-row--space-between {
+  justify-content: space-between;
+}
+
+.form-row--space-around {
+  justify-content: space-around;
+}
+
+.form-row--space-center {
+  justify-content: center;
+}
+
 
 .submit-container {
   text-align: right;

@@ -240,7 +240,7 @@ export function flatten(arr) {
  * @param  {object} obj   Object to omit keys of
  * @return {object}      Object with omitted keys
  */
-function omit(keys, obj) {
+export function omit(keys, obj) {
   return Object.keys(obj)
     .reduce((acc, currentValue) => {
       if (keys.indexOf(currentValue) < 0) acc[currentValue] = obj[currentValue];

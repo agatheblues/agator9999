@@ -36,9 +36,7 @@ const renderListeningUri = function(artist) {
 
 const renderMergeButton = function(artist, id) {
   if (artist.sources.hasOwnProperty('spotify') && artist.sources.hasOwnProperty('discogs')) {
-    return (
-      <p><a href=''>Unmerge artist</a></p>
-    );
+    return <Link to={`/artist/${id}/unmerge`}>Unmerge artist</Link>;
   }
 
   return (

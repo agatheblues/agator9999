@@ -8,6 +8,7 @@ import SpotifyLogin from './components/SpotifyLogin/SpotifyLogin';
 import CreateAlbum from './components/CreateAlbum/CreateAlbum';
 import Artist from './components/Artist/Artist';
 import ArtistMerge from './components/ArtistMerge/ArtistMerge';
+import ArtistUnmerge from './components/ArtistUnmerge/ArtistUnmerge';
 import FirebaseSignIn from './components/FirebaseSignIn/FirebaseSignIn';
 import Loading from './components/Loading/Loading';
 import PageNotFound from './components/PageNotFound/PageNotFound';
@@ -34,6 +35,7 @@ class App extends React.Component {
     this.renderCreateAlbum = this.renderCreateAlbum.bind(this);
     this.renderArtist = this.renderArtist.bind(this);
     this.renderArtistMerge = this.renderArtistMerge.bind(this);
+    this.renderArtistUnmerge = this.renderArtistUnmerge.bind(this);
   }
 
   checkIfAdmin(data) {
@@ -128,6 +130,13 @@ class App extends React.Component {
     return <ArtistMerge {...props} isAdmin={this.state.isAdmin} />;
   }
 
+  renderArtistUnmerge(props) {
+    if (!this.state.isAdmin) {
+      return <Redirect to="/404" />;
+    }
+    return <ArtistUnmerge {...props} isAdmin={this.state.isAdmin} />;
+  }
+
 
   render() {
 
@@ -144,6 +153,7 @@ class App extends React.Component {
           <Route exact path="/album/create" render={this.renderCreateAlbum} />
           <Route exact path="/artist/:id" render={this.renderArtist}/>
           <Route exact path="/artist/:id/merge" render={this.renderArtistMerge} />
+          <Route exact path="/artist/:id/unmerge" render={this.renderArtistUnmerge} />
           <Route exact path="/404" component={PageNotFound} />
           <Route component={PageNotFound} />
         </Switch>

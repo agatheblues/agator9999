@@ -1,0 +1,19 @@
+@import "variables";
+
+.vertical-list {
+  display: inline;
+}
+
+.sources-container {
+  margin: 20px;
+  width: 100%;
+}
+
+.unmerge-button {
+  margin: 0;
+}
+
+.sources-list-item {
+  display: flex;
+  justify-content: space-between;
+}
