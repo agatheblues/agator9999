@@ -6,7 +6,6 @@ import Loading from '../Loading/Loading';
 import Button from '../Button/Button';
 import Message from '../Message/Message';
 import Card from '../Card/Card';
-import classNames from 'classnames';
 require('./ArtistUnmerge.scss');
 
 class ArtistUnmerge extends React.Component {
@@ -22,7 +21,7 @@ class ArtistUnmerge extends React.Component {
       sources: null
     };
 
-    // this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
     this.handleDeleteClick = this.handleDeleteClick.bind(this);
     this.resetDeleteSources = this.resetDeleteSources.bind(this);
   }
@@ -65,29 +64,37 @@ class ArtistUnmerge extends React.Component {
     this.setState({ sources: this.state.originArtist.sources });
   }
 
-  // handleSuccessUnmerge() {
-  //   fb.getArtist(this.props.match.params.id)
-  //     .then((snapshot) => this.handleGetOriginArtistSuccess(snapshot.val(), true))
-  //     .catch((error) => this.handleGetArtistError());
-  // }
-  //
-  // handleErrorUnmerge() {
-  //   this.setState({
-  //     error: true,
-  //     message: 'Oops! Something went wrong while merging artists.'
-  //   });
-  // }
-  //
-  // handleSubmit(e) {
-  //   e.preventDefault();
-  //
-  //   if (!this.state.showForm) return;
-  //
-  //   fb.mergeArtists(this.state.originArtist.id, this.state.artistToMergeWith)
-  //     .then(() => fb.removeArtist(this.state.artistToMergeWith.id))
-  //     .then(() => this.handleSuccessMerge())
-  //     .catch((error) => this.handleErrorMerge(error));
-  // }
+  handleSuccessUnmerge() {
+    this.setState({
+      error: false,
+      message: 'Unmerge of artist successful!',
+      showForm: false
+    });
+  }
+
+  handleErrorUnmerge() {
+    this.setState({
+      error: true,
+      message: 'Oops! Something went wrong while merging artists.'
+    });
+  }
+
+  handleSubmit(e) {
+    e.preventDefault();
+
+    if (!this.state.showForm) return;
+    if (Object.keys(this.state.sources).length == Object.keys(this.state.originArtist.sources).length) {
+      this.setState({
+        error: true,
+        message: 'Please delete a source first!'
+      });
+      return;
+    }
+
+    fb.unmergeArtist(this.state.originArtist.id, this.state.sources)
+      .then(() => this.handleSuccessUnmerge())
+      .catch((error) => this.handleErrorUnmerge(error));
+  }
 
   componentDidMount() {
     fb.getArtist(this.props.match.params.id)
@@ -110,15 +117,8 @@ class ArtistUnmerge extends React.Component {
 
   renderDeleteButton(key) {
     const hasOnlyOneSource = (Object.keys(this.state.sources).length == 1);
-
-    const deleteCrossClass = classNames({
-      'unmerge-button': true,
-      'not-available': hasOnlyOneSource
-    });
-
-    if (hasOnlyOneSource) return <p className={deleteCrossClass}>{'\u{2A2F}'}</p>;
-
-    return <a href='' className={deleteCrossClass} id={key} onClick={this.handleDeleteClick}>{'\u{2A2F}'}</a>;
+    if (hasOnlyOneSource) return null;
+    return <a href='' className='unmerge-button' id={key} onClick={this.handleDeleteClick}>{'\u{2A2F}'}</a>;
   }
 
   renderSources() {

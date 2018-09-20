@@ -351,6 +351,15 @@ function updateMergeArtist(artist0_Id, artist1) {
     .update(updates);
 }
 
+function updateArtistSources(artistId, sources) {
+  let updates = {
+    [`/${artistId}/sources`]: sources
+  };
+
+  return getRef('artists')
+    .update(updates);
+}
+
 /**
  * Sets an artist to Firebase
  * @param {object} artist Firebase artist object
@@ -433,6 +442,9 @@ export function mergeArtists(artist0Id, artist1) {
   return updateMergeArtist(artist0Id, artist1);
 }
 
+export function unmergeArtist(artistId, newSources) {
+  return updateArtistSources(artistId, newSources);
+}
 
 /**
  * Get list of artist ids
