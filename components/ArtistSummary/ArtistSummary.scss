@@ -33,6 +33,11 @@
   left: 0;
 }
 
+.artist-banner-back.content-container {
+  display: flex;
+  justify-content: space-between;
+}
+
 .artist-banner-back a {
   font-size: 16px;
 }

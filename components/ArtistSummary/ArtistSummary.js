@@ -36,11 +36,11 @@ const renderListeningUri = function(artist) {
 
 const renderMergeButton = function(artist, id) {
   if (artist.sources.hasOwnProperty('spotify') && artist.sources.hasOwnProperty('discogs')) {
-    return <Link to={`/artist/${id}/unmerge`}>Unmerge artist</Link>;
+    return <Link to={`/artist/${id}/unmerge`}>&#x2702; Unmerge</Link>;
   }
 
   return (
-    <Link to={`/artist/${id}/merge`}>Merge artist</Link>
+    <Link to={`/artist/${id}/merge`}>&#x21c4; Merge</Link>
   );
 };
 
@@ -56,6 +56,7 @@ const ArtistSummary = function({ artist, id }) {
         <div className='artist-banner-back-wrapper'>
           <div className='artist-banner-back content-container'>
             <Link to='/'>&#9839; Back to library</Link>
+            { renderMergeButton(artist, id) }
           </div>
         </div>
 
@@ -64,7 +65,6 @@ const ArtistSummary = function({ artist, id }) {
             <h1>{artist.name}</h1>
             <p>{`${Object.keys(artist.albums).length} albums, ${totalTracks} tracks`}</p>
             { renderListeningUri(artist) }
-            { renderMergeButton(artist, id) }
           </div>
         </div>
       </div>

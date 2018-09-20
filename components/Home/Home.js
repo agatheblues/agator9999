@@ -21,8 +21,8 @@ class Home extends React.Component {
       return (
         <nav>
           <ul className='menu-wrapper'>
-            <li><Link to='/spotify/sync'>Sync. Spotify Albums &#8635;</Link></li>
-            <li><Link to='/album/create'>New album &#xFF0B;</Link></li>
+            <li><Link to='/spotify/sync'>&#8635; Sync. Spotify Albums</Link></li>
+            <li><Link to='/album/create'>&#xFF0B; New album</Link></li>
           </ul>
         </nav>
       );
