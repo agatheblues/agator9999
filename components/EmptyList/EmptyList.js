@@ -1,8 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-require('./CardGridEmpty.scss');
+require('./EmptyList.scss');
 
-const CardGridEmpty = function({message}) {
+const EmptyList = function({message}) {
 
   return (
     <div className='cardgrid-empty'>
@@ -12,8 +12,8 @@ const CardGridEmpty = function({message}) {
   );
 };
 
-CardGridEmpty.propTypes = {
+EmptyList.propTypes = {
   message: PropTypes.string.isRequired
 };
 
-export default CardGridEmpty;
+export default EmptyList;
