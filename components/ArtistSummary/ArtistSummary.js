@@ -18,7 +18,7 @@ const reducer = (totalTracks, album) => totalTracks + album.totalTracks;
  */
 const renderListeningUri = function(artist) {
   if (artist.sources.hasOwnProperty('spotify')) {
-    const url = 'https://open.spotify.com/artist/' + artist.sources.spotify;
+    const url = 'https://open.spotify.com/go?uri=spotify:artist:' + artist.sources.spotify;
     return (
       <p>
         <a
