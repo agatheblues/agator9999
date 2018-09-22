@@ -79,7 +79,7 @@ class Artist extends React.Component {
   }
 
   componentWillUnmount() {
-    fb.getRef('artists/' + this.props.match.params.id).off('value');
+    getRef('artists/' + this.props.match.params.id).off('value');
   }
 
   componentWillReceiveProps(nextProps) {
