@@ -1,7 +1,7 @@
-# agator9999: A music albums library
+# agator9999: A music library
 
 ## About
-agator9999 is a music library that lists your favourite albums from various streaming sources, in one place. It has a Spotify and a Discogs integration for enriched metadata.
+agator9999 is a music library that lists your favourite albums from various streaming sources, in one place (Spotify, Youtube, Bandcamp, and Discogs).
 
 ## Demo
 
@@ -9,13 +9,15 @@ agator9999 is a music library that lists your favourite albums from various stre
 
 
 ## But why?
-It all started when Spotify told me: *"Epic collection, friend. Your library is all filled up. To save more, you'll need to remove some songs."*. Hitting the 'Save' button on an album has a limit: you can save 10 000 songs in your library. I am constantly seeking new music, but I cannot remember all of the artists and albums I listened to, so I use my Spotify library as my music *storage* place. Until now, because it's full. That's why I created agator9999: to have my own *storage* place where there can be albums from Spotify, as well as other streaming sources like Bandcamp.
+It all started when Spotify told me: *"Epic collection, friend. Your library is all filled up. To save more, you'll need to remove some songs."*. Hitting the 'Save' button on an album has a limit: you can save upt to 10 000 songs in your library. I am constantly seeking new music, but I cannot remember all of the artists and albums I listened to, so I used my Spotify album library as a *storage* place. Until now, because it's full. That's why I created agator9999: to have my own *storage* place where there can be albums from Spotify, as well as other streaming sources.
 
 ## What can you do with agator9999?
 
 **Artists**
-- View your artist library (Artists are derived from your saved albums.)
-- Merge a duplicate artist into one (Artists might come from different sources like Spotify and Discogs)
+- View your artist library
+- Merge a duplicate artist into one (Artists might come from different sources like Spotify or Discogs)
+- Unmerge an artist sources
+- Remove an artist (available when no albums are attached anymore)
 
 **Albums**
 - View your saved albums for a given artist
@@ -26,18 +28,20 @@ It all started when Spotify told me: *"Epic collection, friend. Your library is 
 - Search your artists
 - Sort alphabetically and by recently added
 - Link to the corresponding listening platform.
+- Remove an album
 
 **Users**
 - Login / Logout of agator9999 via Google Authentication
 - Set yourself as admin from the Firebase UI (read+write).
 
+Once an artist has both a Spotify and a Discogs source (after a merge, for example), all the upcoming albums you might add to this artist will be attached to this artist.
 
-![How the library looks like](https://github.com/agatheblues/agator9999/blob/master/static/images/library.png)
-![Artist view like](https://github.com/agatheblues/agator9999/blob/master/static/images/artist.png)
+![Library view](https://github.com/agatheblues/agator9999/blob/master/static/images/library.png)
+![Artist view](https://github.com/agatheblues/agator9999/blob/master/static/images/artist.png)
 
 ## What agator9999 does not do?
 
-- Play music. It's a *storage* place. Like a shelf. Shelves don't play music. In the end it's just a nicer, browsable, nicely looking version of a library spreadsheet.
+- Play music. It's a *storage* place. Like a shelf. Shelves don't play music.
 
 ## How to use it?
 agator9999 is a modest [React](https://reactjs.org/) web application which uses [Firebase](https://firebase.google.com/?authuser=0) as back-end.
@@ -108,7 +112,7 @@ The `isAdmin` tag gives you rights to write to your Firebase database to the giv
 
 14. Go to Database > Rules and change them to:
 
-```
+```json
 {
   "rules": {
     "users": {
