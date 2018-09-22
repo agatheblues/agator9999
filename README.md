@@ -7,6 +7,7 @@ agator9999 is a music library that lists your favourite albums from various stre
 
 [DEMO](https://agator9999-demo.firebaseapp.com) 🔥🔥🔥
 
+In this demo, *everyone* is an admin. In your agator9999 instance, you would set only yourself as admin. Create/Update/Delete feature are only available for an admin, normal users can only browse.
 
 ## But why?
 It all started when Spotify told me: *"Epic collection, friend. Your library is all filled up. To save more, you'll need to remove some songs."*. Hitting the 'Save' button on an album has a limit: you can save upt to 10 000 songs in your library. I am constantly seeking new music, but I cannot remember all of the artists and albums I listened to, so I used my Spotify album library as a *storage* place. Until now, because it's full. That's why I created agator9999: to have my own *storage* place where there can be albums from Spotify, as well as other streaming sources.
@@ -117,7 +118,7 @@ The `isAdmin` tag gives you rights to write to your Firebase database to the giv
   "rules": {
     "users": {
       ".read":"auth != null",
-      ".write":"root.child('users').child(auth.uid).child('isAdmin').val() == true",
+      ".write":false,
       ".indexOn": ["email"]
     },
     "artists": {
