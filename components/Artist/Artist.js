@@ -25,8 +25,7 @@ class Artist extends React.Component {
    */
   getCurrentArtist(id) {
     getArtist(id)
-      .then((snapshot) => this.handleGetArtistSuccess(snapshot.val()))
-      .catch((error) => this.handleGetArtistError());
+      .on('value', (snapshot) => this.handleGetArtistSuccess(snapshot.val()));
   }
 
   /**
@@ -66,7 +65,7 @@ class Artist extends React.Component {
           this.state.artistData.albums.map((album) => {
             return (
               <div key={album.id} >
-                <Album id={album.id} totalTracks={album.totalTracks} isAdmin={this.props.isAdmin}/>
+                <Album artistId={this.props.match.params.id} id={album.id} totalTracks={album.totalTracks} isAdmin={this.props.isAdmin}/>
               </div>
             );
           })
