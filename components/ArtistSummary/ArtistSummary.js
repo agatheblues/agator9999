@@ -48,7 +48,8 @@ const renderMergeButton = function(artist, id) {
 const ArtistSummary = function({ artist, id }) {
 
   // Get artist total amount of tracks
-  let totalTracks = artist.albums.reduce(reducer, 0);
+  let totalAlbums =  (artist.hasOwnProperty('albums')) ? Object.keys(artist.albums).length : 0;
+  let totalTracks = (artist.hasOwnProperty('albums')) ? artist.albums.reduce(reducer, 0) : 0;
 
   return (
     <div className='artist-banner-container' style={{ 'backgroundImage': `url('${artist.imgUrl}')`}}>
@@ -63,7 +64,7 @@ const ArtistSummary = function({ artist, id }) {
         <div className='artist-banner-content-wrapper'>
           <div className='artist-banner-content content-container'>
             <h1>{artist.name}</h1>
-            <p>{`${Object.keys(artist.albums).length} albums, ${totalTracks} tracks`}</p>
+            <p>{`${totalAlbums} albums, ${totalTracks} tracks`}</p>
             { renderListeningUri(artist) }
           </div>
         </div>

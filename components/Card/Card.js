@@ -13,10 +13,7 @@ function sourcesReducer(accumulator, currentValue, currentIndex, array) {
 }
 
 const Card = function({id, name, imgUrl, totalAlbums, sources}) {
-  let albums;
-  if (totalAlbums) {
-    albums = (totalAlbums > 1) ? totalAlbums + ' albums' : totalAlbums + ' album';
-  }
+  let albums = (totalAlbums > 1) ? totalAlbums + ' albums' : totalAlbums + ' album';
 
   let sourceString;
   if (sources) {

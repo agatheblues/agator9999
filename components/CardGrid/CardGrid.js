@@ -6,7 +6,7 @@ import Message from '../Message/Message';
 import Loading from '../Loading/Loading';
 import Search from '../Search/Search';
 import SortBy from '../SortBy/SortBy';
-import CardGridEmpty from '../CardGridEmpty/CardGridEmpty';
+import EmptyList from '../EmptyList/EmptyList';
 require('./CardGrid.scss');
 
 class CardGrid extends React.Component {
@@ -122,7 +122,7 @@ class CardGrid extends React.Component {
    */
   sortListByDate(artists, order) {
     return artists.sort((a, b) => {
-      return order * (this.getMostRecentDate(b.albums) - this.getMostRecentDate(a.albums));
+      return order * (this.getMostRecentDate(b) - this.getMostRecentDate(a));
     });
   }
 
@@ -142,8 +142,9 @@ class CardGrid extends React.Component {
    * @param  {array} albums  artist's albums array
    * @return {Date}          most recent date of addition for an artist's albums
    */
-  getMostRecentDate(albums) {
-    let dates = Object.keys(albums).map((albumKey) => new Date(albums[albumKey].added_at));
+  getMostRecentDate(artist) {
+    if (!artist.hasOwnProperty('albums')) return new Date('1970-01-01Z00:00:00:000');
+    let dates = Object.keys(artist.albums).map((albumKey) => new Date(artist.albums[albumKey].added_at));
     return new Date(Math.max.apply(null, dates));
   }
 
@@ -159,9 +160,10 @@ class CardGrid extends React.Component {
         <div className='grid-container'>
           {
             this.state.visibleArtists.map((artist, index) => {
+              let totalAlbums = (artist.hasOwnProperty('albums')) ? Object.keys(artist.albums).length : 0;
               return(
                 <div key={artist.id} >
-                  <Card id={artist.id} name={artist.name} imgUrl={artist.imgUrl} totalAlbums={Object.keys(artist.albums).length}/>
+                  <Card id={artist.id} name={artist.name} imgUrl={artist.imgUrl} totalAlbums={totalAlbums}/>
                 </div>
               );
             })
@@ -171,11 +173,11 @@ class CardGrid extends React.Component {
     }
 
     if ((this.state.artists.length != 0) && this.state.loaded && !this.state.error && (this.state.visibleArtists.length == 0)) {
-      return <CardGridEmpty message={'No results!'} />;
+      return <EmptyList message={'No results!'} />;
     }
 
     if ((this.state.artists.length == 0) && this.state.loaded && !this.state.error) {
-      return <CardGridEmpty message={'There is 0 artist in your library.'} />;
+      return <EmptyList message={'There is 0 artist in your library.'} />;
     }
 
     if (!this.state.loaded && !this.state.error) {

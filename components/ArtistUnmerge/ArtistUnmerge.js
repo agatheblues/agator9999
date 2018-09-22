@@ -105,13 +105,13 @@ class ArtistUnmerge extends React.Component {
 
   renderCard() {
     if (!this.state.originArtist) return;
-
+    let totalAlbums = (this.state.originArtist.hasOwnProperty('albums')) ? Object.keys(this.state.originArtist.albums).length : 0;
     return (
       <Card
         id={this.props.match.params.id}
         name={this.state.originArtist.name}
         imgUrl={this.state.originArtist.imgUrl}
-        totalAlbums={Object.keys(this.state.originArtist.albums).length}
+        totalAlbums={totalAlbums}
       />
     );
   }

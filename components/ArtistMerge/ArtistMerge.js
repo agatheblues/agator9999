@@ -143,6 +143,9 @@ class ArtistMerge extends React.Component {
       'form-row--space-around': !this.state.artistToMergeWith
     });
 
+    let originTotalAlbums = (this.state.originArtist && this.state.originArtist.hasOwnProperty('albums')) ? Object.keys(this.state.originArtist.albums).length : 0;
+    let mergeWithotalAlbums = (this.state.artistToMergeWith && this.state.artistToMergeWith.hasOwnProperty('albums')) ? Object.keys(this.state.artistToMergeWith.albums).length : 0;
+
     return (
       <div className={cardClass}>
         { this.state.originArtist &&
@@ -150,7 +153,7 @@ class ArtistMerge extends React.Component {
             id={this.props.match.params.id}
             name={this.state.originArtist.name}
             imgUrl={this.state.originArtist.imgUrl}
-            totalAlbums={Object.keys(this.state.originArtist.albums).length}
+            totalAlbums={originTotalAlbums}
             sources={this.state.originArtist.sources}
           />
         }
@@ -162,7 +165,7 @@ class ArtistMerge extends React.Component {
             id={this.state.artistToMergeWith.id}
             name={this.state.artistToMergeWith.name}
             imgUrl={this.state.artistToMergeWith.imgUrl}
-            totalAlbums={Object.keys(this.state.artistToMergeWith.albums).length}
+            totalAlbums={mergeWithotalAlbums}
             sources={this.state.artistToMergeWith.sources}
           />
         }
