@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { getArtist, convertAlbumSummaryToArray } from '../../helpers/FirebaseHelper';
+import { getRef, getArtist, convertAlbumSummaryToArray } from '../../helpers/FirebaseHelper';
 import ArtistSummary from '../ArtistSummary/ArtistSummary';
 import Album from '../Album/Album';
 import PageNotFound from '../PageNotFound/PageNotFound';
