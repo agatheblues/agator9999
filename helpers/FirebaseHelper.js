@@ -398,10 +398,7 @@ function addFirstAlbumToArtist(artist, album, key) {
  * @return {Promise}
  */
 export function getArtist(id) {
-
-  return getRef('artists/' + id)
-    .once('value');
-
+  return getRef('artists/' + id);
 }
 
 
@@ -565,6 +562,14 @@ export function getAlbums() {
   return getRef('albums')
     .once('value');
 
+}
+
+export function removeAlbum(artistId, albumId) {
+  return Promise.all([
+    getRef('albums/' + albumId).off('value'),
+    getRef('albums/' + albumId).remove(),
+    getRef(`artists/${artistId}/albums/${albumId}`).remove()
+  ]);
 }
 
 /********* ARTIST IMAGES ******/
