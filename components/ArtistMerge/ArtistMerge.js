@@ -95,6 +95,7 @@ class ArtistMerge extends React.Component {
 
   handleSuccessMerge() {
     fb.getArtist(this.props.match.params.id)
+      .once('value')
       .then((snapshot) => this.handleGetOriginArtistSuccess(snapshot.val(), true))
       .catch((error) => this.handleGetArtistError());
   }
@@ -119,12 +120,14 @@ class ArtistMerge extends React.Component {
 
   handleSelectedArtist(artistId) {
     fb.getArtist(artistId)
+      .once('value')
       .then((snapshot) => this.handleGetArtistToMergeWithSuccess(snapshot.val(), artistId))
       .catch((error) => this.handleGetArtistError());
   }
 
   componentDidMount() {
     fb.getArtist(this.props.match.params.id)
+      .once('value')
       .then((snapshot) => this.handleGetOriginArtistSuccess(snapshot.val(), false))
       .then(() => fb.getArtists()
         .then((data) => this.handleGetArtistsSuccess(fb.formatArtistList(data)))

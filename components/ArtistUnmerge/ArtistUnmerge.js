@@ -98,6 +98,7 @@ class ArtistUnmerge extends React.Component {
 
   componentDidMount() {
     fb.getArtist(this.props.match.params.id)
+      .once('value')
       .then((snapshot) => this.handleGetOriginArtistSuccess(snapshot.val()))
       .catch((error) => this.handleGetArtistError());
   }
