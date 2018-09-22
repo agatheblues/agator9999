@@ -54,8 +54,16 @@ p {
 
 
 .content-container {
-  width: 70%;
+  width: 80%;
   margin: auto;
+
+  @media only screen and (min-width : 768px) {
+    width: 70%;
+  }
+
+  @media only screen and (min-width : 1224px) {
+    width: 60%;
+  }
 }
 
 a {
@@ -85,6 +93,10 @@ a.not-available:hover {
 
 a.link-button {
   padding: 10px 30px 10px 30px;
+}
+
+a.icon:hover {
+  text-decoration: none;
 }
 
 .capitalize {

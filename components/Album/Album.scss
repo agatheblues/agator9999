@@ -4,11 +4,28 @@
   margin: 50px 0 50px 0;
 }
 
+.album-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: top;
+}
 
 .album-cover-container {
   width: 100%;
   margin-bottom: 50px;
 }
+
+.album-cover-wrapper {
+  position: relative;
+
+  .delete-cross {
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 10px;
+  }
+}
+
 
 .album-detail-container {
   width: 100%;
@@ -34,6 +51,10 @@
 
 .album-open-link {
   margin-top: 10px;
+}
+
+.album-menu-icon {
+  font-size: 20px;
 }
 
 /* iPads (portrait and landscape) ----------- */

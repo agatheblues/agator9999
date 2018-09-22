@@ -3,8 +3,11 @@ import PropTypes from 'prop-types';
 import Message from '../Message/Message';
 import SpotifyUpdateAlbum from '../SpotifyUpdateAlbum/SpotifyUpdateAlbum';
 import CopyToClipboard from '../CopyToClipboard/CopyToClipboard';
-import { getRef } from '../../helpers/FirebaseHelper';
+import DropdownMenu from '../DropdownMenu/DropdownMenu';
+import Button from '../Button/Button';
+import { getRef, removeAlbum } from '../../helpers/FirebaseHelper';
 require('./Album.scss');
+
 
 class Album extends React.Component {
 
@@ -23,11 +26,20 @@ class Album extends React.Component {
       hasAlbumData: false,
       albumData: null,
       showDiscogsForm: false,
-      messageUpdateSuccess: null
+      showRemoveForm: false,
+      message: null
     };
 
-    this.handleShowDiscogsClick = this.handleShowDiscogsClick.bind(this);
     this.handleHideDiscogsClick = this.handleHideDiscogsClick.bind(this);
+    this.handleHideRemoveClick = this.handleHideRemoveClick.bind(this);
+    this.handleRemoveSubmit = this.handleRemoveSubmit.bind(this);
+
+    this.dropdownItems = [
+      {
+        'label': 'Remove album',
+        'handleSelectedValue': this.handleShowRemoveClick.bind(this)
+      }
+    ];
   }
 
 
@@ -43,6 +55,20 @@ class Album extends React.Component {
   }
 
 
+  handleShowRemoveClick() {
+    this.setState({
+      showRemoveForm: true,
+      showDiscogsForm: false
+    });
+  }
+
+  handleHideRemoveClick(event) {
+    event.preventDefault();
+    this.setState({
+      showRemoveForm: false
+    });
+  }
+
   /**
    * On successful album retrieval from firebase, set album to state
    * @param  {Object} album Album, from Firebase
@@ -50,6 +76,13 @@ class Album extends React.Component {
   handleGetAlbumSuccess(album) {
     album.added_at = this.formatDate(album.added_at);
     album.release_date = album.release_date.substr(0, 4); // Get year only
+
+    if (!album.sources.hasOwnProperty('discogs')) {
+      this.dropdownItems.push({
+        'label': 'Link to Discogs',
+        'handleSelectedValue': this.handleShowDiscogsClick.bind(this)
+      });
+    }
 
     this.setState({
       hasAlbumData: true,
@@ -63,11 +96,10 @@ class Album extends React.Component {
    * On click, show the Link to Discogs form
    * @param  {Event} event Click event
    */
-  handleShowDiscogsClick(event) {
-    event.preventDefault();
-
+  handleShowDiscogsClick() {
     this.setState({
-      showDiscogsForm: true
+      showDiscogsForm: true,
+      showRemoveForm: false
     });
   }
 
@@ -77,10 +109,21 @@ class Album extends React.Component {
    */
   handleHideDiscogsClick(event) {
     event.preventDefault();
-
     this.setState({
       showDiscogsForm: false
     });
+  }
+
+  handleRemoveError() {
+    this.setState({
+      error: true,
+      message: 'Oops! Something went wrong while removing the album.'
+    });
+  }
+
+  handleRemoveSubmit() {
+    removeAlbum(this.props.artistId, this.props.id)
+      .catch((error) => this.handleRemoveError() );
   }
 
   /**
@@ -142,23 +185,35 @@ class Album extends React.Component {
    * @return {String} HTML Markup
    */
   renderDiscogsForm() {
-    if (!this.props.isAdmin) return null;
-    if (!this.state.hasAlbumData) return null;
     if (this.state.albumData.sources.hasOwnProperty('discogs')) return null;
-    if (!this.state.showDiscogsForm) {
-      return (
-        <div className='album-minor-details'>
-          <p><a href='' onClick={this.handleShowDiscogsClick}>&#xFF0B; Link to Discogs</a></p>
-        </div>
-      );
-    }
+    if (!this.state.showDiscogsForm) return;
 
+    // Open
     return (
       <div>
         <div className='album-minor-details'>
           <p><a href='' onClick={this.handleHideDiscogsClick}>&#xFF0D; Link to Discogs</a></p>
         </div>
         <SpotifyUpdateAlbum spotifyId={this.state.albumData.sources.spotify} />
+      </div>
+    );
+  }
+
+  renderRemoveForm() {
+    if (!this.state.showRemoveForm) return;
+
+    // Open
+    return (
+      <div>
+        <div className='album-minor-details'>
+          <p><a href='' onClick={this.handleHideRemoveClick}>&#xFF0D; Remove album</a></p>
+          <div className='form-container'>
+            <p>Are you sure you want to remove this album?</p>
+            <div className='submit-container'>
+              <Button label={'Remove'} handleClick={this.handleRemoveSubmit} />
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -193,14 +248,17 @@ class Album extends React.Component {
    */
   renderAlbumDetails() {
     if (!this.state.hasAlbumData) return null;
-    if (this.state.error) return <Message
+    if (this.state.hasAlbumData && !this.state.albumData) return <Message
       message='Oops! There was a problem while retrieving data for this album.'
-      error={this.state.error}
+      error={false}
     />;
 
     return (
       <div>
-        <h2>{this.state.albumData.name}</h2>
+        <div className='album-main'>
+          <h2>{this.state.albumData.name}</h2>
+          <DropdownMenu id={this.props.id} list={this.dropdownItems}/>
+        </div>
         <div className='album-main-details'>
           <p>{this.state.albumData.release_date}&emsp;/&emsp;{this.props.totalTracks} tracks</p>
           { this.renderOpenLink() }
@@ -213,9 +271,10 @@ class Album extends React.Component {
           { this.renderGenresOrStyles('genres', 'Genres') }
           { this.renderGenresOrStyles('styles', 'Styles') }
         </div>
-        { this.renderDiscogsForm() }
-        {this.state.messageUpdateSuccess &&
-          <Message message={this.state.messageUpdateSuccess} error={false}/>
+        {this.renderDiscogsForm()}
+        {this.renderRemoveForm()}
+        {this.state.message &&
+          <Message message={this.state.message} error={this.state.error}/>
         }
       </div>
     );
@@ -236,13 +295,14 @@ class Album extends React.Component {
         nextState.albumData.hasOwnProperty('discogs_id')) {
 
       this.setState({
-        messageUpdateSuccess: 'Album successfully updated!'
+        error: false,
+        message: 'Album successfully updated!'
       });
 
       // Timeout to hide success message
       this.timer = setTimeout(() => {
         this.setState({
-          messageUpdateSuccess: null
+          message: null
         });
       }, 2000);
     }
@@ -271,6 +331,7 @@ class Album extends React.Component {
 }
 
 Album.propTypes = {
+  artistId: PropTypes.string.isRequired,
   id: PropTypes.string.isRequired,
   totalTracks: PropTypes.number.isRequired,
   isAdmin: PropTypes.bool.isRequired
