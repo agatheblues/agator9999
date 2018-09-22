@@ -40,7 +40,7 @@ const renderMergeButton = function(artist, id) {
   }
 
   return (
-    <Link to={`/artist/${id}/merge`}>&#x21c4; Merge</Link>
+    <Link to={`/artist/${id}/merge`}>&#x260A; Merge</Link>
   );
 };
 
