@@ -1,11 +1,15 @@
 import React from 'react';
+import { Redirect } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import { getRef, getArtist, convertAlbumSummaryToArray } from '../../helpers/FirebaseHelper';
+import { getRef, getArtist, convertAlbumSummaryToArray, removeArtist } from '../../helpers/FirebaseHelper';
 import ArtistSummary from '../ArtistSummary/ArtistSummary';
 import Album from '../Album/Album';
+import EmptyList from '../EmptyList/EmptyList';
 import PageNotFound from '../PageNotFound/PageNotFound';
 import Message from '../Message/Message';
 import Loading from '../Loading/Loading';
+import Button from '../Button/Button';
+
 
 class Artist extends React.Component {
 
@@ -14,9 +18,13 @@ class Artist extends React.Component {
 
     this.state = {
       error: false,
+      message: null,
       loaded: false,
-      artistData: null
+      artistData: null,
+      toHome: false
     };
+
+    this.handleRemoveSubmit = this.handleRemoveSubmit.bind(this);
   }
 
   /**
@@ -50,7 +58,27 @@ class Artist extends React.Component {
   handleGetArtistError() {
     this.setState({
       error: true,
-      loaded: true
+      loaded: true,
+      message: 'Oops! There was a problem while retrieving data for this artist.'
+    });
+  }
+
+  handleRemoveSubmit() {
+    removeArtist(this.props.match.params.id)
+      .then(() => this.handleRemoveSuccess())
+      .catch((error) => this.handleRemoveError());
+  }
+
+  handleRemoveSuccess() {
+    this.setState({
+      toHome: true
+    });
+  }
+
+  handleRemoveError() {
+    this.setState({
+      error: true,
+      message: 'Oops! There was a problem while removing this artist.'
     });
   }
 
@@ -59,6 +87,17 @@ class Artist extends React.Component {
    * @return {String} HTML Markup
    */
   renderAlbums() {
+    if (!this.state.artistData.hasOwnProperty('albums')) {
+      return (
+        <div className='content-container'>
+          <EmptyList message='This artist does not have any albums.'/>
+          <div className='submit-container submit-container--center'>
+            <Button label='Remove artist' handleClick={this.handleRemoveSubmit}/>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div>
         {
@@ -90,6 +129,10 @@ class Artist extends React.Component {
   }
 
   render() {
+    if (this.state.toHome) {
+      return <Redirect to='/' />;
+    }
+
     if (!this.state.loaded) {
       return <Loading fullPage={true} label={'Loading artist...'}/>;
     }
@@ -97,7 +140,7 @@ class Artist extends React.Component {
     if (this.state.error) {
       return (
         <div className='content-container'>
-          <Message message='Oops! There was a problem while retrieving data for this artist.' error={this.state.error}/>
+          <Message message={this.state.message} error={this.state.error}/>
         </div>
       );
     }
