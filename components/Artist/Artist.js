@@ -78,6 +78,10 @@ class Artist extends React.Component {
     this.getCurrentArtist(this.props.match.params.id);
   }
 
+  componentWillUnmount() {
+    fb.getRef('artists/' + this.props.match.params.id).off('value');
+  }
+
   componentWillReceiveProps(nextProps) {
     // Handle page change: fetch new artist
     if (nextProps.match.params.id != this.props.match.params.id) {

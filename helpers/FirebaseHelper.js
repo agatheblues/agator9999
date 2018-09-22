@@ -372,7 +372,7 @@ function setArtist(artist) {
 }
 
 export function removeArtist(id) {
-  return getRef('artists/' + id).remove();
+  return getRef('artists/' + id).off('value', () => getRef('artists/' + id).remove());
 }
 
 /**

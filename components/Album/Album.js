@@ -312,6 +312,8 @@ class Album extends React.Component {
     if (this.timer) {
       clearTimeout(this.timer);
     }
+
+    getRef('albums/' + this.props.id).off('value');
   }
 
   render() {
