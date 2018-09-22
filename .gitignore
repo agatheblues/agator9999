@@ -6,6 +6,7 @@ firebase.config.json
 discogs.config.js
 spotify.config.js
 config.js
+config-dev.js
 
 ### Node ###
 # Logs

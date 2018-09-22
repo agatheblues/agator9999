@@ -150,7 +150,7 @@ Read this: [Firebase Hosting](https://firebase.google.com/docs/hosting/).
 * Update your Spotify application with the same callback REDIRECT_UR
 * Run `npm run build`, that will generate your bundle.
 * Do `firebase login` and then `firebase init`, choose the hosting feature and your firebase project
-* Move there `index.html`, `dist/bundle.js`, `dist/style.css` and the `static` folder to the `public` folder of your hosting repo.
+* Move there `index.html`, `bundle.js`, `style.css` (from the `dist` build output) and the `static` folder to the `public` folder of your hosting repo.
 * Then hit `firebase deploy`!
 
 Note: some adblockers might be blocking your calls to the Spotify API when you deploy to Firebase.
