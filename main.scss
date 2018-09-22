@@ -258,6 +258,10 @@ ul.vertical-list {
 
   button {
     margin: 10px 0 0 0;
-    width: 100px;
+    min-width: 100px;
   }
+}
+
+.submit-container--center {
+  text-align: center;
 }
