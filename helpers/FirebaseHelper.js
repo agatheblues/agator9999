@@ -1,7 +1,7 @@
 import axios from 'axios';
-import firebase from 'firebase/app';
-import 'firebase/auth';
-import 'firebase/database';
+// import firebase from 'firebase/app';
+// import 'firebase/auth';
+// import 'firebase/database';
 import { firebaseConfig } from '../config';
 
 /******* FORMATTING *******/
@@ -45,7 +45,7 @@ const formatSpotifyImage = ({ height = null, width = null, url = '' }) => (
   }
 );
 
-export const formatDiscogsAlbum = ({ id, title = '', images = [], year = '', genres = [], styles = []}, source, url, release_type) => (
+export const formatDiscogsAlbum = ({ id, title = '', images = [], year = '', genres = [], styles = [] }, source, url, release_type) => (
   {
     name: title,
     images: formatDiscogsImages(images),
@@ -61,7 +61,7 @@ export const formatDiscogsAlbum = ({ id, title = '', images = [], year = '', gen
   }
 );
 
-export const formatDiscogsUpdateAlbum = ({ id, genres = [], styles = []}, release_type) => (
+export const formatDiscogsUpdateAlbum = ({ id, genres = [], styles = [] }, release_type) => (
   {
     release_type,
     genres,
@@ -92,21 +92,21 @@ export const formatSpotifyDiscogsAlbum = (
     styles = []
   },
   release_type) => (
-  {
-    name,
-    images: formatSpotifyImages(images),
-    release_date,
-    sources: {
-      spotify: spotify_id,
-      discogs: discogs_id
-    },
-    genres,
-    styles,
-    release_type
-  }
-);
+    {
+      name,
+      images: formatSpotifyImages(images),
+      release_date,
+      sources: {
+        spotify: spotify_id,
+        discogs: discogs_id
+      },
+      genres,
+      styles,
+      release_type
+    }
+  );
 
-export const formatAlbumSummary = ({ added_at = '', album: { id, tracks: { total = 0 }}}) => (
+export const formatAlbumSummary = ({ added_at = '', album: { id, tracks: { total = 0 } } }) => (
   {
     id,
     added_at,
@@ -114,19 +114,19 @@ export const formatAlbumSummary = ({ added_at = '', album: { id, tracks: { total
   }
 );
 
-export const formatSpotifySingleAlbumSummary = ({ tracks: { total = 0 }}) => (
+export const formatSpotifySingleAlbumSummary = ({ tracks: { total = 0 } }) => (
   {
     totalTracks: total
   }
 );
 
-export const formatDiscogsSingleAlbumSummary = ({ tracklist = []}) => (
+export const formatDiscogsSingleAlbumSummary = ({ tracklist = [] }) => (
   {
     totalTracks: tracklist.length
   }
 );
 
-export const formatSpotifyArtist = ({ id, name = ''}) => (
+export const formatSpotifyArtist = ({ id, name = '' }) => (
   {
     name,
     sources: {
@@ -164,7 +164,7 @@ export function formatArtists(artists, formatMethod) {
 export function convertAlbumSummaryToArray(item) {
 
   return Object.keys(item).reduce((acc, key) => {
-    acc.push(Object.assign({id: key}, item[key]));
+    acc.push(Object.assign({ id: key }, item[key]));
     return acc;
   }, []);
 
@@ -310,7 +310,7 @@ function updateOrSetSingleArtistFromSingleAlbum(artist, album, source, albumId) 
 
   return getAlbumBySource(source, albumId)
     .then((filteredAlbums) => {
-      filteredAlbums.forEach((item) => { albumKey = item.key;});
+      filteredAlbums.forEach((item) => { albumKey = item.key; });
       return getArtistBySource(source, artist.sources[source])
         .then(mightUpdateArtist)
         .then(mightSetArtist);
@@ -428,7 +428,7 @@ export function getArtists() {
 export function formatArtistList(data) {
   let artists = [];
 
-  data.forEach(function(item) {
+  data.forEach(function (item) {
     let artist = item.val();
     artist.id = item.key;
     artists.push(artist);
@@ -508,7 +508,7 @@ export function setAlbumIfNotExists(album, throwDuplicateError) {
   ]).then((existsArray) => {
     const exists = existsArray.some((item) => item == true);
 
-    if (exists && throwDuplicateError) throw({ message : 'Oops! This album is already in your library!'});
+    if (exists && throwDuplicateError) throw ({ message: 'Oops! This album is already in your library!' });
     if (exists) return;
     setAlbum(album);
   });
@@ -527,7 +527,7 @@ export function updateSpotifyAlbumWithDiscogsAlbum(spotifyId, dgAlbum) {
         getRef('albums/' + album.key)
           .update({
             ['/release_type']: dgAlbum.release_type,
-            ['/genres'] : dgAlbum.genres,
+            ['/genres']: dgAlbum.genres,
             ['/styles']: dgAlbum.styles,
             ['/sources/discogs']: dgAlbum.discogs_id
           });
