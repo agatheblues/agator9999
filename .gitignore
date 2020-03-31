@@ -7,6 +7,8 @@ discogs.config.js
 spotify.config.js
 config.js
 config-dev.js
+config-prod.js
+migrating_scripts/
 
 ### Node ###
 # Logs
