@@ -5,7 +5,7 @@ import CardGrid from '../../components/CardGrid/CardGrid';
 import ProfileCard from '../../components/ProfileCard/ProfileCard';
 
 class Home extends React.Component {
-  constructor(props){
+  constructor(props) {
     super();
 
     this.handleClickLogout = this.handleClickLogout.bind(this);
@@ -43,7 +43,7 @@ class Home extends React.Component {
             />
             {this.renderAdminMenu()}
           </div>
-          <CardGrid />
+          {/* <CardGrid /> */}
         </div>
       </div>
     );

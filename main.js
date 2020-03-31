@@ -16,14 +16,17 @@ import PageNotFound from './components/PageNotFound/PageNotFound';
 require('./main.scss');
 
 class App extends React.Component {
-  constructor(props){
+  constructor(props) {
     super(props);
 
     init();
 
     this.state = {
-      user: null,
-      isAdmin: false,
+      user: {
+        photoURL: 'https://placekitten.com/300/300',
+        displayName: 'Prout'
+      },
+      isAdmin: true,
       loaded: false
     };
 
@@ -41,7 +44,7 @@ class App extends React.Component {
   checkIfAdmin(data) {
     let isAdmin = false;
 
-    data.forEach(function(item) {
+    data.forEach(function (item) {
       isAdmin = item.val().isAdmin;
     });
 
@@ -90,7 +93,7 @@ class App extends React.Component {
 
 
   renderHome() {
-    return <Home user={this.state.user} logout={this.logout} isAdmin={this.state.isAdmin}/>;
+    return <Home user={this.state.user} logout={this.logout} isAdmin={this.state.isAdmin} />;
   }
 
 
@@ -140,18 +143,18 @@ class App extends React.Component {
 
   render() {
 
-    if (!this.state.loaded) return <Loading fullPage={true} label={'Loading...'}/>;
-    if (!this.state.user)   return <FirebaseSignIn />;
+    if (!this.state.loaded) return <Loading fullPage={true} label={'Loading...'} />;
+    if (!this.state.user) return <FirebaseSignIn />;
 
     return (
       <HashRouter>
         <Switch>
-          <Route exact path="/" render={this.renderHome}/>
+          <Route exact path="/" render={this.renderHome} />
           <Route exact path="/spotify/sync" render={this.renderSpotifySync} />
           <Route exact path="/spotify/login" render={this.renderSpotifyLogin} />
           <Route path="/:access_token(access_token=.*)" render={this.renderSpotifyLogin} />
           <Route exact path="/album/create" render={this.renderCreateAlbum} />
-          <Route exact path="/artist/:id" render={this.renderArtist}/>
+          <Route exact path="/artist/:id" render={this.renderArtist} />
           <Route exact path="/artist/:id/merge" render={this.renderArtistMerge} />
           <Route exact path="/artist/:id/unmerge" render={this.renderArtistUnmerge} />
           <Route exact path="/404" component={PageNotFound} />
