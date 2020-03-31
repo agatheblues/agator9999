@@ -1,33 +1,42 @@
 {
-    "env": {
-        "browser": true,
-        "es6": true
+  "env": {
+    "browser": true,
+    "es6": true
+  },
+  "extends": [
+    "plugin:react/recommended",
+    "airbnb",
+    "plugin:jsx-a11y/recommended"
+  ],
+  "parserOptions": {
+    "ecmaFeatures": {
+      "experimentalObjectRestSpread": true,
+      "jsx": true
     },
-    "extends": ["plugin:react/recommended"],
-    "parserOptions": {
-        "ecmaFeatures": {
-            "experimentalObjectRestSpread": true,
-            "jsx": true
-        },
-        "sourceType": "module"
-    },
-    "plugins": [
-        "react"
+    "sourceType": "module"
+  },
+  "plugins": [
+    "react",
+    "jsx-a11y"
+  ],
+  "rules": {
+    "semi": [
+      "error",
+      "always"
     ],
-    "rules": {
-        "indent": [2, 2],
-        "quotes": [
-            "error",
-            "single"
-        ],
-        "semi": [
-            "error",
-            "always"
+    "react/jsx-filename-extension": [
+      1,
+      {
+        "extensions": [
+          ".js",
+          ".jsx"
         ]
-    },
-    "settings": {
-      "react" : {
-        "version": "15.6"
       }
+    ]
+  },
+  "settings": {
+    "react": {
+      "version": "16.8"
     }
+  }
 }
