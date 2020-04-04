@@ -1,7 +1,8 @@
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import { getRef, getArtist, convertAlbumSummaryToArray, removeArtist } from '../../helpers/FirebaseHelper';
+// import { getRef, getArtist, convertAlbumSummaryToArray, removeArtist } from '../../helpers/FirebaseHelper';
+import { getArtist } from '../../helpers/DataHelper';
 import ArtistSummary from '../ArtistSummary/ArtistSummary';
 import Album from '../Album/Album';
 import EmptyList from '../EmptyList/EmptyList';
@@ -13,48 +14,35 @@ import Button from '../Button/Button';
 
 class Artist extends React.Component {
 
-  constructor(props) {
+  constructor() {
     super();
 
     this.state = {
       error: false,
       message: null,
       loaded: false,
-      artistData: null,
+      artist: null,
       toHome: false
     };
 
     this.handleRemoveSubmit = this.handleRemoveSubmit.bind(this);
   }
 
-  /**
-   * Fetch artist from Firebase
-   * @param  {String} id Artist Id
-   */
   getCurrentArtist(id) {
     getArtist(id)
-      .on('value', (snapshot) => this.handleGetArtistSuccess(snapshot.val()));
+      .then((response) => this.handleGetArtistSuccess(response))
+      .catch((error) => this.handleGetArtistError());
   }
 
-  /**
-   * Format artist's albums if exist. Set artist data to state
-   * @param  {Object} artist Firebase artist object
-   */
-  handleGetArtistSuccess(artist) {
-    if (artist && artist.hasOwnProperty('albums')) {
-      // Update albums structure in artist object
-      artist.albums = convertAlbumSummaryToArray(artist.albums);
-    }
+  handleGetArtistSuccess(response) {
+    const { data } = response;
 
     this.setState({
       loaded: true,
-      artistData: artist
+      artist: data
     });
   }
 
-  /**
-   * Set fetching artist error to state
-   */
   handleGetArtistError() {
     this.setState({
       error: true,
@@ -87,38 +75,26 @@ class Artist extends React.Component {
    * @return {String} HTML Markup
    */
   renderAlbums() {
-    if (!this.state.artistData.hasOwnProperty('albums')) {
+    const { artist: { albums } } = this.state;
+
+    if (albums.length === 0) {
       return (
         <div className='content-container'>
-          <EmptyList message='This artist does not have any albums.'/>
+          <EmptyList message='This artist does not have any albums.' />
           <div className='submit-container submit-container--center'>
-            <Button label='Remove artist' handleClick={this.handleRemoveSubmit}/>
+            <Button label='Remove artist' handleClick={this.handleRemoveSubmit} />
           </div>
         </div>
       );
     }
 
-    return (
-      <div>
-        {
-          this.state.artistData.albums.map((album) => {
-            return (
-              <div key={album.id} >
-                <Album artistId={this.props.match.params.id} id={album.id} totalTracks={album.totalTracks} isAdmin={this.props.isAdmin}/>
-              </div>
-            );
-          })
-        }
-      </div>
+    return albums.map((album, index) =>
+      <Album key={index} artistId={this.props.match.params.id} album={album} isAdmin={this.props.isAdmin} />
     );
   }
 
   componentDidMount() {
     this.getCurrentArtist(this.props.match.params.id);
-  }
-
-  componentWillUnmount() {
-    getRef('artists/' + this.props.match.params.id).off('value');
   }
 
   componentWillReceiveProps(nextProps) {
@@ -129,30 +105,32 @@ class Artist extends React.Component {
   }
 
   render() {
-    if (this.state.toHome) {
+    const { toHome, loaded, error, artist, message } = this.state;
+
+    if (toHome) {
       return <Redirect to='/' />;
     }
 
-    if (!this.state.loaded) {
-      return <Loading fullPage={true} label={'Loading artist...'}/>;
+    if (!loaded) {
+      return <Loading fullPage={true} label={'Loading artist...'} />;
     }
 
-    if (this.state.error) {
+    if (error) {
       return (
         <div className='content-container'>
-          <Message message={this.state.message} error={this.state.error}/>
+          <Message message={message} error={error} />
         </div>
       );
     }
 
-    if (!this.state.artistData) {
+    if (!artist) {
       return <PageNotFound />;
     }
 
     return (
       <div>
-        <ArtistSummary id={this.props.match.params.id} artist={this.state.artistData} />
-        { this.renderAlbums() }
+        <ArtistSummary id={this.props.match.params.id} artist={artist} />
+        {this.renderAlbums()}
       </div>
     );
   }

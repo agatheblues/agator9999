@@ -19,3 +19,9 @@ function getInstance() {
  * @return {Promise}
  */
 export const getArtists = () => getInstance().get('/artists');
+
+/**
+ * Get an artist
+ * @return {Promise}
+ */
+export const getArtist = (id) => getInstance().get(`/artists/${id}`);

@@ -3,22 +3,15 @@ import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 require('./ArtistSummary.scss');
 
-/**
- * Sums up the total number of tracks over several albums
- * @param  {Integer} totalTracks Initial total tracks
- * @param  {Object} album        Current album
- * @return {Integer}             Sum of tracks per album
- */
-const reducer = (totalTracks, album) => totalTracks + album.totalTracks;
 
 /**
  * Renders the listening URI for an artist
- * @param  {Object} artist Artist from FB
- * @return {String}        HTML Markup
+ * @param  {String} spotify_id Artist's spotify_id
+ * @return {String}            HTML Markup
  */
-const renderListeningUri = function(artist) {
-  if (artist.sources.hasOwnProperty('spotify')) {
-    const url = 'https://open.spotify.com/go?uri=spotify:artist:' + artist.sources.spotify;
+const renderListeningUri = function (spotify_id) {
+  if (spotify_id) {
+    const url = 'https://open.spotify.com/go?uri=spotify:artist:' + spotify_id;
     return (
       <p>
         <a
@@ -34,8 +27,8 @@ const renderListeningUri = function(artist) {
   return <p className='not-available not-available--line'>&#9836;</p>;
 };
 
-const renderMergeButton = function(artist, id) {
-  if (artist.sources.hasOwnProperty('spotify') && artist.sources.hasOwnProperty('discogs')) {
+const renderMergeButton = function (spotify_id, discogs_id, id) {
+  if (spotify_id && discogs_id) {
     return <Link to={`/artist/${id}/unmerge`}>&#x2702; Unmerge</Link>;
   }
 
@@ -45,27 +38,24 @@ const renderMergeButton = function(artist, id) {
 };
 
 
-const ArtistSummary = function({ artist, id }) {
-
-  // Get artist total amount of tracks
-  let totalAlbums =  (artist.hasOwnProperty('albums')) ? Object.keys(artist.albums).length : 0;
-  let totalTracks = (artist.hasOwnProperty('albums')) ? artist.albums.reduce(reducer, 0) : 0;
+const ArtistSummary = function ({ artist, id }) {
+  const { img_url, total_albums, total_tracks, name, discogs_id, spotify_id } = artist;
 
   return (
-    <div className='artist-banner-container' style={{ 'backgroundImage': `url('${artist.imgUrl}')`}}>
+    <div className='artist-banner-container' style={{ 'backgroundImage': `url('${img_url}')` }}>
       <div className='artist-banner-wrapper'>
         <div className='artist-banner-back-wrapper'>
           <div className='artist-banner-back content-container'>
             <Link to='/'>&#9839; Back to library</Link>
-            { renderMergeButton(artist, id) }
+            {renderMergeButton(discogs_id, spotify_id, id)}
           </div>
         </div>
 
         <div className='artist-banner-content-wrapper'>
           <div className='artist-banner-content content-container'>
-            <h1>{artist.name}</h1>
-            <p>{`${totalAlbums} albums, ${totalTracks} tracks`}</p>
-            { renderListeningUri(artist) }
+            <h1>{name}</h1>
+            <p>{`${total_albums} albums, ${total_tracks} tracks`}</p>
+            {renderListeningUri(spotify_id)}
           </div>
         </div>
       </div>
