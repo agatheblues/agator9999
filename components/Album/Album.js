@@ -5,7 +5,7 @@ import SpotifyUpdateAlbum from '../SpotifyUpdateAlbum/SpotifyUpdateAlbum';
 import CopyToClipboard from '../CopyToClipboard/CopyToClipboard';
 import DropdownMenu from '../DropdownMenu/DropdownMenu';
 import Button from '../Button/Button';
-// import { removeAlbum } from '../../helpers/DataHelper';
+import { deleteAlbum } from '../../helpers/DataHelper';
 require('./Album.scss');
 
 
@@ -98,7 +98,12 @@ class Album extends React.Component {
   }
 
   handleRemoveSubmit() {
-    removeAlbum(this.props.artistId, this.props.id)
+    deleteAlbum(this.state.album.id)
+      .then(response => {
+        this.setState({
+          album: null
+        });
+      })
       .catch((error) => this.handleRemoveError());
   }
 
@@ -143,6 +148,7 @@ class Album extends React.Component {
    * @return {String} HTML Markup
    */
   renderDiscogsForm(spotify_id) {
+    // TODO: Link to discogs ability (PATCH album)
     return (
       <div>
         <div className='album-minor-details'>
@@ -154,6 +160,9 @@ class Album extends React.Component {
   }
 
   renderRemoveForm() {
+    // TODO: when the artist has only one album left
+    // DB automatically deletes artist. Here, show a different message in this case
+    // indicating artist will be deleted as well. Redirect to index
     return (
       <div>
         <div className='album-minor-details'>
@@ -235,6 +244,7 @@ class Album extends React.Component {
     );
   }
 
+  // TODO: Update album when discogs has been added
   componentWillUpdate(nextProps, nextState) {
     if (!this.state.album) return;
 
@@ -263,6 +273,8 @@ class Album extends React.Component {
   }
 
   render() {
+    if (!this.state.album) return null; // TODO: temp solution, for when album gets removed
+
     return (
       <div className='content-container'>
         <div className='album-wrapper'>
