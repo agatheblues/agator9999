@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { HashRouter, Route, Switch, Redirect } from 'react-router-dom';
-import { init, getUser, getFbSignOut, getAuth } from './helpers/FirebaseHelper.js';
+// import { init, getUser, getFbSignOut, getAuth } from './helpers/FirebaseHelper.js';
 import SpotifySync from './components/SpotifySync/SpotifySync';
 import Home from './components/Home/Home';
 import SpotifyLogin from './components/SpotifyLogin/SpotifyLogin';
@@ -9,7 +9,7 @@ import CreateAlbum from './components/CreateAlbum/CreateAlbum';
 import Artist from './components/Artist/Artist';
 import ArtistMerge from './components/ArtistMerge/ArtistMerge';
 import ArtistUnmerge from './components/ArtistUnmerge/ArtistUnmerge';
-import FirebaseSignIn from './components/FirebaseSignIn/FirebaseSignIn';
+// import FirebaseSignIn from './components/FirebaseSignIn/FirebaseSignIn';
 import Loading from './components/Loading/Loading';
 import PageNotFound from './components/PageNotFound/PageNotFound';
 
@@ -19,7 +19,7 @@ class App extends React.Component {
   constructor(props) {
     super(props);
 
-    init();
+    // init();
 
     this.state = {
       user: {
@@ -31,7 +31,7 @@ class App extends React.Component {
     };
 
     this.setUserToState = this.setUserToState.bind(this);
-    this.logout = this.logout.bind(this);
+    // this.logout = this.logout.bind(this);
     this.renderHome = this.renderHome.bind(this);
     this.renderSpotifySync = this.renderSpotifySync.bind(this);
     this.renderSpotifyLogin = this.renderSpotifyLogin.bind(this);
@@ -60,35 +60,35 @@ class App extends React.Component {
   }
 
 
-  persistUserAuth() {
-    getAuth()
-      .onAuthStateChanged((user) => {
-        if (user) {
-          getUser(user.email)
-            .then((data) => this.setUserToState(user, data));
-        } else {
-          this.setState({
-            loaded: true
-          });
-        }
-      });
-  }
+  // persistUserAuth() {
+  //   getAuth()
+  //     .onAuthStateChanged((user) => {
+  //       if (user) {
+  //         getUser(user.email)
+  //           .then((data) => this.setUserToState(user, data));
+  //       } else {
+  //         this.setState({
+  //           loaded: true
+  //         });
+  //       }
+  //     });
+  // }
 
 
-  logout() {
-    getFbSignOut()
-      .then(() => {
-        this.setState({
-          user: null,
-          isAdmin: false,
-          loaded: true
-        });
-      });
-  }
+  // logout() {
+  //   getFbSignOut()
+  //     .then(() => {
+  //       this.setState({
+  //         user: null,
+  //         isAdmin: false,
+  //         loaded: true
+  //       });
+  //     });
+  // }
 
 
   componentDidMount() {
-    this.persistUserAuth();
+    // this.persistUserAuth();
   }
 
 
@@ -143,8 +143,8 @@ class App extends React.Component {
 
   render() {
 
-    if (!this.state.loaded) return <Loading fullPage={true} label={'Loading...'} />;
-    if (!this.state.user) return <FirebaseSignIn />;
+    // if (!this.state.loaded) return <Loading fullPage={true} label={'Loading...'} />;
+    // if (!this.state.user) return <FirebaseSignIn />;
 
     return (
       <HashRouter>
