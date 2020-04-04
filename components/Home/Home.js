@@ -43,7 +43,7 @@ class Home extends React.Component {
             />
             {this.renderAdminMenu()}
           </div>
-          {/* <CardGrid /> */}
+          <CardGrid />
         </div>
       </div>
     );

@@ -33,10 +33,10 @@ class FirebaseSignIn extends React.Component {
         <div className='signin-container'>
           <div className='signin-content'>
             <h1>Welcome to {`${config.owner}`}&#39;s music library.</h1>
-            <StyledFirebaseAuth
+            {/* <StyledFirebaseAuth
               uiConfig={this.uiConfig}
               firebaseAuth={getAuth()}
-            />
+            /> */}
             <p className='note note--light'>agator9999 is an open-source personal music library aggregator built with React + Firebase. Check it out on <a className='inverted' href='https://github.com/agatheblues/agator9999'>Github</a> and start your own library!</p>
           </div>
         </div>

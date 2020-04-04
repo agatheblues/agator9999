@@ -12,7 +12,7 @@ function sourcesReducer(accumulator, currentValue, currentIndex, array) {
   return accumulator + ' ' + currentValue + ',';
 }
 
-const Card = function({id, name, imgUrl, totalAlbums, sources}) {
+const Card = function ({ id, name, imgUrl, totalAlbums, sources }) {
   let albums = (totalAlbums > 1) ? totalAlbums + ' albums' : totalAlbums + ' album';
 
   let sourceString;
@@ -24,7 +24,7 @@ const Card = function({id, name, imgUrl, totalAlbums, sources}) {
     <div className='card-container'>
       <Link to={'/artist/' + id} className='card-link'>
         <div className='card-wrapper'>
-          <div className='card-image' style={{ 'backgroundImage': `url('${imgUrl}'), url('/static/images/loading-artist.png')`}}>
+          <div className='card-image' style={{ 'backgroundImage': `url('${imgUrl}'), url('/static/images/loading-artist.png')` }}>
           </div>
           <div className='card-details'>
             <p>{name}</p>
@@ -42,7 +42,7 @@ const Card = function({id, name, imgUrl, totalAlbums, sources}) {
 };
 
 Card.propTypes = {
-  id: PropTypes.string.isRequired,
+  id: PropTypes.number.isRequired,
   name: PropTypes.string.isRequired,
   totalAlbums: PropTypes.number,
   imgUrl: PropTypes.string,
