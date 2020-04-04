@@ -25,3 +25,9 @@ export const getArtists = () => getInstance().get('/artists');
  * @return {Promise}
  */
 export const getArtist = (id) => getInstance().get(`/artists/${id}`);
+
+/**
+ * Delete an album
+ * @return {Promise}
+ */
+export const deleteAlbum = (id) => getInstance().delete(`/albums/${id}`);
