@@ -1,17 +1,17 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import { HashRouter, Route, Switch, Redirect } from 'react-router-dom';
 // import { init, getUser, getFbSignOut, getAuth } from './helpers/FirebaseHelper.js';
-import SpotifySync from './components/SpotifySync/SpotifySync';
-import Home from './components/Home/Home';
-import SpotifyLogin from './components/SpotifyLogin/SpotifyLogin';
-import CreateAlbum from './components/CreateAlbum/CreateAlbum';
-import Artist from './components/Artist/Artist';
+// import FirebaseSignIn from './components/FirebaseSignIn/FirebaseSignIn';
+import { HashRouter, Route, Switch, Redirect } from 'react-router-dom';
+import ArtistPage from './pages/ArtistPage';
 import ArtistMerge from './components/ArtistMerge/ArtistMerge';
 import ArtistUnmerge from './components/ArtistUnmerge/ArtistUnmerge';
-// import FirebaseSignIn from './components/FirebaseSignIn/FirebaseSignIn';
+import CreateAlbum from './components/CreateAlbum/CreateAlbum';
+import HomePage from './pages/HomePage';
 import Loading from './components/Loading/Loading';
 import PageNotFound from './components/PageNotFound/PageNotFound';
+import React from 'react';
+import ReactDOM from 'react-dom';
+import SpotifyLogin from './components/SpotifyLogin/SpotifyLogin';
+import SpotifySync from './components/SpotifySync/SpotifySync';
 
 require('./main.scss');
 
@@ -32,11 +32,11 @@ class App extends React.Component {
 
     this.setUserToState = this.setUserToState.bind(this);
     // this.logout = this.logout.bind(this);
-    this.renderHome = this.renderHome.bind(this);
+    this.renderHomePage = this.renderHomePage.bind(this);
     this.renderSpotifySync = this.renderSpotifySync.bind(this);
     this.renderSpotifyLogin = this.renderSpotifyLogin.bind(this);
     this.renderCreateAlbum = this.renderCreateAlbum.bind(this);
-    this.renderArtist = this.renderArtist.bind(this);
+    this.renderArtistPage = this.renderArtistPage.bind(this);
     this.renderArtistMerge = this.renderArtistMerge.bind(this);
     this.renderArtistUnmerge = this.renderArtistUnmerge.bind(this);
   }
@@ -92,8 +92,8 @@ class App extends React.Component {
   }
 
 
-  renderHome() {
-    return <Home user={this.state.user} logout={this.logout} isAdmin={this.state.isAdmin} />;
+  renderHomePage() {
+    return <HomePage user={this.state.user} logout={this.logout} isAdmin={this.state.isAdmin} />;
   }
 
 
@@ -104,14 +104,12 @@ class App extends React.Component {
     return <SpotifySync />;
   }
 
-
   renderSpotifyLogin() {
     if (!this.state.isAdmin) {
       return <Redirect to="/404" />;
     }
     return <SpotifyLogin />;
   }
-
 
   renderCreateAlbum() {
     if (!this.state.isAdmin) {
@@ -120,11 +118,9 @@ class App extends React.Component {
     return <CreateAlbum />;
   }
 
-
-  renderArtist(props) {
-    return <Artist {...props} isAdmin={this.state.isAdmin} />;
+  renderArtistPage(props) {
+    return <ArtistPage {...props} isAdmin={this.state.isAdmin} />;
   }
-
 
   renderArtistMerge(props) {
     if (!this.state.isAdmin) {
@@ -140,7 +136,6 @@ class App extends React.Component {
     return <ArtistUnmerge {...props} isAdmin={this.state.isAdmin} />;
   }
 
-
   render() {
 
     // if (!this.state.loaded) return <Loading fullPage={true} label={'Loading...'} />;
@@ -149,12 +144,12 @@ class App extends React.Component {
     return (
       <HashRouter>
         <Switch>
-          <Route exact path="/" render={this.renderHome} />
+          <Route exact path="/" render={this.renderHomePage} />
           <Route exact path="/spotify/sync" render={this.renderSpotifySync} />
           <Route exact path="/spotify/login" render={this.renderSpotifyLogin} />
           <Route path="/:access_token(access_token=.*)" render={this.renderSpotifyLogin} />
           <Route exact path="/album/create" render={this.renderCreateAlbum} />
-          <Route exact path="/artist/:id" render={this.renderArtist} />
+          <Route exact path="/artist/:id" render={this.renderArtistPage} />
           <Route exact path="/artist/:id/merge" render={this.renderArtistMerge} />
           <Route exact path="/artist/:id/unmerge" render={this.renderArtistUnmerge} />
           <Route exact path="/404" component={PageNotFound} />

@@ -1,11 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { ArtistContext } from '../../context/ArtistContext';
 import Message from '../Message/Message';
 import SpotifyUpdateAlbum from '../SpotifyUpdateAlbum/SpotifyUpdateAlbum';
 import CopyToClipboard from '../CopyToClipboard/CopyToClipboard';
 import DropdownMenu from '../DropdownMenu/DropdownMenu';
 import Button from '../Button/Button';
-import { deleteAlbum } from '../../helpers/DataHelper';
 require('./Album.scss');
 
 
@@ -30,7 +30,6 @@ class Album extends React.Component {
 
     this.state = {
       error: false,
-      album: props.album,
       showDiscogsForm: false,
       showRemoveForm: false,
       message: null,
@@ -68,10 +67,6 @@ class Album extends React.Component {
     });
   }
 
-  /**
-   * On click, show the Link to Discogs form
-   * @param  {Event} event Click event
-   */
   handleShowDiscogsClick() {
     this.setState({
       showDiscogsForm: true,
@@ -79,10 +74,6 @@ class Album extends React.Component {
     });
   }
 
-  /**
-   * On click, hide the Link to Discogs form
-   * @param  {Event} event Click event
-   */
   handleHideDiscogsClick(event) {
     event.preventDefault();
     this.setState({
@@ -90,21 +81,8 @@ class Album extends React.Component {
     });
   }
 
-  handleRemoveError() {
-    this.setState({
-      error: true,
-      message: 'Oops! Something went wrong while removing the album.'
-    });
-  }
-
   handleRemoveSubmit() {
-    deleteAlbum(this.state.album.id)
-      .then(response => {
-        this.setState({
-          album: null
-        });
-      })
-      .catch((error) => this.handleRemoveError());
+    this.props.deleteAlbum(this.props.album.id)
   }
 
   /**
@@ -126,9 +104,7 @@ class Album extends React.Component {
    * Renders Album cover image or placeholder
    * @return {String} Album image markup
    */
-  renderAlbumCover() {
-    const { album: { img_url } } = this.state;
-
+  renderAlbumCover(img_url) {
     const src = img_url ? img_url : '/static/images/missing-album.jpg';
     return <img src={src} alt={'Album Cover'} className='album-cover' />;
   }
@@ -160,9 +136,6 @@ class Album extends React.Component {
   }
 
   renderRemoveForm() {
-    // TODO: when the artist has only one album left
-    // DB automatically deletes artist. Here, show a different message in this case
-    // indicating artist will be deleted as well. Redirect to index
     return (
       <div>
         <div className='album-minor-details'>
@@ -210,9 +183,8 @@ class Album extends React.Component {
    * else render album details
    * @return {String} HTML Markup
    */
-  renderAlbumDetails() {
-    const { showDiscogsForm, showRemoveForm, album, message, error } = this.state;
-    const { name, id, release_date, total_tracks, added_at, spotify_id, discogs_id, genres, styles } = album;
+  renderAlbumDetails(showDiscogsForm, showRemoveForm, message, error) {
+    const { name, id, release_date, total_tracks, added_at, spotify_id, discogs_id, genres, styles } = this.props.album;
 
     const dropdownList = discogs_id ? this.dropdownItems : this.dropdownItems.concat([{
       'label': 'Link to Discogs',
@@ -246,11 +218,11 @@ class Album extends React.Component {
 
   // TODO: Update album when discogs has been added
   componentWillUpdate(nextProps, nextState) {
-    if (!this.state.album) return;
+    if (!this.props.album) return;
 
     // If album has received a data update
-    if (!this.state.album.hasOwnProperty('discogs_id') &&
-      nextState.album.hasOwnProperty('discogs_id')) {
+    if (!this.props.album.hasOwnProperty('discogs_id') &&
+      nextProps.album.hasOwnProperty('discogs_id')) {
 
       this.setState({
         error: false,
@@ -273,16 +245,17 @@ class Album extends React.Component {
   }
 
   render() {
-    if (!this.state.album) return null; // TODO: temp solution, for when album gets removed
+    const { showDiscogsForm, showRemoveForm, album, message, error } = this.state;
+    const { img_url } = this.props.album;
 
     return (
       <div className='content-container'>
         <div className='album-wrapper'>
           <div className='album-cover-container'>
-            {this.renderAlbumCover()}
+            {this.renderAlbumCover(img_url)}
           </div>
           <div className='album-detail-container'>
-            {this.renderAlbumDetails()}
+            {this.renderAlbumDetails(showDiscogsForm, showRemoveForm, message, error)}
           </div>
         </div>
       </div>
@@ -291,9 +264,17 @@ class Album extends React.Component {
 }
 
 Album.propTypes = {
-  artistId: PropTypes.string.isRequired,
   album: PropTypes.object.isRequired,
-  isAdmin: PropTypes.bool.isRequired
+  isAdmin: PropTypes.bool.isRequired,
+  deleteAlbum: PropTypes.func.isRequired
 };
 
-export default Album;
+const AlbumConsumer = (props) => {
+  return (
+    <ArtistContext.Consumer>
+      {({ deleteAlbum }) => <Album {...props} {...{ deleteAlbum }} />}
+    </ArtistContext.Consumer>
+  );
+}
+
+export default AlbumConsumer;

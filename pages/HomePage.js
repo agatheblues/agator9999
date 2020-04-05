@@ -1,11 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import CardGrid from '../../components/CardGrid/CardGrid';
-import ProfileCard from '../../components/ProfileCard/ProfileCard';
+import CardGrid from '../components/CardGrid/CardGrid';
+import ProfileCard from '../components/ProfileCard/ProfileCard';
 
-class Home extends React.Component {
-  constructor(props) {
+class HomePage extends React.Component {
+  constructor() {
     super();
 
     this.handleClickLogout = this.handleClickLogout.bind(this);
@@ -50,10 +50,10 @@ class Home extends React.Component {
   }
 }
 
-Home.propTypes = {
+HomePage.propTypes = {
   user: PropTypes.object.isRequired,
   logout: PropTypes.func.isRequired,
   isAdmin: PropTypes.bool.isRequired
 };
 
-export default Home;
+export default HomePage;
