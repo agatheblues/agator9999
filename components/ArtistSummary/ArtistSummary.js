@@ -1,4 +1,5 @@
 import React from 'react';
+import { ArtistContext } from '../../context/ArtistContext';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 require('./ArtistSummary.scss');
@@ -9,7 +10,7 @@ require('./ArtistSummary.scss');
  * @param  {String} spotify_id Artist's spotify_id
  * @return {String}            HTML Markup
  */
-const renderListeningUri = function (spotify_id) {
+const renderListeningUri = (spotify_id) => {
   if (spotify_id) {
     const url = 'https://open.spotify.com/go?uri=spotify:artist:' + spotify_id;
     return (
@@ -27,7 +28,7 @@ const renderListeningUri = function (spotify_id) {
   return <p className='not-available not-available--line'>&#9836;</p>;
 };
 
-const renderMergeButton = function (spotify_id, discogs_id, id) {
+const renderMergeButton = (spotify_id, discogs_id, id) => {
   if (spotify_id && discogs_id) {
     return <Link to={`/artist/${id}/unmerge`}>&#x2702; Unmerge</Link>;
   }
@@ -37,9 +38,8 @@ const renderMergeButton = function (spotify_id, discogs_id, id) {
   );
 };
 
-
-const ArtistSummary = function ({ artist, id }) {
-  const { img_url, total_albums, total_tracks, name, discogs_id, spotify_id } = artist;
+const ArtistSummary = (artist) => {
+  const { id, img_url, total_albums, total_tracks, name, discogs_id, spotify_id } = artist;
 
   return (
     <div className='artist-banner-container' style={{ 'backgroundImage': `url('${img_url}')` }}>
@@ -61,11 +61,18 @@ const ArtistSummary = function ({ artist, id }) {
       </div>
     </div>
   );
-};
+}
 
 ArtistSummary.propTypes = {
-  artist: PropTypes.object.isRequired,
-  id: PropTypes.string.isRequired
+  artist: PropTypes.object.isRequired
 };
 
-export default ArtistSummary;
+const ArtistSummaryConsumer = () => {
+  return (
+    <ArtistContext.Consumer>
+      {({ artist }) => ArtistSummary(artist)}
+    </ArtistContext.Consumer>
+  );
+};
+
+export default ArtistSummaryConsumer;
