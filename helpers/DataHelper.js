@@ -1,6 +1,8 @@
 import axios from 'axios';
 import { databaseConfig } from '../config';
 import * as discogs from './DiscogsHelper';
+import * as spotify from './SpotifyHelper';
+
 
 const TOKEN = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1ODY1NDA0NzIsInN1YiI6Mn0.WU9q_hrmf5w5k7xFaJladWoZ9oRPVgVyEZJKgAXaFz8';
 /**
@@ -59,9 +61,36 @@ export const createDiscogsAlbum = (discogsUri, releaseType, source, listeningUri
     });
 }
 
+/**
+ * Create an album from Discogs. 
+ * First get the album data, then for each artists get the artist data.
+ */
+export const createSpotifyAlbum = (spotifyUri, discogsUri, releaseType, token) => {
+  let album;
+  return Promise.all([
+    spotify.getAlbum(token, spotifyUri),
+    discogs.getRelease(discogsUri, releaseType)
+  ])
+    .then((response) => {
+      // Just in case
+      if (response.length != 2) { throw ({ message: 'Oops! Something went wrong while retrieving data from Spotify or Discogs.' }); }
+
+      const data = response.map(({ data }) => data);
+      album = formatSpotifyAlbum(data[0], data[1]);
+
+      const ids = data[0].artists.map(artist => artist.id);
+      return spotify.getArtists(token, ids)
+    })
+    .then((response) => {
+      const artists = flatten(response.map(({ data }) => data.artists));
+      album.artists = formatSpotifyArtists(artists);
+      return createAlbum(album);
+    });
+}
+
 //////////////////// FORMATTING
 const formatDiscogsArtists = (artists) => artists.map(({ id, name, images = [] }) => {
-  const resource_url = images.length === 0 ? '/static/images/missing.jpg' : images[0].resource_url;
+  const resource_url = images.length === 0 ? null : images[0].resource_url;
 
   return {
     name: name,
@@ -73,21 +102,14 @@ const formatDiscogsArtists = (artists) => artists.map(({ id, name, images = [] }
 const formatGenresOrStyles = (values) => values.map((value) => ({ name: value }));
 
 const formatDiscogsImage = (images) => {
-  if (images.length == 0) {
-    return {
-      img_height: height,
-      img_width: width,
-      img_url: resource_url
-    };
-  } else {
-    const { height = null, width = null, resource_url = '' } = images[0];
+  if (images.length == 0) return {};
+  const { height = null, width = null, resource_url = '' } = images[0];
 
-    return {
-      img_height: height,
-      img_width: width,
-      img_url: resource_url
-    };
-  }
+  return {
+    img_height: height,
+    img_width: width,
+    img_url: resource_url
+  };
 };
 
 const formatDiscogsAlbum = (data, source, listeningUri) => {
@@ -109,3 +131,55 @@ const formatDiscogsAlbum = (data, source, listeningUri) => {
     ...formatDiscogsImage(images)
   }
 };
+
+const formatSpotifyImage = (images) => {
+  if (images.length == 0) return {};
+  const { height = null, width = null, url = '' } = images[0];
+
+  return {
+    img_height: height,
+    img_width: width,
+    img_url: url
+  };
+};
+
+const formatSpotifyAlbum = (spotifyData, discogsData) => {
+  const { id: spotifyId, name = '', external_urls: { spotify = '' }, images = [], release_date = '', total_tracks } = spotifyData;
+  const { id: discogsId, genres, styles } = discogsData;
+  const date = new Date(Date.now());
+
+  return {
+    name: name,
+    release_date: release_date,
+    discogs_id: discogsId + '',
+    spotify_id: spotifyId,
+    bandcamp_url: '',
+    youtube_url: '',
+    genres: formatGenresOrStyles(genres),
+    styles: formatGenresOrStyles(styles),
+    total_tracks: total_tracks,
+    added_at: date.toISOString(),
+    ...formatSpotifyImage(images)
+  }
+};
+
+const formatSpotifyArtists = (artists) => artists.map(({ id, name, images = [] }) => {
+  const url = images.length === 0 ? null : images[0].url;
+
+  return {
+    name: name,
+    spotify_id: id,
+    img_url: url
+  };
+});
+
+/**
+ * Flattens an array
+ * @param  {array} arr Array of arrays
+ * @return {array}     Array
+ */
+function flatten(arr) {
+  return arr.reduce(function (flat, toFlatten) {
+    return flat.concat(Array.isArray(toFlatten) ? flatten(toFlatten) : toFlatten);
+  }, []);
+}
