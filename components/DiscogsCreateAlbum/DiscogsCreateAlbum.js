@@ -1,7 +1,6 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-import* as dg from '../../helpers/DiscogsHelper';
-import * as fb from '../../helpers/FirebaseHelper';
+import * as discogs from '../../helpers/DiscogsHelper';
+import { createDiscogsAlbum } from '../../helpers/DataHelper';
 import { checkDiscogsUri, checkListeningUri } from '../../helpers/ErrorHelper';
 import Button from '../Button/Button';
 import Message from '../Message/Message';
@@ -11,7 +10,7 @@ import Loading from '../Loading/Loading';
 require('./DiscogsCreateAlbum.scss');
 
 class DiscogsCreateAlbum extends React.Component {
-  constructor(props) {
+  constructor() {
     super();
 
     // set local state
@@ -116,24 +115,21 @@ class DiscogsCreateAlbum extends React.Component {
    * @return {function}     handler for the given input
    */
   handleValueFor(label) {
-
-    const handleValue = (value) => {
+    return (value) => {
       this.setState({
         [label]: value
       });
     };
-
-    return handleValue;
   }
 
   /**
    * Handle form submit error
    * @param  {String} message Error message
    */
-  handleSubmitError(message) {
+  handleSubmitError(error) {
     this.setState({
       errorSubmit: true,
-      messageSubmit: message,
+      messageSubmit: error.data.message,
       loaded: true
     });
   }
@@ -153,22 +149,12 @@ class DiscogsCreateAlbum extends React.Component {
     });
   }
 
-  /**
-   * Fetch Discogs Album, save it to firebase, save artist to Firebase
-   * Set artist images
-   */
-  saveDiscogsAlbumToFirebase() {
-    dg.getRelease(this.state.discogsUri, this.state.selectedReleaseType)
-      .then(({data}) => {
-        const artists = fb.formatArtists(data.artists, fb.formatDiscogsArtist);
-        const albumSummary = fb.formatDiscogsSingleAlbumSummary(data);
+  createAlbum() {
+    const { discogsUri, selectedReleaseType, selectedSource, listeningUri } = this.state;
 
-        return fb.setAlbumIfNotExists(fb.formatDiscogsAlbum(data, this.state.selectedSource, this.state.listeningUri, this.state.selectedReleaseType), true)
-          .then(() => fb.updateOrSetArtistsFromSingleAlbum(artists, albumSummary, 'discogs', data.id))
-          .then(() => dg.getArtistsImages(fb.getArtistIds(data.artists), 'discogs'));
-      })
+    createDiscogsAlbum(discogsUri, selectedReleaseType, selectedSource, listeningUri)
       .then(() => this.handleSubmitSuccess())
-      .catch((error) => this.handleSubmitError(error.message));
+      .catch((error) => this.handleSubmitError(error.response));
   }
 
   /**
@@ -195,8 +181,7 @@ class DiscogsCreateAlbum extends React.Component {
       loaded: false
     });
 
-    // Save Album
-    this.saveDiscogsAlbumToFirebase();
+    this.createAlbum();
   }
 
   render() {
@@ -204,14 +189,30 @@ class DiscogsCreateAlbum extends React.Component {
       <div>
         <div>
           <form onSubmit={this.handleSubmit}>
-
+            <div className='form-row-container'>
+              <Dropdown
+                list={discogs.sourceList}
+                id={'id'}
+                value={'name'}
+                selectedValue={discogs.getSource(this.state.selectedSource)}
+                handleSelectedValue={this.handleValueFor('selectedSource')}
+                handleError={this.handleErrorSource}
+              />
+              <InputText
+                placeholder={'Bandcamp or Youtube URL of the album'}
+                handleValue={this.handleValueFor('listeningUri')}
+                handleError={this.handleErrorListeningUri}
+                value={this.state.listeningUri}
+              />
+            </div>
+            <Message message={this.state.errorListeningUri} error={true} style={'input-msg'} />
 
             <div className='form-row-container'>
               <Dropdown
-                list={dg.releaseTypeList}
+                list={discogs.releaseTypeList}
                 id={'id'}
                 value={'name'}
-                selectedValue={dg.getReleaseType(this.state.selectedReleaseType)}
+                selectedValue={discogs.getReleaseType(this.state.selectedReleaseType)}
                 handleSelectedValue={this.handleValueFor('selectedReleaseType')}
                 handleError={this.handleErrorReleaseType}
               />
@@ -223,38 +224,18 @@ class DiscogsCreateAlbum extends React.Component {
               />
             </div>
 
-            <Message message={this.state.errorDiscogsUri} error={true} style={'input-msg'}/>
-
-
-            <div className='form-row-container'>
-              <Dropdown
-                list={dg.sourceList}
-                id={'id'}
-                value={'name'}
-                selectedValue={dg.getSource(this.state.selectedSource)}
-                handleSelectedValue={this.handleValueFor('selectedSource')}
-                handleError={this.handleErrorSource}
-              />
-              <InputText
-                placeholder={'Bandcamp or Youtube URL of the album'}
-                handleValue={this.handleValueFor('listeningUri')}
-                handleError={this.handleErrorListeningUri}
-                value={this.state.listeningUri}
-              />
-            </div>
-
-            <Message message={this.state.errorListeningUri} error={true} style={'input-msg'}/>
+            <Message message={this.state.errorDiscogsUri} error={true} style={'input-msg'} />
 
             {!this.state.loaded &&
               <Loading fullPage={false} label={'Creating album...'} />
             }
 
             {this.state.messageSubmit &&
-              <Message message={this.state.messageSubmit} error={this.state.errorSubmit}/>
+              <Message message={this.state.messageSubmit} error={this.state.errorSubmit} />
             }
 
             <div className='submit-container'>
-              <Button label='OK' handleClick={this.handleSubmit}/>
+              <Button label='OK' handleClick={this.handleSubmit} />
             </div>
 
             <p className='note'>To add an album from Discogs, fill in the release or master url of the album on Discogs, and the Youtube or Bandcamp url of where the album can be streamed.</p>
