@@ -38,7 +38,7 @@ export function handleErrorMessage(error) {
 function getInstance(access_token) {
   return axios.create({
     baseURL: 'https://api.spotify.com/v1/',
-    headers: {'Authorization': 'Bearer ' + access_token}
+    headers: { 'Authorization': 'Bearer ' + access_token }
   });
 }
 
@@ -52,13 +52,12 @@ function splitArrayInChunks(arr, chunkLength) {
   let i, j;
   let result = [];
 
-  for (i = 0, j = arr.length; i < j; i+=chunkLength) {
+  for (i = 0, j = arr.length; i < j; i += chunkLength) {
     result.push(arr.slice(i, i + chunkLength));
   }
 
   return result;
 }
-
 
 
 /***** AUTHENTICATION *****/
@@ -106,7 +105,7 @@ function getHashParams() {
   let hashParams = {};
   let e, r = /([^&;=]+)=?([^&;]*)/g,
     q = window.location.hash.substring(2);
-  while ( e = r.exec(q)) {
+  while (e = r.exec(q)) {
     hashParams[e[1]] = decodeURIComponent(e[2]);
   }
   return hashParams;
@@ -184,7 +183,17 @@ export function authenticate(onError) {
 
 /************ ALBUM ***********/
 
-export function getAlbum(token, albumId) {
+/**
+ * Extract album Spotify Id from spotify URI
+ * @param  {String} s Spotify URI
+ * @return {String}   Spotify ID
+ */
+function getSpotifyId(s) {
+  return s.substring(14);
+}
+
+export function getAlbum(token, uri) {
+  const albumId = getSpotifyId(uri);
 
   return getInstance(token)
     .get('/albums/' + albumId);
@@ -205,7 +214,7 @@ function getArtistsIds(items) {
 export function getAndSetUserSavedAlbums(token, offset) {
 
   return getUserSavedAlbumsChunk(token, offset)
-    .then(({data}) => {
+    .then(({ data }) => {
       const arrayOfPromises = [
         fb.setAlbums(data.items.map((item) => fb.formatSpotifyAlbums(item)))
           .then(() => fb.updateOrSetArtistsFromAlbums(data.items, 'spotify'))
@@ -213,7 +222,7 @@ export function getAndSetUserSavedAlbums(token, offset) {
       ];
 
       // If there is a next page, push next promise to array
-      if (data.next) { arrayOfPromises.push(getAndSetUserSavedAlbums(token, offset + 50));}
+      if (data.next) { arrayOfPromises.push(getAndSetUserSavedAlbums(token, offset + 50)); }
       return Promise.all(arrayOfPromises);
     });
 
@@ -256,12 +265,11 @@ export function getProfile(token) {
 /******** ARTIST IMAGES  *********/
 
 export function getArtistsImages(token, artistIds, source) {
-
   // Create batches of 50 ids
   const artistIdsChunks = splitArrayInChunks(artistIds, 50);
 
   const arrayOfImagePromises = artistIdsChunks.map((chunk) =>
-    getArtistsChunkImages(token, chunk)
+    getArtistsChunk(token, chunk)
       .then((response) => fb.updateArtistsImages(formatArtistsImages(response.data.artists, source)))
   );
 
@@ -270,12 +278,12 @@ export function getArtistsImages(token, artistIds, source) {
 
 
 /**
- * Get artists images for a list of artist ids < 50 items
+ * Get artists for a list of artist ids < 50 items
  * @param  {string} token     Spotify API Token
  * @param  {array} artistIds  List of artist Ids
  * @return {Promise}
  */
-function getArtistsChunkImages(token, artistIds) {
+function getArtistsChunk(token, artistIds) {
   return getInstance(token)
     .get('/artists', {
       params: {
@@ -283,7 +291,6 @@ function getArtistsChunkImages(token, artistIds) {
       }
     });
 }
-
 
 /**
  * For a given artist object, return its first image url or returned
@@ -315,3 +322,11 @@ function formatArtistsImages(artists, source) {
     };
   });
 }
+
+export function getArtists(token, artistIds) {
+  // Create batches of 50 ids
+  const artistIdsChunks = splitArrayInChunks(artistIds, 50);
+
+  return Promise.all(artistIdsChunks.map((chunk) => getArtistsChunk(token, chunk)));
+}
+
