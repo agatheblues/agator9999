@@ -4,7 +4,7 @@ import { HashRouter, Route, Switch, Redirect } from 'react-router-dom';
 import ArtistPage from './pages/ArtistPage';
 import ArtistMerge from './components/ArtistMerge/ArtistMerge';
 import ArtistUnmerge from './components/ArtistUnmerge/ArtistUnmerge';
-import CreateAlbum from './components/CreateAlbum/CreateAlbum';
+import CreateAlbumPage from './pages/CreateAlbumPage';
 import HomePage from './pages/HomePage';
 import Loading from './components/Loading/Loading';
 import PageNotFound from './components/PageNotFound/PageNotFound';
@@ -35,7 +35,7 @@ class App extends React.Component {
     this.renderHomePage = this.renderHomePage.bind(this);
     this.renderSpotifySync = this.renderSpotifySync.bind(this);
     this.renderSpotifyLogin = this.renderSpotifyLogin.bind(this);
-    this.renderCreateAlbum = this.renderCreateAlbum.bind(this);
+    this.renderCreateAlbumPage = this.renderCreateAlbumPage.bind(this);
     this.renderArtistPage = this.renderArtistPage.bind(this);
     this.renderArtistMerge = this.renderArtistMerge.bind(this);
     this.renderArtistUnmerge = this.renderArtistUnmerge.bind(this);
@@ -111,11 +111,11 @@ class App extends React.Component {
     return <SpotifyLogin />;
   }
 
-  renderCreateAlbum() {
+  renderCreateAlbumPage() {
     if (!this.state.isAdmin) {
       return <Redirect to="/404" />;
     }
-    return <CreateAlbum />;
+    return <CreateAlbumPage />;
   }
 
   renderArtistPage(props) {
@@ -148,7 +148,7 @@ class App extends React.Component {
           <Route exact path="/spotify/sync" render={this.renderSpotifySync} />
           <Route exact path="/spotify/login" render={this.renderSpotifyLogin} />
           <Route path="/:access_token(access_token=.*)" render={this.renderSpotifyLogin} />
-          <Route exact path="/album/create" render={this.renderCreateAlbum} />
+          <Route exact path="/album/create" render={this.renderCreateAlbumPage} />
           <Route exact path="/artist/:id" render={this.renderArtistPage} />
           <Route exact path="/artist/:id/merge" render={this.renderArtistMerge} />
           <Route exact path="/artist/:id/unmerge" render={this.renderArtistUnmerge} />

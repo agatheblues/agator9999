@@ -1,17 +1,16 @@
 import axios from 'axios';
-import * as fb from './FirebaseHelper';
 import { discogsConfig } from '../config';
 
 export const releaseTypeList = [
-  {'id': 'placeholder', 'name': 'Select type', 'hide': true},
-  {'id': 'master', 'name': 'Master'},
-  {'id': 'release', 'name': 'Release'}
+  { 'id': 'placeholder', 'name': 'Select type', 'hide': true },
+  { 'id': 'master', 'name': 'Master' },
+  { 'id': 'release', 'name': 'Release' }
 ];
 
 export const sourceList = [
-  {'id': 'placeholder', 'name': 'Select source', 'hide': true},
-  {'id': 'bandcamp', 'name': 'Bandcamp'},
-  {'id': 'youtube', 'name': 'Youtube'}
+  { 'id': 'placeholder', 'name': 'Select source', 'hide': true },
+  { 'id': 'bandcamp', 'name': 'Bandcamp' },
+  { 'id': 'youtube', 'name': 'Youtube' }
 ];
 
 /**
@@ -19,18 +18,30 @@ export const sourceList = [
  * @return {func}              Axios instance
  */
 function getInstance() {
-  return fb.getDiscogsSecret()
-    .then((data) => {
-      let secret = data.val();
+  return axios.create({
+    baseURL: 'https://api.discogs.com/',
+    headers: {
+      'Authorization': `Discogs key=${discogsConfig.CONSUMER_KEY}, secret=${discogsConfig.CONSUMER_SECRET}`
+    }
+  });
+}
 
-      return axios.create({
-        baseURL: 'https://api.discogs.com/',
-        headers: {
-          'Authorization': `Discogs key=${discogsConfig.CONSUMER_KEY}, secret=${secret}`
-        }
-      });
-    })
-    .catch((error) => {console.log(error);});
+/**
+ * Get source from source array
+ * @param  {String} id id of source
+ * @return {Object}    Source item
+ */
+export function getSource(id) {
+  return this.sourceList.filter((s) => (s.id == id))[0].name;
+}
+
+/**
+ * Get release type from release type array
+ * @param  {String} id id of release type
+ * @return {Object}    Release type item
+ */
+export function getReleaseType(id) {
+  return this.releaseTypeList.filter((s) => (s.id == id))[0].name;
 }
 
 
@@ -45,8 +56,7 @@ function getInstance() {
 export function getRelease(uri, releaseType) {
   const id = getReleaseId(uri, releaseType);
 
-  return getInstance()
-    .then((instance) => instance.get('/' + releaseType + 's/' + id));
+  return getInstance().get('/' + releaseType + 's/' + id);
 }
 
 /**
@@ -69,74 +79,11 @@ function getReleaseId(uri, releaseType) {
  */
 function getArtist(id) {
   if (id == 194) { // PLaceholder for Various artists
-    return getInstance().then(() => {
-      return { data: { id: id, images: [] }};
-    });
+    return new Promise(() => ({ data: { id: id, images: [] } }), () => { });
   }
-  return getInstance()
-    .then((instance) => instance.get(`/artists/${id}`));
+  return getInstance().get(`/artists/${id}`);
 }
 
-
-/**************** ARTIST IMAGE ******************/
-
-export function getArtistsImages(artistIds, source) {
-  const arrayOfImagePromises = artistIds.map((id) =>
-    getArtist(id)
-      .then(({data}) => {
-        fb.updateArtistsImages(formatArtistsImages(data, source));
-      })
-  );
-
-  return Promise.all(arrayOfImagePromises);
-}
-
-
-/**
- * Format an artist object into the artist image array expected by FB
- * @param  {object} artist Artist object as sent back by Discogs
- * @return {Array}        Array with one formatted artist object
- */
-function formatArtistsImages(artist, source) {
-  return [{
-    id: artist.id,
-    source: source,
-    imgUrl: getArtistImageUrl(artist)
-  }];
-}
-
-
-/**
- * For a given artist object, return its first image url or returned
- * default image
- * @param  {object} artist Discogs Artist
- * @return {String}        Image url
- */
-function getArtistImageUrl(artist) {
-  if (artist.hasOwnProperty('images') && (artist.images.length > 0)) {
-    return artist.images[0].resource_url;
-  }
-
-
-  // TODO: Return image from latest album from artist
-  return '/static/images/missing.jpg';
-}
-
-
-/**
- * Get source from source array
- * @param  {String} id id of source
- * @return {Object}    Source item
- */
-export function getSource(id) {
-  return this.sourceList.filter((s) => (s.id == id))[0].name;
-}
-
-/**
- * Get release type from release type array
- * @param  {String} id id of release type
- * @return {Object}    Release type item
- */
-export function getReleaseType(id) {
-  return this.releaseTypeList.filter((s) => (s.id == id))[0].name;
+export function getArtists(artists) {
+  return Promise.all(artists.map((artist) => getArtist(artist.id)));
 }

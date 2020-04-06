@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
-// import { getRef, getArtist, convertAlbumSummaryToArray, removeArtist } from '../../helpers/FirebaseHelper';
 import { getArtist, deleteAlbum } from '../helpers/DataHelper';
 import { ArtistContext } from '../context/ArtistContext';
 import ArtistSummary from '../components/ArtistSummary/ArtistSummary';
