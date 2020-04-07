@@ -87,16 +87,9 @@ class SpotifyUpdateAlbum extends React.Component {
    * Get Discogs release
    * Update album with Discogs metadata
    */
-  updateSpotifyAlbum() {
-    const releaseType = this.state.selectedReleaseType;
-
-    dg.getRelease(this.state.discogsUri, releaseType)
-      .then(({data}) => {
-        return fb.updateSpotifyAlbumWithDiscogsAlbum(this.props.spotifyId, fb.formatDiscogsUpdateAlbum(data, releaseType));
-      })
-      .catch((error) => {
-        this.handleSubmitError(error.message);
-      });
+  updateAlbum() {
+    const { discogsUri, selectedReleaseType } = this.state;
+    this.props.updateAlbum(this.props.id, discogsUri, selectedReleaseType);
   }
 
   /**
@@ -125,7 +118,7 @@ class SpotifyUpdateAlbum extends React.Component {
       messageSubmit: null
     });
 
-    this.updateSpotifyAlbum();
+    this.updateAlbum();
   }
 
   render() {
@@ -149,18 +142,17 @@ class SpotifyUpdateAlbum extends React.Component {
             />
           </div>
 
-          <Message message={this.state.errorDiscogsUri} error={true} style={'input-msg'}/>
+          <Message message={this.state.errorDiscogsUri} error={true} style={'input-msg'} />
 
           {this.state.messageSubmit &&
-            <Message message={this.state.messageSubmit} error={this.state.errorSubmit}/>
+            <Message message={this.state.messageSubmit} error={this.state.errorSubmit} />
           }
 
           <div className='submit-container'>
-            <Button label='OK' handleClick={this.handleSubmit}/>
+            <Button label='OK' handleClick={this.handleSubmit} />
           </div>
 
           <p className='note'>To link a Spotify album to its Discogs equivalent, fill in the release or master url of the album on Discogs.</p>
-
         </form>
       </div>
     );
@@ -168,7 +160,8 @@ class SpotifyUpdateAlbum extends React.Component {
 }
 
 SpotifyUpdateAlbum.propTypes = {
-  spotifyId: PropTypes.string.isRequired
+  id: PropTypes.number.isRequired,
+  updateAlbum: PropTypes.func.isRequired
 };
 
 

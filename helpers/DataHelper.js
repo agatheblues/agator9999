@@ -39,13 +39,19 @@ export const deleteAlbum = (id) => getInstance().delete(`/albums/${id}`)
  * Create an album
  * @return {Promise}
 */
-const createAlbum = (data) => getInstance().post(`/albums`, data);
+const createAlbum = (data) => getInstance().post('/albums', data);
 
+/**
+ * Update an album
+ * @return {Promise}
+*/
+const updateAlbum = (id, data) => getInstance().patch(`/albums/${id}`, data);
 
 
 /**
  * Create an album from Discogs. 
  * First get the album data, then for each artists get the artist data.
+ * @return {Promise}
  */
 export const createDiscogsAlbum = (discogsUri, releaseType, source, listeningUri) => {
   let album;
@@ -64,6 +70,7 @@ export const createDiscogsAlbum = (discogsUri, releaseType, source, listeningUri
 /**
  * Create an album from Discogs. 
  * First get the album data, then for each artists get the artist data.
+ * @return {Promise}
  */
 export const createSpotifyAlbum = (spotifyUri, discogsUri, releaseType, token) => {
   let album;
@@ -85,6 +92,19 @@ export const createSpotifyAlbum = (spotifyUri, discogsUri, releaseType, token) =
       const artists = flatten(response.map(({ data }) => data.artists));
       album.artists = formatSpotifyArtists(artists);
       return createAlbum(album);
+    });
+}
+
+export const updateAlbumWithDiscogs = (albumId, discogsUri, releaseType) => {
+  return discogs.getRelease(discogsUri, releaseType)
+    .then(({ data }) => {
+      const { id, genres, styles } = data;
+      const updates = {
+        discogs_id: id + '',
+        genres: formatGenresOrStyles(genres),
+        styles: formatGenresOrStyles(styles),
+      };
+      return updateAlbum(albumId, updates);
     });
 }
 

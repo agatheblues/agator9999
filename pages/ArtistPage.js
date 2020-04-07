@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import { getArtist, deleteAlbum } from '../helpers/DataHelper';
+import { getArtist, deleteAlbum, updateAlbumWithDiscogs } from '../helpers/DataHelper';
 import { ArtistContext } from '../context/ArtistContext';
 import ArtistSummary from '../components/ArtistSummary/ArtistSummary';
 import AlbumList from '../components/AlbumList/AlbumList';
@@ -21,7 +21,8 @@ class ArtistPage extends React.Component {
       loaded: false,
       artist: null,
       showArtistDeleted: false,
-      deleteAlbum: this.deleteAlbum.bind(this)
+      deleteAlbum: this.deleteAlbum.bind(this),
+      updateAlbum: this.updateAlbum.bind(this)
     };
   }
 
@@ -49,6 +50,13 @@ class ArtistPage extends React.Component {
           this.handleRemoveArtistError();
         }
       });
+  }
+
+  updateAlbum(albumId, discogsUri, releaseType) {
+    updateAlbumWithDiscogs(albumId, discogsUri, releaseType)
+      .then(() => getArtist(this.props.match.params.id))
+      .then((response) => this.handleGetArtistSuccess(response))
+      .catch(() => this.handleGetArtistError());
   }
 
   handleGetArtistSuccess({ data }) {
