@@ -37,7 +37,7 @@ const renderMergeButton = (spotify_id, discogs_id, id) => {
   );
 };
 
-const ArtistSummary = (artist) => {
+const ArtistSummary = (artist, isAdmin) => {
   const { id, img_url, total_albums, total_tracks, name, discogs_id, spotify_id } = artist;
 
   return (
@@ -46,7 +46,7 @@ const ArtistSummary = (artist) => {
         <div className='artist-banner-back-wrapper'>
           <div className='artist-banner-back content-container'>
             <Link to='/'>&#9839; Back to library</Link>
-            {renderMergeButton(discogs_id, spotify_id, id)}
+            {isAdmin && renderMergeButton(discogs_id, spotify_id, id)}
           </div>
         </div>
 
@@ -63,13 +63,14 @@ const ArtistSummary = (artist) => {
 }
 
 ArtistSummary.propTypes = {
-  artist: PropTypes.object.isRequired
+  artist: PropTypes.object.isRequired,
+  isAdmin: PropTypes.bool.isRequired
 };
 
-const ArtistSummaryConsumer = () => {
+const ArtistSummaryConsumer = (props) => {
   return (
     <ArtistContext.Consumer>
-      {({ artist }) => ArtistSummary(artist)}
+      {({ artist }) => ArtistSummary(artist, props.isAdmin)}
     </ArtistContext.Consumer>
   );
 };
