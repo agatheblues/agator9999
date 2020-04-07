@@ -1,230 +1,178 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Link } from 'react-router-dom';
-import * as fb from '../../helpers/FirebaseHelper';
-import Loading from '../Loading/Loading';
 import Button from '../Button/Button';
 import Message from '../Message/Message';
 import Card from '../Card/Card';
 import SearchDropdown from '../SearchDropdown/SearchDropdown';
+import { ArtistMergeContext } from '../../context/ArtistMergeContext';
 import classNames from 'classnames';
 require('./ArtistMerge.scss');
 
 class ArtistMerge extends React.Component {
-
-  constructor(props) {
+  constructor() {
     super();
 
     this.state = {
-      originArtist: null,
       artistToMergeWith: null,
+      mergeableArtists: [],
       error: false,
       message: null,
-      showForm: false,
-      artists: [],
-      loaded: false
+      showForm: false
     };
 
     this.handleSelectedArtist = this.handleSelectedArtist.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
-  handleGetOriginArtistSuccess(artist, hasMerged) {
-    if (!hasMerged) {
-      artist.id = this.props.match.params.id;
-      this.setState({
-        originArtist: artist
-      });
-    } else {
-      this.setState({
-        error: false,
-        message: 'Merge was successful!',
-        artistToMergeWith: null,
-        originArtist: artist,
-        showForm: false
-      });
+  /**
+   * Filters the list of artists to return only those which are mergeable.
+   * Mergeable means that the artist has not the same source as the originArtist
+   * @param {String} spotify_id 
+   * @param {String} discogs_id 
+   * @param {Array} artists 
+   */
+  getMergeableArtists(spotify_id, discogs_id, artists) {
+    if (spotify_id && !discogs_id) {
+      return artists.filter(a => a.discogs_id && !a.spotify_id);
     }
-  }
-
-  handleGetArtistError() {
-    this.setState({
-      error: true,
-      message: 'Oops! Something went wrong while retrieving the artist.'
-    });
-  }
-
-  checkIfHasNotSource(arrayOfSources, source) {
-    return (arrayOfSources.indexOf(source) == -1);
-  }
-
-  handleGetArtistsSuccess(artists) {
-    const mergeSource = Object.keys(this.state.originArtist.sources)[0];
-    const filteredArtistsBySource = artists.filter((artist) => !artist.sources.hasOwnProperty(mergeSource));
-
-    if (filteredArtistsBySource.length == 0) {
-      this.setState({
-        error: false,
-        showForm: false,
-        loaded: true,
-        message: 'There are no artists from a different source to merge with!'
-      });
-      return;
-    }
-
-    this.setState({
-      artists: filteredArtistsBySource,
-      showForm: true,
-      loaded: true
-    });
-  }
-
-  handleGetArtistToMergeWithSuccess(artist, artistId) {
-    artist.id = artistId;
-
-    this.setState({
-      artistToMergeWith: artist
-    });
-  }
-
-  handleGetArtistsError() {
-    this.setState({
-      error: true,
-      message: 'Oops! Something went wrong while retrieving your list of artists.'
-    });
-  }
-
-  handleSuccessMerge() {
-    fb.getArtist(this.props.match.params.id)
-      .once('value')
-      .then((snapshot) => this.handleGetOriginArtistSuccess(snapshot.val(), true))
-      .catch((error) => this.handleGetArtistError());
-  }
-
-  handleErrorMerge() {
-    this.setState({
-      error: true,
-      message: 'Oops! Something went wrong while merging artists.'
-    });
+    return artists.filter(a => a.spotify_id && !a.discogs_id);
   }
 
   handleSubmit(e) {
     e.preventDefault();
-
-    if (!this.state.showForm) return;
-
-    fb.mergeArtists(this.state.originArtist.id, this.state.artistToMergeWith)
-      .then(() => fb.removeArtist(this.state.artistToMergeWith.id))
-      .then(() => this.handleSuccessMerge())
-      .catch((error) => this.handleErrorMerge(error));
+    this.props.mergeArtists(this.props.originArtist, this.state.artistToMergeWith);
   }
 
   handleSelectedArtist(artistId) {
-    fb.getArtist(artistId)
-      .once('value')
-      .then((snapshot) => this.handleGetArtistToMergeWithSuccess(snapshot.val(), artistId))
-      .catch((error) => this.handleGetArtistError());
+    this.setState({
+      artistToMergeWith: this.props.artists.find((artist) => artist.id == artistId)
+    });
   }
 
-  componentDidMount() {
-    fb.getArtist(this.props.match.params.id)
-      .once('value')
-      .then((snapshot) => this.handleGetOriginArtistSuccess(snapshot.val(), false))
-      .then(() => fb.getArtists()
-        .then((data) => this.handleGetArtistsSuccess(fb.formatArtistList(data)))
-        .catch((error) => this.handleGetArtistsError())
-      )
-      .catch((error) => this.handleGetArtistError());
+  handleMergeableArtists(mergeableArtists) {
+    if (mergeableArtists.length === 0) {
+      this.setState({
+        message: 'There are no artists from a different source to merge with!'
+      });
+    } else {
+      this.setState({
+        mergeableArtists: mergeableArtists,
+        showForm: true
+      });
+    }
   }
 
-  renderCards() {
+  renderCards(originArtist, artistToMergeWith) {
     const cardClass = classNames({
       'form-row-container form-row--center': true,
-      'form-row--space-between': this.state.artistToMergeWith,
-      'form-row--space-around': !this.state.artistToMergeWith
+      'form-row--space-between': artistToMergeWith,
+      'form-row--space-around': !artistToMergeWith
     });
 
-    let originTotalAlbums = (this.state.originArtist && this.state.originArtist.hasOwnProperty('albums')) ? Object.keys(this.state.originArtist.albums).length : 0;
-    let mergeWithotalAlbums = (this.state.artistToMergeWith && this.state.artistToMergeWith.hasOwnProperty('albums')) ? Object.keys(this.state.artistToMergeWith.albums).length : 0;
+    const { img_url, name, id, total_albums, spotify_id, discogs_id } = originArtist;
 
     return (
       <div className={cardClass}>
-        { this.state.originArtist &&
-          <Card
-            id={this.props.match.params.id}
-            name={this.state.originArtist.name}
-            imgUrl={this.state.originArtist.imgUrl}
-            totalAlbums={originTotalAlbums}
-            sources={this.state.originArtist.sources}
-          />
-        }
-        { this.state.artistToMergeWith &&
+        <Card
+          id={id}
+          name={name}
+          imgUrl={img_url}
+          totalAlbums={total_albums}
+          sources={{ spotify: spotify_id, discogs: discogs_id }}
+        />
+        {artistToMergeWith &&
           <p className='merge-plus'>+</p>
         }
-        { this.state.artistToMergeWith &&
+        {artistToMergeWith &&
           <Card
-            id={this.state.artistToMergeWith.id}
-            name={this.state.artistToMergeWith.name}
-            imgUrl={this.state.artistToMergeWith.imgUrl}
-            totalAlbums={mergeWithotalAlbums}
-            sources={this.state.artistToMergeWith.sources}
+            id={artistToMergeWith.id}
+            name={artistToMergeWith.name}
+            imgUrl={artistToMergeWith.img_url}
+            totalAlbums={artistToMergeWith.total_albums}
+            sources={{ spotify: artistToMergeWith.spotify_id, discogs: artistToMergeWith.discogs_id }}
           />
         }
       </div>
     );
   }
 
-  renderForm() {
-    if (!this.state.loaded) return <Loading fullPage={false} label={'Loading available artists to merge with...'}/>;
-    if (this.state.showForm) return (
+  renderForm(artists, message, error) {
+    return (
       <div>
         <SearchDropdown
-          list={this.state.artists}
+          list={artists}
           id={'id'}
           value={'name'}
           placeholder={'Find an artist to merge with'}
           handleValue={this.handleSelectedArtist}
         />
 
-        { this.state.message &&
-            <Message message={this.state.message} error={this.state.error}/>
+        {message &&
+          <Message message={message} error={error} />
         }
 
         <div className='submit-container'>
-          <Button label='OK' handleClick={this.handleSubmit}/>
+          <Button label='OK' handleClick={this.handleSubmit} />
         </div>
       </div>
     );
+  }
 
-    if (this.state.message) return <Message message={this.state.message} error={this.state.error}/>;
+  componentDidMount() {
+    const { spotify_id, discogs_id } = this.props.originArtist;
+    if (spotify_id && discogs_id) {
+      this.setState({
+        message: 'This artist has already been merged!'
+      });
+      return;
+    }
+    const mergeableArtists = this.getMergeableArtists(spotify_id, discogs_id, this.props.artists);
+    this.handleMergeableArtists(mergeableArtists);
+  }
+
+  componentWillUpdate(nextProps, _nextState) {
+    const { originArtist: artist } = this.props;
+    const { originArtist: nextArtist } = nextProps;
+
+    if ((artist.spotify_id && artist.discogs_id != nextArtist.discogs_id) || (artist.discogs_id && artist.spotify_id != nextArtist.spotify_id)) {
+      this.setState({
+        error: false,
+        message: 'Merge was successful!',
+        showForm: false,
+        artistToMergeWith: null
+      });
+    }
   }
 
   render() {
-    return (
-      <div className='content-container'>
-        <div className='back-to-library'>
-          <Link to='/'>&#9839; Back to library</Link>
-        </div>
-        <h2>Merge artist</h2>
+    const { showForm, artistToMergeWith, message, error, mergeableArtists } = this.state;
 
-        <div className='form-container'>
-          <form onSubmit={this.handleSubmit}>
-            { this.renderCards() }
-            { this.renderForm() }
-            <p className='note'>You can only merge two artists with different sources. Merging two artists creates one artist with both sources combined, and all the albums will be stored under one artist.</p>
-          </form>
-        </div>
+    return (
+      <div className='form-container'>
+        <form onSubmit={this.handleSubmit}>
+          {this.renderCards(this.props.originArtist, artistToMergeWith)}
+          {showForm && this.renderForm(mergeableArtists, message, error)}
+          {!showForm && message && <Message message={message} error={error} />}
+          <p className='note'>You can only merge two artists with different sources. Merging two artists creates one artist with both sources combined, and all the albums will be stored under one artist.</p>
+        </form>
       </div>
     );
   }
 }
 
 ArtistMerge.propTypes = {
-  match: PropTypes.shape({
-    params: PropTypes.shape({
-      id: PropTypes.node,
-    }).isRequired,
-  }).isRequired,
-  isAdmin: PropTypes.bool.isRequired
+  isAdmin: PropTypes.bool.isRequired,
+  artists: PropTypes.array.isRequired,
+  originArtist: PropTypes.object.isRequired,
+  mergeArtists: PropTypes.func.isRequired
 };
 
-export default ArtistMerge;
+const ArtistMergeConsumer = (props) => {
+  return (
+    <ArtistMergeContext.Consumer>
+      {({ mergeArtists }) => <ArtistMerge {...props} {...{ mergeArtists }} />}
+    </ArtistMergeContext.Consumer>
+  );
+}
+
+export default ArtistMergeConsumer;

@@ -2,7 +2,7 @@
 // import FirebaseSignIn from './components/FirebaseSignIn/FirebaseSignIn';
 import { HashRouter, Route, Switch, Redirect } from 'react-router-dom';
 import ArtistPage from './pages/ArtistPage';
-import ArtistMerge from './components/ArtistMerge/ArtistMerge';
+import ArtistMergePage from './pages/ArtistMergePage';
 import ArtistUnmerge from './components/ArtistUnmerge/ArtistUnmerge';
 import CreateAlbumPage from './pages/CreateAlbumPage';
 import HomePage from './pages/HomePage';
@@ -37,7 +37,7 @@ class App extends React.Component {
     this.renderSpotifyLogin = this.renderSpotifyLogin.bind(this);
     this.renderCreateAlbumPage = this.renderCreateAlbumPage.bind(this);
     this.renderArtistPage = this.renderArtistPage.bind(this);
-    this.renderArtistMerge = this.renderArtistMerge.bind(this);
+    this.renderArtistMergePage = this.renderArtistMergePage.bind(this);
     this.renderArtistUnmerge = this.renderArtistUnmerge.bind(this);
   }
 
@@ -122,11 +122,11 @@ class App extends React.Component {
     return <ArtistPage {...props} isAdmin={this.state.isAdmin} />;
   }
 
-  renderArtistMerge(props) {
+  renderArtistMergePage(props) {
     if (!this.state.isAdmin) {
       return <Redirect to="/404" />;
     }
-    return <ArtistMerge {...props} isAdmin={this.state.isAdmin} />;
+    return <ArtistMergePage {...props} isAdmin={this.state.isAdmin} />;
   }
 
   renderArtistUnmerge(props) {
@@ -150,7 +150,7 @@ class App extends React.Component {
           <Route path="/:access_token(access_token=.*)" render={this.renderSpotifyLogin} />
           <Route exact path="/album/create" render={this.renderCreateAlbumPage} />
           <Route exact path="/artist/:id" render={this.renderArtistPage} />
-          <Route exact path="/artist/:id/merge" render={this.renderArtistMerge} />
+          <Route exact path="/artist/:id/merge" render={this.renderArtistMergePage} />
           <Route exact path="/artist/:id/unmerge" render={this.renderArtistUnmerge} />
           <Route exact path="/404" component={PageNotFound} />
           <Route component={PageNotFound} />
