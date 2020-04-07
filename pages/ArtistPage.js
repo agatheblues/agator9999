@@ -124,7 +124,7 @@ class ArtistPage extends React.Component {
 
     return (
       <ArtistContext.Provider value={this.state}>
-        <ArtistSummary />
+        <ArtistSummary isAdmin={this.props.isAdmin} />
         <AlbumList albums={artist.albums} isAdmin={this.props.isAdmin} />
       </ArtistContext.Provider>
     );
