@@ -123,14 +123,16 @@ class Album extends React.Component {
    * loaded, and the album is not yet linked to a Discogs id.
    * @return {String} HTML Markup
    */
-  renderDiscogsForm(spotify_id) {
+  renderDiscogsForm(albumId) {
     // TODO: Link to discogs ability (PATCH album)
     return (
       <div>
         <div className='album-minor-details'>
           <p><a href='' onClick={this.handleHideDiscogsClick}>&#xFF0D; Link to Discogs</a></p>
         </div>
-        <SpotifyUpdateAlbum spotifyId={spotify_id} />
+        <ArtistContext.Consumer>
+          {({ updateAlbum }) => <SpotifyUpdateAlbum id={albumId} {...{ updateAlbum }} />}
+        </ArtistContext.Consumer>
       </div>
     );
   }
@@ -209,7 +211,7 @@ class Album extends React.Component {
           {this.renderGenresOrStyles(genres, 'Genres')}
           {this.renderGenresOrStyles(styles, 'Styles')}
         </div>
-        {!discogs_id && showDiscogsForm && this.renderDiscogsForm(spotify_id)}
+        {!discogs_id && showDiscogsForm && this.renderDiscogsForm(id)}
         {showRemoveForm && this.renderRemoveForm()}
         {message && <Message message={message} error={error} />}
       </div>
@@ -245,7 +247,7 @@ class Album extends React.Component {
   }
 
   render() {
-    const { showDiscogsForm, showRemoveForm, album, message, error } = this.state;
+    const { showDiscogsForm, showRemoveForm, message, error } = this.state;
     const { img_url } = this.props.album;
 
     return (
