@@ -1,22 +1,16 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-import Synchronize from '../Synchronize/Synchronize';
 import { Link } from 'react-router-dom';
-import { getAccessToken, getAndSetUserSavedAlbums } from '../../helpers/SpotifyHelper.js';
-import * as fb from '../../helpers/FirebaseHelper.js';
+import Synchronize from '../components/Synchronize/Synchronize';
+import { getAccessToken } from '../helpers/SpotifyHelper.js';
+import { synchronizeSpotifyAlbums } from '../helpers/DataHelper.js';
 
-class SpotifySync extends React.Component {
+class SpotifySyncPage extends React.Component {
 
-  constructor(props) {
+  constructor() {
     super();
 
-    // Pagination limit
-    this.limit = 50;
-
-    // Get accessToken
     this.accessToken = getAccessToken();
 
-    // set local state
     this.state = {
       error: false,
       message: null,
@@ -45,11 +39,10 @@ class SpotifySync extends React.Component {
   handleClick() {
     this.updateMessage(false, null, 'Loading albums and artists...');
 
-    getAndSetUserSavedAlbums(this.accessToken, 0)
+    synchronizeSpotifyAlbums(this.accessToken, 0)
       .then(() => this.handleAlbumSyncSuccess())
-      .catch((error) => this.handleError(error.message));
+      .catch((error) => this.handleError(error));
   }
-
 
   /**
    * On success of fetching a batch of albums, fetch the next one
@@ -61,27 +54,32 @@ class SpotifySync extends React.Component {
     this.updateMessage(false, 'Loading albums and artists successful!', null);
   }
 
-
   /**
    * Display error message when a problem occured
    * @param  {String} message Error message
    */
-  handleError(message) {
-    this.updateMessage(true, message, null);
+  handleError(error) {
+    console.log("Handles error:", error)
+    this.updateMessage(true, error.message, null);
   }
-
 
   render() {
     return (
-      <Synchronize
-        message = { this.state.message }
-        error = { this.state.error }
-        handleClick={ this.handleClick }
-        loadingMessage = { this.state.loadingMessage }
-      />
+      <div className='content-container'>
+        <div className='back-to-library'>
+          <Link to='/'>&#9839; Back to library</Link>
+        </div>
+        <h2>Synchronize your Spotify saved albums</h2>
+        <Synchronize
+          message={this.state.message}
+          error={this.state.error}
+          handleClick={this.handleClick}
+          loadingMessage={this.state.loadingMessage}
+        />
+      </div>
     );
   }
 }
 
 
-export default SpotifySync;
+export default SpotifySyncPage;
