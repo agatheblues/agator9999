@@ -11,7 +11,7 @@ import PageNotFound from './components/PageNotFound/PageNotFound';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import SpotifyLogin from './components/SpotifyLogin/SpotifyLogin';
-import SpotifySync from './components/SpotifySync/SpotifySync';
+import SpotifySyncPage from './pages/SpotifySyncPage';
 
 require('./main.scss');
 
@@ -33,7 +33,7 @@ class App extends React.Component {
     this.setUserToState = this.setUserToState.bind(this);
     // this.logout = this.logout.bind(this);
     this.renderHomePage = this.renderHomePage.bind(this);
-    this.renderSpotifySync = this.renderSpotifySync.bind(this);
+    this.renderSpotifySyncPage = this.renderSpotifySyncPage.bind(this);
     this.renderSpotifyLogin = this.renderSpotifyLogin.bind(this);
     this.renderCreateAlbumPage = this.renderCreateAlbumPage.bind(this);
     this.renderArtistPage = this.renderArtistPage.bind(this);
@@ -97,11 +97,11 @@ class App extends React.Component {
   }
 
 
-  renderSpotifySync() {
+  renderSpotifySyncPage() {
     if (!this.state.isAdmin) {
       return <Redirect to="/404" />;
     }
-    return <SpotifySync />;
+    return <SpotifySyncPage />;
   }
 
   renderSpotifyLogin() {
@@ -145,7 +145,7 @@ class App extends React.Component {
       <HashRouter>
         <Switch>
           <Route exact path="/" render={this.renderHomePage} />
-          <Route exact path="/spotify/sync" render={this.renderSpotifySync} />
+          <Route exact path="/spotify/sync" render={this.renderSpotifySyncPage} />
           <Route exact path="/spotify/login" render={this.renderSpotifyLogin} />
           <Route path="/:access_token(access_token=.*)" render={this.renderSpotifyLogin} />
           <Route exact path="/album/create" render={this.renderCreateAlbumPage} />

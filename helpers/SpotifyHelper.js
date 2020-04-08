@@ -70,7 +70,6 @@ function getStateKey() {
   return localStorage.getItem(spotifyConfig.STATE_KEY);
 }
 
-
 /**
  * Get value of state in local storage
  * @return {string} Value of state
@@ -95,7 +94,6 @@ function removeAccessToken() {
   localStorage.removeItem('access_token');
   localStorage.removeItem('token_end_date');
 }
-
 
 /**
  * Obtains parameters from the hash of the URL
@@ -147,13 +145,11 @@ export function getLoginUrl(redirectTo) {
   return url;
 }
 
-
 /**
  * Authentication flow
  * @param  {function} onError handles error
  */
 export function authenticate(onError) {
-
   const storedState = getStateKey();
 
   // URL dependencies
@@ -176,10 +172,6 @@ export function authenticate(onError) {
   // Remove state key from storage to prevent side effects
   removeStateKey();
 }
-
-
-
-
 
 /************ ALBUM ***********/
 
@@ -228,14 +220,13 @@ export function getAndSetUserSavedAlbums(token, offset) {
 
 }
 
-
 /**
  * Retrieve a batch of 50 albums from Spotify user's saved albums
  * @param  {String} token  Spotify access token
  * @param  {number} offset Batch offset (limit is 50)
  * @return {Promise}
  */
-export function getUserSavedAlbumsChunk(token, offset) {
+export function getAlbumsPage(token, offset) {
   return getInstance(token)
     .get('/me/albums', {
       params: {

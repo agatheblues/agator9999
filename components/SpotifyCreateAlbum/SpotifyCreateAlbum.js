@@ -1,7 +1,7 @@
 import React from 'react';
 import { getAccessToken } from '../../helpers/SpotifyHelper';
 import * as dg from '../../helpers/DiscogsHelper';
-import { createSpotifyAlbum } from '../../helpers/DataHelper';
+import { createSpotifyDiscogsAlbum } from '../../helpers/DataHelper';
 import Button from '../Button/Button';
 import SpotifyLogin from '../SpotifyLogin/SpotifyLogin';
 import Message from '../Message/Message';
@@ -131,7 +131,7 @@ class SpotifyCreateAlbum extends React.Component {
     const token = this.accessToken;
     const { selectedReleaseType, spotifyUri, discogsUri } = this.state;
 
-    createSpotifyAlbum(spotifyUri, discogsUri, selectedReleaseType, token)
+    createSpotifyDiscogsAlbum(spotifyUri, discogsUri, selectedReleaseType, token)
       .then(() => this.handleSubmitSuccess())
       .catch((error) => this.handleSubmitError(error.response));
   }

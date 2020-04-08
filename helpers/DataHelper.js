@@ -74,11 +74,11 @@ export const createDiscogsAlbum = (discogsUri, releaseType, source, listeningUri
 }
 
 /**
- * Create an album from Discogs. 
+ * Create an album from Spotify and Discogs data
  * First get the album data, then for each artists get the artist data.
  * @return {Promise}
  */
-export const createSpotifyAlbum = (spotifyUri, discogsUri, releaseType, token) => {
+export const createSpotifyDiscogsAlbum = (spotifyUri, discogsUri, releaseType, token) => {
   let album;
   return Promise.all([
     spotify.getAlbum(token, spotifyUri),
@@ -89,7 +89,7 @@ export const createSpotifyAlbum = (spotifyUri, discogsUri, releaseType, token) =
       if (response.length != 2) { throw ({ message: 'Oops! Something went wrong while retrieving data from Spotify or Discogs.' }); }
 
       const data = response.map(({ data }) => data);
-      album = formatSpotifyAlbum(data[0], data[1]);
+      album = formatSpotifyDiscogsAlbum(data[0], data[1]);
 
       const ids = data[0].artists.map(artist => artist.id);
       return spotify.getArtists(token, ids)
@@ -99,6 +99,32 @@ export const createSpotifyAlbum = (spotifyUri, discogsUri, releaseType, token) =
       album.artists = formatSpotifyArtists(artists);
       return createAlbum(album);
     });
+}
+
+/**
+ * Create an album from Spotify data
+ * First get the album data, then for each artists get the artist data.
+ * @return {Promise}
+ */
+export const createSpotifyAlbum = (token, albumData, added_at) => {
+  let album = formatSpotifyAlbum(albumData, added_at);
+  const ids = albumData.artists.map(artist => artist.id);
+
+  return spotify.getArtists(token, ids)
+    .then((response) => {
+      const artists = flatten(response.map(({ data }) => data.artists));
+      album.artists = formatSpotifyArtists(artists);
+      return createAlbum(album);
+    })
+    .catch(error => {
+      if (error.response.status == 409) return null; // Ignore Conflicts
+      if (error.response.status == 429) {            // Rate limiting
+        return retryAfter(error, () => createSpotifyAlbum(token, albumData, added_at));
+        // return null;
+      }
+      console.log("i am here", error.response)
+      throw ({ message: error.response.data.message });
+    })
 }
 
 export const updateAlbumWithDiscogs = (albumId, discogsUri, releaseType) => {
@@ -112,6 +138,36 @@ export const updateAlbumWithDiscogs = (albumId, discogsUri, releaseType) => {
       };
       return updateAlbum(albumId, updates);
     });
+}
+
+export const synchronizeSpotifyAlbums = (token, offset) => {
+  return spotify.getAlbumsPage(token, offset)
+    .then(({ data: { items, next } }) => {
+      console.log(offset, items, next)
+      const arrayOfPromises = items.map(({ album, added_at }) => createSpotifyAlbum(token, album, added_at))
+
+      console.log("Next page");
+      // If there is a next page, push next promise to array
+      if (next) { arrayOfPromises.push(synchronizeSpotifyAlbums(token, offset + 50)); }
+      return Promise.all(arrayOfPromises);
+    })
+    .catch(error => {
+      if (error.response.status == 429) {            // Rate limiting
+        return retryAfter(error, () => synchronizeSpotifyAlbums(token, offset));
+        // return null;
+      }
+      console.log("i am here 2", error.response)
+      throw ({ message: error.response.data.message });
+    })
+}
+
+const retryAfter = (error, callback) => {
+  const milliseconds = error.response.headers['retry-after'] * 1000;
+  if (milliseconds) {
+    console.log("retrying....")
+    return setTimeout(callback, milliseconds);
+  }
+  return null;
 }
 
 //////////////////// FORMATTING
@@ -169,7 +225,7 @@ const formatSpotifyImage = (images) => {
   };
 };
 
-const formatSpotifyAlbum = (spotifyData, discogsData) => {
+const formatSpotifyDiscogsAlbum = (spotifyData, discogsData) => {
   const { id: spotifyId, name = '', external_urls: { spotify = '' }, images = [], release_date = '', total_tracks } = spotifyData;
   const { id: discogsId, genres, styles } = discogsData;
   const date = new Date(Date.now());
@@ -185,6 +241,21 @@ const formatSpotifyAlbum = (spotifyData, discogsData) => {
     styles: formatGenresOrStyles(styles),
     total_tracks: total_tracks,
     added_at: date.toISOString(),
+    ...formatSpotifyImage(images)
+  }
+};
+
+const formatSpotifyAlbum = (data, added_at) => {
+  const { id: spotifyId, name = '', external_urls: { spotify = '' }, images = [], release_date = '', total_tracks } = data;
+
+  return {
+    name: name,
+    release_date: release_date,
+    spotify_id: spotifyId,
+    bandcamp_url: '',
+    youtube_url: '',
+    total_tracks: total_tracks,
+    added_at: added_at,
     ...formatSpotifyImage(images)
   }
 };
