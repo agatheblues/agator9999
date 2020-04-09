@@ -2,12 +2,14 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import Synchronize from '../components/Synchronize/Synchronize';
 import { getAccessToken } from '../helpers/SpotifyHelper.js';
-import { synchronizeSpotifyAlbums } from '../helpers/DataHelper.js';
+import { synchronizeSpotifyCollection } from '../helpers/DataHelper.js';
 
 class SpotifySyncPage extends React.Component {
 
   constructor() {
     super();
+
+    this.limit = 50;
 
     this.accessToken = getAccessToken();
 
@@ -37,9 +39,9 @@ class SpotifySyncPage extends React.Component {
    * Start fetching first batch of albums
    */
   handleClick() {
-    this.updateMessage(false, null, 'Loading albums and artists...');
+    this.updateMessage(false, null, 'Loading collection...');
 
-    synchronizeSpotifyAlbums(this.accessToken, 0)
+    synchronizeSpotifyCollection(this.accessToken, this.limit)
       .then(() => this.handleAlbumSyncSuccess())
       .catch((error) => this.handleError(error));
   }
@@ -51,7 +53,7 @@ class SpotifySyncPage extends React.Component {
    * @param  {int} offset      Current pagination offset
    */
   handleAlbumSyncSuccess() {
-    this.updateMessage(false, 'Loading albums and artists successful!', null);
+    this.updateMessage(false, 'Loading collection was successful!', null);
   }
 
   /**
@@ -59,7 +61,6 @@ class SpotifySyncPage extends React.Component {
    * @param  {String} message Error message
    */
   handleError(error) {
-    console.log("Handles error:", error)
     this.updateMessage(true, error.message, null);
   }
 

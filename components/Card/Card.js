@@ -8,12 +8,13 @@ const Card = function ({ id, name, imgUrl, totalAlbums, sources }) {
   const sourceString = sources ? Object.keys(sources)
     .filter(key => sources[key])
     .join(', ') : null;
+  const src = imgUrl ? imgUrl : '/static/images/missing.jpg';
 
   return (
     <div className='card-container'>
       <Link to={'/artist/' + id} className='card-link'>
         <div className='card-wrapper'>
-          <div className='card-image' style={{ 'backgroundImage': `url('${imgUrl}'), url('/static/images/loading-artist.png')` }}>
+          <div className='card-image' style={{ 'backgroundImage': `url('${src}'), url('/static/images/loading-artist.png')` }}>
           </div>
           <div className='card-details'>
             <p>{name}</p>

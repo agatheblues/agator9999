@@ -1,5 +1,5 @@
 import React from 'react';
-import { getArtists } from '../../helpers/DataHelper';
+import { getArtists } from '../../helpers/ApiHelper';
 import Card from '../Card/Card';
 import Message from '../Message/Message';
 import Loading from '../Loading/Loading';

@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
-import { getArtists, mergeArtists } from '../helpers/DataHelper';
+import { getArtists, mergeArtists } from '../helpers/ApiHelper';
 import { ArtistMergeContext } from '../context/ArtistMergeContext';
 import Loading from '../components/Loading/Loading';
 import PageNotFound from '../components/PageNotFound/PageNotFound';

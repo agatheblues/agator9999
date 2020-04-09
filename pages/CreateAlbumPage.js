@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import SpotifyCreateAlbum from '../components/SpotifyCreateAlbum/SpotifyCreateAlbum';
 import DiscogsCreateAlbum from '../components/DiscogsCreateAlbum/DiscogsCreateAlbum';

@@ -1,7 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import { getArtist, deleteAlbum, updateAlbumWithDiscogs } from '../helpers/DataHelper';
+import { getArtist, deleteAlbum } from '../helpers/ApiHelper';
+import { updateAlbumWithDiscogs } from '../helpers/DataHelper';
 import { ArtistContext } from '../context/ArtistContext';
 import ArtistSummary from '../components/ArtistSummary/ArtistSummary';
 import AlbumList from '../components/AlbumList/AlbumList';
