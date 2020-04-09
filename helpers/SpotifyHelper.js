@@ -1,5 +1,7 @@
 import axios from 'axios';
+import axiosRetry from 'axios-retry';
 import * as fb from './FirebaseHelper';
+import { splitArrayInChunks } from './utils';
 import { spotifyConfig } from '../config';
 
 
@@ -35,30 +37,21 @@ export function handleErrorMessage(error) {
  * @param  {string} access_token Spotify API Access token retrieved after login
  * @return {func}              Axios instance
  */
-function getInstance(access_token) {
-  return axios.create({
+function getInstance(access_token, retry = false) {
+  const client = axios.create({
     baseURL: 'https://api.spotify.com/v1/',
     headers: { 'Authorization': 'Bearer ' + access_token }
   });
+
+  if (!retry) return client;
+
+  axiosRetry(client, {
+    retryCondition: e => e.code === 429,
+    retryDelay: axiosRetry.exponentialBackoff,
+  });
+
+  return client;
 }
-
-/**
- * Split a given array into chunks of a given length
- * @param  {array} arr   Array to split
- * @param  {int} chunkLength Length of a chunk
- * @return {array[array]}       array of array chunks
- */
-function splitArrayInChunks(arr, chunkLength) {
-  let i, j;
-  let result = [];
-
-  for (i = 0, j = arr.length; i < j; i += chunkLength) {
-    result.push(arr.slice(i, i + chunkLength));
-  }
-
-  return result;
-}
-
 
 /***** AUTHENTICATION *****/
 
@@ -226,11 +219,11 @@ export function getAndSetUserSavedAlbums(token, offset) {
  * @param  {number} offset Batch offset (limit is 50)
  * @return {Promise}
  */
-export function getAlbumsPage(token, offset) {
-  return getInstance(token)
+export function getAlbumsPage(token, offset, limit) {
+  return getInstance(token, true)
     .get('/me/albums', {
       params: {
-        limit: 50,
+        limit: limit,
         offset: offset
       }
     });
@@ -314,9 +307,9 @@ function formatArtistsImages(artists, source) {
   });
 }
 
-export function getArtists(token, artistIds) {
+export function getArtists(token, artistIds, limit = 50) {
   // Create batches of 50 ids
-  const artistIdsChunks = splitArrayInChunks(artistIds, 50);
+  const artistIdsChunks = splitArrayInChunks(artistIds, limit);
 
   return Promise.all(artistIdsChunks.map((chunk) => getArtistsChunk(token, chunk)));
 }
