@@ -33,6 +33,12 @@ export const getArtist = (id) => getInstance().get(`/artists/${id}`);
 export const mergeArtists = (id1, id2) => getInstance().post(`/artists/${id1},${id2}`);
 
 /**
+ * Unmerge an artist
+ * @return {Promise}
+*/
+export const unmergeArtist = (id, data) => getInstance().patch(`/artists/${id}`, data);
+
+/**
  * Delete an album
  * @return {Promise}
  */

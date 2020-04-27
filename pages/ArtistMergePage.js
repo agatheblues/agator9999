@@ -30,12 +30,14 @@ class ArtistMergePage extends React.Component {
 
   mergeArtists(originArtist, artistToMergeWith) {
     mergeArtists(originArtist.id, artistToMergeWith.id)
-      .then(() => this.getArtists(this.props.match.params.id));
+      .then(() => this.getArtists(this.props.match.params.id))
+      .catch(() => this.handleMergeArtistsError())
   }
 
   handleGetArtistsError() {
     this.setState({
       error: true,
+      loaded: true,
       message: 'Oops! Something went wrong while retrieving the list of artists.'
     });
   }
@@ -48,6 +50,14 @@ class ArtistMergePage extends React.Component {
       artists: eligibleArtists,
       originArtist: originArtist,
       loaded: true
+    });
+  }
+
+  handleMergeArtistsError() {
+    this.setState({
+      error: true,
+      loaded: true,
+      message: 'Oops! Something went wrong while merging the artists.'
     });
   }
 
@@ -75,7 +85,7 @@ class ArtistMergePage extends React.Component {
         <div className='back-to-library'>
           <Link to='/'>&#9839; Back to library</Link>
         </div>
-        <h2>Merge artist</h2>
+        <h2>Merge artists</h2>
         <ArtistMergeContext.Provider value={this.state}>
           <ArtistMerge isAdmin={this.props.isAdmin} originArtist={originArtist} artists={artists} />
         </ArtistMergeContext.Provider>

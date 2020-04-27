@@ -1,8 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Link } from 'react-router-dom';
-import * as fb from '../../helpers/FirebaseHelper';
-import Loading from '../Loading/Loading';
+import { ArtistUnmergeContext } from '../../context/ArtistUnmergeContext';
 import Button from '../Button/Button';
 import Message from '../Message/Message';
 import Card from '../Card/Card';
@@ -10,15 +8,15 @@ require('./ArtistUnmerge.scss');
 
 class ArtistUnmerge extends React.Component {
 
-  constructor(props) {
+  constructor() {
     super();
 
     this.state = {
-      artist: null,
       error: false,
       message: null,
       showForm: false,
-      sources: null
+      spotify_id: null,
+      discogs_id: null
     };
 
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -26,42 +24,23 @@ class ArtistUnmerge extends React.Component {
     this.resetDeleteSources = this.resetDeleteSources.bind(this);
   }
 
-  handleGetOriginArtistSuccess(artist) {
-    artist.id = this.props.match.params.id;
-
-    if (artist.sources.hasOwnProperty('spotify') && artist.sources.hasOwnProperty('discogs')) {
-      this.setState({
-        originArtist: artist,
-        sources: artist.sources,
-        showForm: true
-      });
-    } else {
-      this.setState({
-        originArtist: artist,
-        error: true,
-        sources: artist.sources,
-        message: 'Oops! This artist cannot be unmerged because it only has one source!',
-        showForm: false
-      });
-    }
-  }
-
-  handleGetArtistError() {
-    this.setState({
-      error: true,
-      message: 'Oops! Something went wrong while retrieving the artist.'
-    });
-  }
-
   handleDeleteClick(event) {
     event.preventDefault();
-    const sources = fb.omit(event.target.id, this.state.sources);
-    this.setState({ sources });
+    this.setState({
+      error: false,
+      message: null,
+      [event.target.id]: null
+    });
   }
 
   resetDeleteSources(event) {
     event.preventDefault();
-    this.setState({ sources: this.state.originArtist.sources });
+    this.setState({
+      error: false,
+      message: null,
+      spotify_id: this.props.artist.spotify_id,
+      discogs_id: this.props.artist.discogs_id
+    });
   }
 
   handleSuccessUnmerge() {
@@ -81,9 +60,9 @@ class ArtistUnmerge extends React.Component {
 
   handleSubmit(e) {
     e.preventDefault();
+    const { spotify_id, discogs_id } = this.state;
 
-    if (!this.state.showForm) return;
-    if (Object.keys(this.state.sources).length == Object.keys(this.state.originArtist.sources).length) {
+    if (spotify_id && discogs_id) {
       this.setState({
         error: true,
         message: 'Please delete a source first!'
@@ -91,60 +70,53 @@ class ArtistUnmerge extends React.Component {
       return;
     }
 
-    fb.unmergeArtist(this.state.originArtist.id, this.state.sources)
-      .then(() => this.handleSuccessUnmerge())
-      .catch((error) => this.handleErrorUnmerge(error));
+    const data = spotify_id ? { discogs_id } : { spotify_id };
+    this.props.unmergeArtist(this.props.artist, data);
   }
 
-  componentDidMount() {
-    fb.getArtist(this.props.match.params.id)
-      .once('value')
-      .then((snapshot) => this.handleGetOriginArtistSuccess(snapshot.val()))
-      .catch((error) => this.handleGetArtistError());
-  }
+  renderCard(artist) {
+    const { img_url, name, id, total_albums } = artist;
 
-  renderCard() {
-    if (!this.state.originArtist) return;
-    let totalAlbums = (this.state.originArtist.hasOwnProperty('albums')) ? Object.keys(this.state.originArtist.albums).length : 0;
     return (
       <Card
-        id={this.props.match.params.id}
-        name={this.state.originArtist.name}
-        imgUrl={this.state.originArtist.imgUrl}
-        totalAlbums={totalAlbums}
+        id={id}
+        name={name}
+        imgUrl={img_url}
+        totalAlbums={total_albums}
       />
     );
   }
 
-  renderDeleteButton(key) {
-    const hasOnlyOneSource = (Object.keys(this.state.sources).length == 1);
-    if (hasOnlyOneSource) return null;
-    return <a href='' className='unmerge-button' id={key} onClick={this.handleDeleteClick}>{'\u{2A2F}'}</a>;
+  renderSourceItem(id, url, source, deletable) {
+    return (
+      <li key={source} className='sources-list-item'>
+        <div>
+          <span className='capitalize'>{source}: </span>
+          <a href={url} target='_blank' rel='noopener noreferrer'>{id}</a>
+        </div>
+        {deletable &&
+          <a href='' className='unmerge-button' id={`${source}_id`} onClick={this.handleDeleteClick}>{'\u{2A2F}'}</a>
+        }
+      </li>
+    );
   }
 
-  renderSources() {
-    if (!this.state.sources) return;
-
+  renderSources(spotify_id, discogs_id) {
     return (
       <div className='sources-container'>
         <h3>Artist sources:</h3>
         <ul className='vertical-list'>
-          {
-            Object.keys(this.state.sources).map((key) => {
-              let url = '';
-              if (key == 'discogs') url = 'https://api.discogs.com/artists/' + this.state.sources[key];
-              if (key == 'spotify') url = 'https://open.spotify.com/go?uri=spotify:artist:' + this.state.sources[key];
-
-              return (
-                <li key={key} className='sources-list-item'>
-                  <div>
-                    <span className='capitalize'>{key}: </span>
-                    <a href={url} target='_blank' rel='noopener noreferrer'>{this.state.sources[key]}</a>
-                  </div>
-                  { this.renderDeleteButton(key)}
-                </li>
-              );
-            })
+          {spotify_id && discogs_id &&
+            this.renderSourceItem(spotify_id, 'https://open.spotify.com/go?uri=spotify:artist:', 'spotify', true)
+          }
+          {spotify_id && discogs_id &&
+            this.renderSourceItem(discogs_id, 'https://api.discogs.com/artists/', 'discogs', true)
+          }
+          {spotify_id && !discogs_id &&
+            this.renderSourceItem(spotify_id, 'https://open.spotify.com/go?uri=spotify:artist:', 'spotify', false)
+          }
+          {!spotify_id && discogs_id &&
+            this.renderSourceItem(discogs_id, 'https://api.discogs.com/artists/', 'discogs', false)
           }
         </ul>
       </div>
@@ -153,51 +125,66 @@ class ArtistUnmerge extends React.Component {
 
   renderForm() {
     return (
-      <div>
-        { this.state.message &&
-            <Message message={this.state.message} error={this.state.error}/>
-        }
-
-        { this.state.showForm &&
-          <div className='submit-container'>
-            <a href='' className='link-button' onClick={this.resetDeleteSources}>Cancel</a>
-            <Button label='OK' handleClick={this.handleSubmit}/>
-          </div>
-        }
+      <div className='submit-container'>
+        <a href='' className='link-button' onClick={this.resetDeleteSources}>Cancel</a>
+        <Button label='OK' handleClick={this.handleSubmit} />
       </div>
     );
   }
 
-  render() {
-    return (
-      <div className='content-container'>
-        <div className='back-to-library'>
-          <Link to='/'>&#9839; Back to library</Link>
-        </div>
-        <h2>Unmerge artist</h2>
+  componentDidMount() {
+    const { spotify_id, discogs_id } = this.props.artist;
 
-        <div className='form-container'>
-          <form onSubmit={this.handleSubmit}>
-            <div className='form-row-container form-row--space-center'>
-              { this.renderCard() }
-              { this.renderSources() }
-            </div>
-            { this.renderForm() }
-            <p className='note'>To unmerge an artist means removing a source from this artist. The albums will stay attached to the artist even if you remove a source. An artist should have at least one source.</p>
-          </form>
-        </div>
+    if (spotify_id && discogs_id) {
+      this.setState({
+        showForm: true,
+        spotify_id: spotify_id,
+        discogs_id: discogs_id
+      });
+    } else {
+      this.setState({
+        error: true,
+        message: 'Oops! This artist cannot be unmerged because it only has one source!',
+        showForm: false,
+        spotify_id: spotify_id,
+        discogs_id: discogs_id
+      });
+    }
+  }
+
+  render() {
+    const { artist } = this.props;
+    console.log(artist)
+    const { showForm, message, error, spotify_id, discogs_id } = this.state;
+
+    return (
+      <div className='form-container'>
+        <form onSubmit={this.handleSubmit}>
+          <div className='form-row-container form-row--space-center'>
+            {this.renderCard(artist)}
+            {this.renderSources(spotify_id, discogs_id)}
+          </div>
+          {message && <Message message={message} error={error} />}
+          {showForm && this.renderForm()}
+          <p className='note'>To unmerge an artist means removing a source from this artist. The albums will stay attached to the artist even if you remove a source. An artist should have at least one source.</p>
+        </form>
       </div>
     );
   }
 }
 
 ArtistUnmerge.propTypes = {
-  match: PropTypes.shape({
-    params: PropTypes.shape({
-      id: PropTypes.node,
-    }).isRequired,
-  }).isRequired,
-  isAdmin: PropTypes.bool.isRequired
+  isAdmin: PropTypes.bool.isRequired,
+  artist: PropTypes.object.isRequired,
+  unmergeArtist: PropTypes.func.isRequired
 };
 
-export default ArtistUnmerge;
+const ArtistUnmergeConsumer = (props) => {
+  return (
+    <ArtistUnmergeContext.Consumer>
+      {({ unmergeArtist }) => <ArtistUnmerge {...props} {...{ unmergeArtist }} />}
+    </ArtistUnmergeContext.Consumer>
+  );
+}
+
+export default ArtistUnmergeConsumer;
