@@ -186,7 +186,7 @@ class Album extends React.Component {
    * @return {String} HTML Markup
    */
   renderAlbumDetails(showDiscogsForm, showRemoveForm, message, error) {
-    const { name, id, release_date, total_tracks, added_at, spotify_id, discogs_id, genres, styles } = this.props.album;
+    const { name, id, release_date, total_tracks, added_at, spotify_id, discogs_id, genres, styles, bandcamp_url, youtube_url } = this.props.album;
 
     const dropdownList = discogs_id ? this.dropdownItems : this.dropdownItems.concat([{
       'label': 'Link to Discogs',
@@ -201,7 +201,7 @@ class Album extends React.Component {
         </div>
         <div className='album-main-details'>
           <p>{release_date.substr(0, 4)}&emsp;/&emsp;{total_tracks} tracks</p>
-          {this.renderOpenLinks(spotify_id, 'fixme', 'fixme')}
+          {this.renderOpenLinks(spotify_id, bandcamp_url, youtube_url)}
           {spotify_id && this.renderCopyToClipboard(spotify_id)}
         </div>
         <div className='album-minor-details'>
