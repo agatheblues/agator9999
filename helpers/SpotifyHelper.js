@@ -166,71 +166,28 @@ export function authenticate(onError) {
   removeStateKey();
 }
 
-/************ ALBUM ***********/
+/************ RESOURCES ***********/
 
 /**
- * Extract album Spotify Id from spotify URI
- * @param  {String} s Spotify URI
- * @return {String}   Spotify ID
+ * Retrieve one album given its Spotify URI
+ * @param {String} token 
+ * @param {String} uri 
  */
-function getSpotifyId(s) {
-  return s.substring(14);
-}
-
-export function getAlbum(token, uri) {
-  const albumId = getSpotifyId(uri);
-
-  return getInstance(token)
-    .get('/albums/' + albumId);
-
-}
-
-function getArtistsIds(items) {
-  return fb.flatten(items.map((item) => item.album.artists.map((artist) => artist.id)));
-}
+export const getAlbum = (token, uri) => getInstance(token).get('/albums/' + getSpotifyId(uri));
 
 /**
- * Get chunks of 50 albums from spotify, and save albums and artists to Firebase.
- * Loop over the different pages by calling the function recursively.
+ * Retrieve a batch of albums from Spotify user's saved albums
  * @param  {String} token  Spotify access token
  * @param  {number} offset Batch offset
+ * @param  {number} limit  Items per batch (max is 50)
  * @return {Promise}
  */
-export function getAndSetUserSavedAlbums(token, offset) {
-
-  return getUserSavedAlbumsChunk(token, offset)
-    .then(({ data }) => {
-      const arrayOfPromises = [
-        fb.setAlbums(data.items.map((item) => fb.formatSpotifyAlbums(item)))
-          .then(() => fb.updateOrSetArtistsFromAlbums(data.items, 'spotify'))
-          .then(() => getArtistsImages(token, getArtistsIds(data.items), 'spotify'))
-      ];
-
-      // If there is a next page, push next promise to array
-      if (data.next) { arrayOfPromises.push(getAndSetUserSavedAlbums(token, offset + 50)); }
-      return Promise.all(arrayOfPromises);
-    });
-
-}
-
-/**
- * Retrieve a batch of 50 albums from Spotify user's saved albums
- * @param  {String} token  Spotify access token
- * @param  {number} offset Batch offset (limit is 50)
- * @return {Promise}
- */
-export function getAlbumsPage(token, offset, limit) {
-  return getInstance(token, true)
-    .get('/me/albums', {
-      params: {
-        limit: limit,
-        offset: offset
-      }
-    });
-}
-
-
-/********* PROFILE **********/
+export const getAlbumsPage = (token, offset, limit) => getInstance(token, true).get('/me/albums', {
+  params: {
+    limit: limit,
+    offset: offset
+  }
+});
 
 /**
  * Get Spotify user profile
@@ -238,28 +195,28 @@ export function getAlbumsPage(token, offset, limit) {
  * @param {function} onSuccess Success callback
  * @param {function} onError   Error callback
  */
-export function getProfile(token) {
+export const getProfile = (token) => getInstance(token).get('/me');
 
-  return getInstance(token)
-    .get('/me');
-
+/**
+ * Returns an array of promises, from the pagination of the retrieval
+ * of the required artistIds
+ * @param {String} token  Spotify access token
+ * @param {Array} artistIds List of desired artist ids
+ * @param {Number} limit    Items per batch (max is 50)
+ */
+export function getArtists(token, artistIds, limit = 50) {
+  const chunks = splitArrayInChunks(artistIds, limit);
+  return Promise.all(chunks.map((chunk) => getArtistsPage(token, chunk)));
 }
 
-
-/******** ARTIST IMAGES  *********/
-
-export function getArtistsImages(token, artistIds, source) {
-  // Create batches of 50 ids
-  const artistIdsChunks = splitArrayInChunks(artistIds, 50);
-
-  const arrayOfImagePromises = artistIdsChunks.map((chunk) =>
-    getArtistsChunk(token, chunk)
-      .then((response) => fb.updateArtistsImages(formatArtistsImages(response.data.artists, source)))
-  );
-
-  return Promise.all(arrayOfImagePromises);
+/**
+ * Extract album Spotify Id from spotify URI
+ * @param  {String} s Spotify URI
+ * @return {String}   Spotify ID
+ */
+const getSpotifyId = (s) => {
+  return s.substring(14);
 }
-
 
 /**
  * Get artists for a list of artist ids < 50 items
@@ -267,50 +224,8 @@ export function getArtistsImages(token, artistIds, source) {
  * @param  {array} artistIds  List of artist Ids
  * @return {Promise}
  */
-function getArtistsChunk(token, artistIds) {
-  return getInstance(token)
-    .get('/artists', {
-      params: {
-        ids: artistIds.join(',')
-      }
-    });
-}
-
-/**
- * For a given artist object, return its first image url or returned
- * default image
- * @param  {object} artist Spotify Artist
- * @return {String}        Image url
- */
-function getArtistImageUrl(artist) {
-  if (artist.hasOwnProperty('images') && (artist.images.length > 0)) {
-    return artist.images[0].url;
+const getArtistsPage = (token, artistIds) => getInstance(token).get('/artists', {
+  params: {
+    ids: artistIds.join(',')
   }
-
-  return '/static/images/missing.jpg';
-}
-
-
-/**
- * Format the response of getting artists to extract images
- * @param  {array} artists  List of Spotify Artists
- * @param  {String} source  Name of the source
- * @return {array}          List of object containing id and imgUrl of each artist
- */
-function formatArtistsImages(artists, source) {
-  return artists.map((artist) => {
-    return {
-      id: artist.id,
-      source: source,
-      imgUrl: getArtistImageUrl(artist)
-    };
-  });
-}
-
-export function getArtists(token, artistIds, limit = 50) {
-  // Create batches of 50 ids
-  const artistIdsChunks = splitArrayInChunks(artistIds, limit);
-
-  return Promise.all(artistIdsChunks.map((chunk) => getArtistsChunk(token, chunk)));
-}
-
+});

@@ -11,6 +11,7 @@ import { splitArrayInChunks, flatten } from './utils';
  */
 export const createDiscogsAlbum = (discogsUri, releaseType, source, listeningUri) => {
   let album;
+
   return discogs.getRelease(discogsUri, releaseType)
     .then(({ data }) => {
       album = format.formatDiscogsAlbum(data, source, listeningUri);
@@ -49,6 +50,13 @@ export const createSpotifyDiscogsAlbum = (spotifyUri, discogsUri, releaseType, t
     });
 }
 
+/**
+ * Update a Spotify album with discogs data
+ * @param {Number} albumId DB id of album to update
+ * @param {String} discogsUri URI of the discogs album
+ * @param {String} releaseType master or release
+ * @return {Promise}
+ */
 export const updateAlbumWithDiscogs = (albumId, discogsUri, releaseType) => {
   return discogs.getRelease(discogsUri, releaseType)
     .then(({ data }) => {
@@ -58,6 +66,16 @@ export const updateAlbumWithDiscogs = (albumId, discogsUri, releaseType) => {
     });
 }
 
+/**
+ * Orchestrates the synchronisation of the user's collection of albums in Spotify
+ * to the DB. 
+ * - First get all the albums
+ * - Then get all the artists from those albums
+ * - Format and save to DB
+ * @param {String} accessToken Spotify access token
+ * @param {Number} limit       Number of items in batches (max is 50)
+ * @return {Promise}
+ */
 export const synchronizeSpotifyCollection = (accessToken, limit) => {
   let albums;
 
@@ -81,23 +99,36 @@ export const synchronizeSpotifyCollection = (accessToken, limit) => {
     });
 }
 
-const getSpotifyAlbumCollection = (token, limit) => {
-  return spotify.getAlbumsPage(token, 0, limit)   // Get the first page
+/**
+ * Retrieves all the albums in the user's collection
+ * @param {String} accessToken Spotify access token
+ * @param {Number} limit       Number of items in batches (max is 50)
+ * @return {Promise}
+ */
+const getSpotifyAlbumCollection = (accessToken, limit) => {
+  return spotify.getAlbumsPage(accessToken, 0, limit)   // Get the first page
     .then(({ data: { total } }) => {
       // Compute how many pages to request
       const remainder = total % limit;
       const quotient = (remainder == 0) ? Math.floor(total / limit) : Math.floor(total / limit) + 1;
 
       // Prepare all requests
-      const arrayOfPromises = Array(quotient).fill().map((_, i) => spotify.getAlbumsPage(token, i * limit, limit))
+      const arrayOfPromises = Array(quotient).fill().map((_, i) => spotify.getAlbumsPage(accessToken, i * limit, limit))
       return Promise.all(arrayOfPromises);
     })
 }
 
-const assignArtistsToAlbums = (albums, artistsData) => {
-  return albums.map(({ album, added_at }) => {
-    const artistIds = album.artists.map(({ id }) => id);
-    const artists = artistsData.filter(({ id }) => artistIds.includes(id));
-    return { ...format.formatSpotifyAlbum(album, added_at), artists: format.formatSpotifyArtists(artists) };
-  });
-}
+/**
+ * For a given list of albums and artists, returns the list of albums
+ * with an `artists` key, being the array of artists for each album.
+ * @param {Array} albums 
+ * @param {Array} artistsData 
+ */
+const assignArtistsToAlbums = (albums, artistsData) => albums.map(({ album, added_at }) => {
+  const artistIds = album.artists.map(({ id }) => id);
+  const artists = artistsData.filter(({ id }) => artistIds.includes(id));
+  return {
+    ...format.formatSpotifyAlbum(album, added_at),
+    artists: format.formatSpotifyArtists(artists)
+  };
+});
