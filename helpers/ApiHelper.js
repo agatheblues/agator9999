@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { databaseConfig } from '../config';
 
-const TOKEN = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1ODY1NDA0NzIsInN1YiI6Mn0.WU9q_hrmf5w5k7xFaJladWoZ9oRPVgVyEZJKgAXaFz8';
+const TOKEN = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1ODg2MjAzOTIsInN1YiI6Mn0.nS3QE7taSGpOrouGaRfeV1CD-d1qKt8qfK3eB-gMxbE';
 /**
  * Create axios instance for Database requests
  * @return {func}              Axios instance
