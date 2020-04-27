@@ -3,7 +3,7 @@
 import { HashRouter, Route, Switch, Redirect } from 'react-router-dom';
 import ArtistPage from './pages/ArtistPage';
 import ArtistMergePage from './pages/ArtistMergePage';
-import ArtistUnmerge from './components/ArtistUnmerge/ArtistUnmerge';
+import ArtistUnmergePage from './pages/ArtistUnmergePage';
 import CreateAlbumPage from './pages/CreateAlbumPage';
 import HomePage from './pages/HomePage';
 import Loading from './components/Loading/Loading';
@@ -38,7 +38,7 @@ class App extends React.Component {
     this.renderCreateAlbumPage = this.renderCreateAlbumPage.bind(this);
     this.renderArtistPage = this.renderArtistPage.bind(this);
     this.renderArtistMergePage = this.renderArtistMergePage.bind(this);
-    this.renderArtistUnmerge = this.renderArtistUnmerge.bind(this);
+    this.renderArtistUnmergePage = this.renderArtistUnmergePage.bind(this);
   }
 
   checkIfAdmin(data) {
@@ -129,11 +129,11 @@ class App extends React.Component {
     return <ArtistMergePage {...props} isAdmin={this.state.isAdmin} />;
   }
 
-  renderArtistUnmerge(props) {
+  renderArtistUnmergePage(props) {
     if (!this.state.isAdmin) {
       return <Redirect to="/404" />;
     }
-    return <ArtistUnmerge {...props} isAdmin={this.state.isAdmin} />;
+    return <ArtistUnmergePage {...props} isAdmin={this.state.isAdmin} />;
   }
 
   render() {
@@ -151,7 +151,7 @@ class App extends React.Component {
           <Route exact path="/album/create" render={this.renderCreateAlbumPage} />
           <Route exact path="/artist/:id" render={this.renderArtistPage} />
           <Route exact path="/artist/:id/merge" render={this.renderArtistMergePage} />
-          <Route exact path="/artist/:id/unmerge" render={this.renderArtistUnmerge} />
+          <Route exact path="/artist/:id/unmerge" render={this.renderArtistUnmergePage} />
           <Route exact path="/404" component={PageNotFound} />
           <Route component={PageNotFound} />
         </Switch>
