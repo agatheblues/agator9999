@@ -87,7 +87,7 @@ class ArtistMergePage extends React.Component {
         </div>
         <h2>Merge artists</h2>
         <ArtistMergeContext.Provider value={this.state}>
-          <ArtistMerge isAdmin={this.props.isAdmin} originArtist={originArtist} artists={artists} />
+          <ArtistMerge originArtist={originArtist} artists={artists} />
         </ArtistMergeContext.Provider>
       </div>
     );
@@ -99,8 +99,7 @@ ArtistMergePage.propTypes = {
     params: PropTypes.shape({
       id: PropTypes.node,
     }).isRequired,
-  }).isRequired,
-  isAdmin: PropTypes.bool.isRequired
+  }).isRequired
 };
 
 export default ArtistMergePage;

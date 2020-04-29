@@ -171,7 +171,6 @@ class ArtistUnmerge extends React.Component {
 }
 
 ArtistUnmerge.propTypes = {
-  isAdmin: PropTypes.bool.isRequired,
   artist: PropTypes.object.isRequired,
   updateArtist: PropTypes.func.isRequired
 };

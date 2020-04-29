@@ -161,7 +161,6 @@ class ArtistMerge extends React.Component {
 }
 
 ArtistMerge.propTypes = {
-  isAdmin: PropTypes.bool.isRequired,
   artists: PropTypes.array.isRequired,
   originArtist: PropTypes.object.isRequired,
   mergeArtists: PropTypes.func.isRequired
