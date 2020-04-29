@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
-import { getArtist, unmergeArtist } from '../helpers/ApiHelper';
+import { getArtist, updateArtist } from '../helpers/ApiHelper';
 import { ArtistUnmergeContext } from '../context/ArtistUnmergeContext';
 import Loading from '../components/Loading/Loading';
 import PageNotFound from '../components/PageNotFound/PageNotFound';
@@ -17,7 +17,7 @@ class ArtistUnmergePage extends React.Component {
       error: false,
       message: null,
       loaded: false,
-      unmergeArtist: this.unmergeArtist.bind(this)
+      updateArtist: this.updateArtist.bind(this)
     };
   }
 
@@ -27,9 +27,9 @@ class ArtistUnmergePage extends React.Component {
       .catch(() => this.handleGetArtistError())
   }
 
-  unmergeArtist(artist, data) {
-    unmergeArtist(artist.id, data)
-      .then(() => this.getArtist(this.props.match.params.id))
+  updateArtist(artist, data) {
+    updateArtist(artist.id, data)
+      .then(({ data }) => this.handleUnmergeArtistSuccess(data))
       .catch(() => this.handleUnmergeArtistError())
   }
 
@@ -53,6 +53,12 @@ class ArtistUnmergePage extends React.Component {
       error: true,
       loaded: true,
       message: 'Oops! Something went wrong while unmerging the artist.'
+    });
+  }
+
+  handleUnmergeArtistSuccess(artist) {
+    this.setState({
+      artist: artist
     });
   }
 

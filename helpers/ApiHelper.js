@@ -36,7 +36,7 @@ export const mergeArtists = (id1, id2) => getInstance().post(`/artists/${id1},${
  * Unmerge an artist
  * @return {Promise}
 */
-export const unmergeArtist = (id, data) => getInstance().patch(`/artists/${id}`, data);
+export const updateArtist = (id, data) => getInstance().patch(`/artists/${id}`, data);
 
 /**
  * Delete an album

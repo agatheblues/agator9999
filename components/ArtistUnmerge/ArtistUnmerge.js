@@ -43,21 +43,6 @@ class ArtistUnmerge extends React.Component {
     });
   }
 
-  handleSuccessUnmerge() {
-    this.setState({
-      error: false,
-      message: 'Unmerge of artist successful!',
-      showForm: false
-    });
-  }
-
-  handleErrorUnmerge() {
-    this.setState({
-      error: true,
-      message: 'Oops! Something went wrong while merging artists.'
-    });
-  }
-
   handleSubmit(e) {
     e.preventDefault();
     const { spotify_id, discogs_id } = this.state;
@@ -71,7 +56,7 @@ class ArtistUnmerge extends React.Component {
     }
 
     const data = spotify_id ? { discogs_id } : { spotify_id };
-    this.props.unmergeArtist(this.props.artist, data);
+    this.props.updateArtist(this.props.artist, data);
   }
 
   renderCard(artist) {
@@ -152,9 +137,21 @@ class ArtistUnmerge extends React.Component {
     }
   }
 
+  componentWillUpdate(nextProps, _nextState) {
+    const { artist: artist } = this.props;
+    const { artist: nextArtist } = nextProps;
+
+    if ((artist.spotify_id && !nextArtist.spotify_id) || (artist.discogs_id && !nextArtist.discogs_id)) {
+      this.setState({
+        error: false,
+        message: 'Unmerge was successful!',
+        showForm: false
+      });
+    }
+  }
+
   render() {
     const { artist } = this.props;
-    console.log(artist)
     const { showForm, message, error, spotify_id, discogs_id } = this.state;
 
     return (
@@ -176,13 +173,13 @@ class ArtistUnmerge extends React.Component {
 ArtistUnmerge.propTypes = {
   isAdmin: PropTypes.bool.isRequired,
   artist: PropTypes.object.isRequired,
-  unmergeArtist: PropTypes.func.isRequired
+  updateArtist: PropTypes.func.isRequired
 };
 
 const ArtistUnmergeConsumer = (props) => {
   return (
     <ArtistUnmergeContext.Consumer>
-      {({ unmergeArtist }) => <ArtistUnmerge {...props} {...{ unmergeArtist }} />}
+      {({ updateArtist }) => <ArtistUnmerge {...props} {...{ updateArtist }} />}
     </ArtistUnmergeContext.Consumer>
   );
 }
