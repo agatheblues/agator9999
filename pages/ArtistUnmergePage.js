@@ -88,7 +88,7 @@ class ArtistUnmergePage extends React.Component {
         </div>
         <h2>Unmerge artist</h2>
         <ArtistUnmergeContext.Provider value={this.state}>
-          <ArtistUnmerge isAdmin={this.props.isAdmin} artist={artist} />
+          <ArtistUnmerge artist={artist} />
         </ArtistUnmergeContext.Provider>
       </div>
     );
@@ -100,8 +100,7 @@ ArtistUnmergePage.propTypes = {
     params: PropTypes.shape({
       id: PropTypes.node,
     }).isRequired,
-  }).isRequired,
-  isAdmin: PropTypes.bool.isRequired
+  }).isRequired
 };
 
 export default ArtistUnmergePage;

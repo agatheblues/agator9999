@@ -17,7 +17,7 @@ class HomePage extends React.Component {
   }
 
   renderAdminMenu() {
-    if (this.props.isAdmin) {
+    if (this.props.admin) {
       return (
         <nav>
           <ul className='menu-wrapper'>
@@ -52,8 +52,7 @@ class HomePage extends React.Component {
 
 HomePage.propTypes = {
   user: PropTypes.object.isRequired,
-  logout: PropTypes.func.isRequired,
-  isAdmin: PropTypes.bool.isRequired
+  admin: PropTypes.bool.isRequired
 };
 
 export default HomePage;

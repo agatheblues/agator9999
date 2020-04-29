@@ -185,7 +185,7 @@ class Album extends React.Component {
    * else render album details
    * @return {String} HTML Markup
    */
-  renderAlbumDetails(showDiscogsForm, showRemoveForm, message, error) {
+  renderAlbumDetails(admin, showDiscogsForm, showRemoveForm, message, error) {
     const { name, id, release_date, total_tracks, added_at, spotify_id, discogs_id, genres, styles, bandcamp_url, youtube_url } = this.props.album;
 
     const dropdownList = discogs_id ? this.dropdownItems : this.dropdownItems.concat([{
@@ -195,10 +195,11 @@ class Album extends React.Component {
 
     return (
       <div>
-        <div className='album-main'>
+        {admin && <div className='album-main'>
           <h2>{name}</h2>
           <DropdownMenu id={id} list={dropdownList} />
         </div>
+        }
         <div className='album-main-details'>
           <p>{release_date.substr(0, 4)}&emsp;/&emsp;{total_tracks} tracks</p>
           {this.renderOpenLinks(spotify_id, bandcamp_url, youtube_url)}
@@ -211,9 +212,9 @@ class Album extends React.Component {
           {this.renderGenresOrStyles(genres, 'Genres')}
           {this.renderGenresOrStyles(styles, 'Styles')}
         </div>
-        {!discogs_id && showDiscogsForm && this.renderDiscogsForm(id)}
-        {showRemoveForm && this.renderRemoveForm()}
-        {message && <Message message={message} error={error} />}
+        {admin && !discogs_id && showDiscogsForm && this.renderDiscogsForm(id)}
+        {admin && showRemoveForm && this.renderRemoveForm()}
+        {admin && message && <Message message={message} error={error} />}
       </div>
     );
   }
@@ -248,7 +249,7 @@ class Album extends React.Component {
 
   render() {
     const { showDiscogsForm, showRemoveForm, message, error } = this.state;
-    const { img_url } = this.props.album;
+    const { album: { img_url }, admin } = this.props;
 
     return (
       <div className='content-container'>
@@ -257,7 +258,7 @@ class Album extends React.Component {
             {this.renderAlbumCover(img_url)}
           </div>
           <div className='album-detail-container'>
-            {this.renderAlbumDetails(showDiscogsForm, showRemoveForm, message, error)}
+            {this.renderAlbumDetails(admin, showDiscogsForm, showRemoveForm, message, error)}
           </div>
         </div>
       </div>
@@ -267,7 +268,7 @@ class Album extends React.Component {
 
 Album.propTypes = {
   album: PropTypes.object.isRequired,
-  isAdmin: PropTypes.bool.isRequired,
+  admin: PropTypes.bool.isRequired,
   deleteAlbum: PropTypes.func.isRequired
 };
 

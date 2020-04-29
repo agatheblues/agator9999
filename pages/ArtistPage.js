@@ -125,8 +125,8 @@ class ArtistPage extends React.Component {
 
     return (
       <ArtistContext.Provider value={this.state}>
-        <ArtistSummary isAdmin={this.props.isAdmin} />
-        <AlbumList albums={artist.albums} isAdmin={this.props.isAdmin} />
+        <ArtistSummary admin={this.props.admin} />
+        <AlbumList albums={artist.albums} admin={this.props.admin} />
       </ArtistContext.Provider>
     );
   }
@@ -138,7 +138,7 @@ ArtistPage.propTypes = {
       id: PropTypes.node,
     }).isRequired,
   }).isRequired,
-  isAdmin: PropTypes.bool.isRequired
+  admin: PropTypes.bool.isRequired
 };
 
 export default ArtistPage;
