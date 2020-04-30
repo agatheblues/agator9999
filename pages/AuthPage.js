@@ -1,8 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { config } from '../config';
-import { getToken } from '../helpers/ApiHelper';
+import { getToken, createUser } from '../helpers/ApiHelper';
 import Login from '../components/Login/Login';
+import SignUp from '../components/SignUp/SignUp';
 import Message from '../components/Message/Message';
 
 class AuthPage extends React.Component {
@@ -11,10 +12,14 @@ class AuthPage extends React.Component {
 
     this.state = {
       error: false,
-      message: null
+      message: null,
+      showLogin: true,
     };
 
     this.login = this.login.bind(this);
+    this.createUser = this.createUser.bind(this);
+    this.showSignUp = this.showSignUp.bind(this);
+    this.showLogin = this.showLogin.bind(this);
   }
 
   login(email, password) {
@@ -25,7 +30,17 @@ class AuthPage extends React.Component {
       }
     })
       .then(({ data }) => this.handleSubmitSuccess(data))
-      .catch((error) => this.handleSubmitError(error))
+      .catch((error) => this.handleSubmitError(error));
+  }
+
+  createUser(email, username, password) {
+    createUser({
+      username: username,
+      email: email,
+      password: password
+    })
+      .then(() => this.handleCreateUserSuccess())
+      .catch((error) => this.handleCreateUserError(error));
   }
 
   handleSubmitError(error) {
@@ -49,16 +64,47 @@ class AuthPage extends React.Component {
     this.props.loginCallback();
   }
 
+  showSignUp(e) {
+    e.preventDefault();
+    this.setState({
+      showLogin: false
+    });
+  }
+
+  showLogin(e) {
+    e.preventDefault();
+    this.setState({
+      showLogin: true
+    });
+  }
+
+  handleCreateUserSuccess() {
+    this.setState({
+      showLogin: true,
+      message: 'Account created! Proceed with login.'
+    });
+  }
+
+  handleCreateUserError() {
+    this.setState({
+      error: true,
+      message: 'Something went wrong while creating the account.'
+    })
+  }
+
   render() {
+    const { message, error, showLogin } = this.state;
+
     return (
       <div className='login-wrapper'>
         <div className='login-container'>
           <div className='login-content'>
             <h1>Welcome to {`${config.owner}`}&#39;s music library.</h1>
             <div className='login-form-container'>
-              <Login handleLogin={this.login} />
-              {this.state.message &&
-                <Message message={this.state.message} error={this.state.error} />
+              {showLogin && <Login handleLogin={this.login} showSignUp={this.showSignUp} />}
+              {!showLogin && <SignUp handleSignUp={this.createUser} showLogin={this.showLogin} />}
+              {message &&
+                <Message message={message} error={error} />
               }
             </div>
             <p className='note note--light'>agator9999 is an open-source personal music library aggregator built with React + Rails. Check it out on <a className='inverted' href='https://github.com/agatheblues/agator9999'>Github</a> and start your own library!</p>

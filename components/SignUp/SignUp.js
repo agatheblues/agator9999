@@ -3,10 +3,10 @@ import PropTypes from 'prop-types';
 import InputText from '../InputText/InputText';
 import Button from '../Button/Button';
 import Message from '../Message/Message';
-import { emailRegex } from '../../helpers/utils';
-require('./Login.scss');
+import { passwordRegex, emailRegex, usernameRegex } from '../../helpers/utils';
+require('./SignUp.scss');
 
-class Login extends React.Component {
+class SignUp extends React.Component {
 
   constructor() {
     super();
@@ -14,16 +14,31 @@ class Login extends React.Component {
     this.state = {
       email: '',
       password: '',
+      username: '',
       errorEmail: false,
       errorPassword: false,
+      errorUsername: false,
       messageEmail: null,
-      messagePassword: null
+      messagePassword: null,
+      messageUsername: null
     }
 
     this.handleSubmit = this.handleSubmit.bind(this);
-    this.handleErrorEmail = this.handleErrorEmail.bind(this);
-    this.handleErrorPassword = this.handleErrorPassword.bind(this);
+    this.handleError = this.handleError.bind(this);
     this.handleValueFor = this.handleValueFor.bind(this);
+  }
+
+  validate(field) {
+    switch (field) {
+      case 'email':
+        return this.validateEmail(this.state.email);
+      case 'password':
+        return this.validatePassword(this.state.password);
+      case 'username':
+        return this.validateUsername(this.state.username);
+      default:
+        return;
+    }
   }
 
   validateEmail(email) {
@@ -45,6 +60,25 @@ class Login extends React.Component {
     if (password.length === 0) {
       errors.push('Password is required.');
     }
+    if (password.length < 8) {
+      errors.push('Password should have more than 8 characters.');
+    }
+    if (!passwordRegex.test(password)) {
+      errors.push('Password should contain at least one number.');
+    }
+    return errors;
+  }
+
+  validateUsername(username) {
+    let errors = [];
+
+    if (username.length === 0) {
+      errors.push('Username is required.');
+    }
+    if (!usernameRegex.test(username)) {
+      errors.push('Username can only contain alphanumeric characters.');
+    }
+
     return errors;
   }
 
@@ -62,22 +96,14 @@ class Login extends React.Component {
     }
   }
 
-  handleErrorEmail() {
-    const errors = this.validateEmail(this.state.email);
-    this.handleInputErrors(errors, 'Email');
-    return errors;
-  }
-
-  handleErrorPassword() {
-    const errors = this.validatePassword(this.state.password);
-    this.handleInputErrors(errors, 'Password');
+  handleError(field) {
+    const errors = this.validate(field.toLowerCase());
+    this.handleInputErrors(errors, field);
     return errors;
   }
 
   hasErrors() {
-    const { email, password } = this.state;
-    const errors = this.handleErrorEmail(email).concat(this.handleErrorPassword(password));
-
+    const errors = this.handleError('Email').concat(this.handleError('Password')).concat(this.handleError('Username'));
     return errors.length > 0;
   }
 
@@ -104,7 +130,7 @@ class Login extends React.Component {
       message: null
     });
 
-    this.props.handleLogin(this.state.email, this.state.password);
+    this.props.handleSignUp(this.state.email, this.state.username, this.state.password);
   }
 
   render() {
@@ -112,9 +138,21 @@ class Login extends React.Component {
       <form onSubmit={this.handleSubmit}>
         <div className='form-row-container'>
           <InputText
+            placeholder={'Username'}
+            handleValue={this.handleValueFor('username')}
+            handleError={() => this.handleError('Username')}
+            value={this.state.username}
+            invert={true}
+            type={'text'}
+          />
+        </div>
+        <Message message={this.state.messageUsername} error={this.state.errorUsername} style={'input-msg-invert'} />
+
+        <div className='form-row-container'>
+          <InputText
             placeholder={'Email'}
             handleValue={this.handleValueFor('email')}
-            // handleError={this.handleErrorEmail}
+            handleError={() => this.handleError('Email')}
             value={this.state.email}
             invert={true}
             type={'email'}
@@ -126,7 +164,7 @@ class Login extends React.Component {
           <InputText
             placeholder={'Password'}
             handleValue={this.handleValueFor('password')}
-            // handleError={this.handleErrorPassword}
+            handleError={() => this.handleError('Password')}
             value={this.state.password}
             invert={true}
             type={'password'}
@@ -135,17 +173,17 @@ class Login extends React.Component {
         <Message message={this.state.messagePassword} error={this.state.errorPassword} style={'input-msg-invert'} />
 
         <div className='submit-container'>
-          <a href='' className='link-button link-button--inverted' onClick={this.props.showSignUp}>Sign up</a>
-          <Button label='Login' handleClick={this.handleSubmit} invert={true} />
+          <a href='' className='link-button link-button--inverted' onClick={this.props.showLogin}>Login</a>
+          <Button label='SignUp' handleClick={this.handleSubmit} invert={true} />
         </div>
       </form>
     );
   }
 }
 
-Login.propTypes = {
-  handleLogin: PropTypes.func.isRequired,
-  showSignUp: PropTypes.func.isRequired
+SignUp.propTypes = {
+  handleSignUp: PropTypes.func.isRequired,
+  showLogin: PropTypes.func.isRequired
 };
 
-export default Login;
+export default SignUp;
