@@ -95,6 +95,10 @@ a.link-button {
   padding: 10px 30px 10px 30px;
 }
 
+a.link-button--inverted {
+  color: $white;
+}
+
 a.icon:hover {
   text-decoration: none;
 }

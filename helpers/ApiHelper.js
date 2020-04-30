@@ -27,9 +27,14 @@ export const getToken = (data) => getInstance().post('/user_token', data);
 export const getUser = () => getInstance().get('/users/current');
 
 /**
- * Get list of all artists stored in Firebase
- * @return {Promise}
+ * Create a user
  */
+export const createUser = (data) => getInstance().post('/users', data);
+
+/**
+* Get list of all artists stored in Firebase
+* @return {Promise}
+*/
 export const getArtists = () => getInstance().get('/artists');
 
 /**
