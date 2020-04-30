@@ -1,0 +1,68 @@
+@import "variables";
+
+.login-wrapper {
+  height: 100vh;
+}
+
+.login-content {
+  margin: 20px;
+}
+
+.login-container {
+    width: 90%;
+    margin: auto;
+    background-color: $orange;
+    transform: translate(-50%, -50%);
+    top: 50%;
+    position: absolute;
+    left: 50%;
+}
+
+.login-form-container {
+  padding-top: 5px;
+}
+
+/* iPads (portrait and landscape) ----------- */
+@media only screen and (min-width : 480px) {
+  .login-container {
+    width: 60%;
+  }
+
+  .login-content {
+    margin: 30px;
+  }
+
+  .login-form-container {
+    padding-top: 10px;
+  }
+}
+
+/* iPads (portrait and landscape) ----------- */
+@media only screen and (min-width : 768px) {
+  .login-container {
+    width: 50%;
+  }
+
+  .login-content {
+    margin: 40px;
+  }
+
+  .login-form-container {
+    padding-top: 15px;
+  }
+}
+
+/* Desktops and laptops ----------- */
+@media only screen  and (min-width : 992px) {
+  .login-container {
+    width: 525px;
+  }
+
+  .login-content {
+    margin: 50px;
+  }
+
+  .login-form-container {
+    padding-top: 20px;
+  }
+}

@@ -1,18 +1,30 @@
 import axios from 'axios';
 import { databaseConfig } from '../config';
 
-const TOKEN = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1ODg2MjAzOTIsInN1YiI6Mn0.nS3QE7taSGpOrouGaRfeV1CD-d1qKt8qfK3eB-gMxbE';
+// const TOKEN = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1ODg2MjAzOTIsInN1YiI6Mn0.nS3QE7taSGpOrouGaRfeV1CD-d1qKt8qfK3eB-gMxbE';
 /**
  * Create axios instance for Database requests
  * @return {func}              Axios instance
  */
 function getInstance() {
+  const token = localStorage.token;
+
   return axios.create({
     baseURL: databaseConfig.databaseURL,
     timeout: 10000,
-    headers: { Authorization: `Bearer ${TOKEN}` }
+    headers: { Authorization: `Bearer ${token}` }
   });
 }
+
+/**
+ * Get a token by passing an email and password
+ */
+export const getToken = (data) => getInstance().post('/user_token', data);
+
+/**
+ * Get current user
+ */
+export const getUser = () => getInstance().get('/users/current');
 
 /**
  * Get list of all artists stored in Firebase
