@@ -16,32 +16,31 @@ class HomePage extends React.Component {
     this.props.logout();
   }
 
-  renderAdminMenu() {
-    if (this.props.admin) {
-      return (
-        <nav>
-          <ul className='menu-wrapper'>
-            <li><Link to='/spotify/sync'>&#8635; Sync. Spotify Albums</Link></li>
-            <li><Link to='/album/create'>&#xFF0B; New album</Link></li>
-          </ul>
-        </nav>
-      );
-    }
-
-    return null;
+  renderAdminMenu(admin) {
+    if (!admin) return null;
+    return (
+      <nav>
+        <ul className='menu-wrapper'>
+          <li><Link to='/spotify/sync'>&#8635; Sync. Spotify Albums</Link></li>
+          <li><Link to='/album/create'>&#xFF0B; New album</Link></li>
+        </ul>
+      </nav>
+    );
   }
 
   render() {
+    const { user: { imgUrl, username }, admin } = this.props;
+
     return (
       <div className='content-container'>
         <div>
           <div className='menu-container'>
             <ProfileCard
-              imgUrl={this.props.user.photoURL}
-              name={this.props.user.displayName}
+              imgUrl={imgUrl}
+              name={username}
               handleClick={this.handleClickLogout}
             />
-            {this.renderAdminMenu()}
+            {this.renderAdminMenu(admin)}
           </div>
           <CardGrid />
         </div>
@@ -52,7 +51,8 @@ class HomePage extends React.Component {
 
 HomePage.propTypes = {
   user: PropTypes.object.isRequired,
-  admin: PropTypes.bool.isRequired
+  admin: PropTypes.bool.isRequired,
+  logout: PropTypes.func.isRequired
 };
 
 export default HomePage;

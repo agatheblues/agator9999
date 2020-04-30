@@ -19,11 +19,11 @@ class SpotifyCreateAlbum extends React.Component {
 
     // set local state
     this.state = {
-      spotifyUri: 'spotify:album:59GRmAvlGs7KjLizFnV7Y9',
+      spotifyUri: '',
       errorSubmit: false,
       errorSpotifyUri: null,
-      discogsUri: 'https://www.discogs.com/Thundercat-It-Is-What-It-Is/master/1709557',
-      selectedReleaseType: 'master', // 'placeholder',
+      discogsUri: '',
+      selectedReleaseType: 'placeholder',
       errorDiscogsUri: null,
       messageSubmit: null,
       accessToken: this.accessToken,

@@ -1,11 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
+import { ArtistMergeContext } from '../../context/ArtistMergeContext';
 import Button from '../Button/Button';
 import Message from '../Message/Message';
 import Card from '../Card/Card';
 import SearchDropdown from '../SearchDropdown/SearchDropdown';
-import { ArtistMergeContext } from '../../context/ArtistMergeContext';
-import classNames from 'classnames';
 require('./ArtistMerge.scss');
 
 class ArtistMerge extends React.Component {

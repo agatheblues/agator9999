@@ -42,11 +42,21 @@
   }
 
   &:focus {
-    outline: 1px dotted #959595;
+    outline: 1px dotted $dark-grey;
     outline-offset: -4px;
   }
 }
 
 .btn:disabled {
   opacity: 0.5;
+}
+
+.btn--inverted {
+  color: $orange;
+  background: $white;
+
+  &:hover {
+    transition: none;
+    opacity: 1;
+  }
 }

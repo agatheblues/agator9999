@@ -1,4 +1,5 @@
 import React from 'react';
+import classNames from 'classnames';
 import PropTypes from 'prop-types';
 require('./InputText.scss');
 
@@ -22,22 +23,39 @@ class InputText extends React.Component {
   }
 
   render() {
+    const { id, placeholder, value, invert, type } = this.props;
+
+    const classes = classNames({
+      'form-input-text': true,
+      'form-input-text--inverted': invert
+    });
+
     return (
       <div className='input-container'>
         <input
-          type='text'
+          type={type}
           spellCheck='false'
-          value={this.props.value || ''}
+          value={value || ''}
           onChange={this.handleChange}
           onFocus={this.handleFocus}
-          className='form-input-text'
-          placeholder={this.props.placeholder}
-          id={this.props.id}
+          className={classes}
+          placeholder={placeholder}
+          id={id}
         />
       </div>
     );
   }
 
+}
+
+InputText.defaultProps = {
+  placeholder: null,
+  handleError: null,
+  handleFocus: null,
+  id: null,
+  value: null,
+  invert: false,
+  type: 'text'
 }
 
 InputText.propTypes = {
@@ -46,7 +64,9 @@ InputText.propTypes = {
   handleError: PropTypes.func,
   handleFocus: PropTypes.func,
   id: PropTypes.string,
-  value: PropTypes.string
+  value: PropTypes.string,
+  invert: PropTypes.bool,
+  type: PropTypes.string,
 };
 
 export default InputText;

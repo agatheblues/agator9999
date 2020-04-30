@@ -5,7 +5,7 @@
   flex-grow: 1;
   flex-direction: column;
 
-  input {
+  .form-input-text {
     display: inline-block; // for safari
     flex: 1;
 
@@ -20,5 +20,10 @@
     &:focus {
       outline: none;
     }
+  }
+
+  .form-input-text--inverted {
+    background: $white;
+    border: none;
   }
 }
