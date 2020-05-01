@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { HashRouter, Route, Switch, Redirect } from 'react-router-dom';
 import { UserContext } from './context/UserContext';
-import { getUser } from './helpers/ApiHelper';
+import { getUser, resetInstance } from './helpers/ApiHelper';
 import ArtistPage from './pages/ArtistPage';
 import ArtistMergePage from './pages/ArtistMergePage';
 import ArtistUnmergePage from './pages/ArtistUnmergePage';
@@ -27,7 +27,7 @@ class App extends React.Component {
       logout: this.logout.bind(this)
     };
 
-    // this.logout = this.logout.bind(this);
+    this.login = this.login.bind(this);
     this.renderPage = this.renderPage.bind(this);
     this.getUser = this.getUser.bind(this);
   }
@@ -55,14 +55,21 @@ class App extends React.Component {
     });
   }
 
-  handleGetUserError(error) {
+  handleGetUserError() {
     this.setState({
       loaded: true
     });
   }
 
+  login(token) {
+    localStorage.setItem("token", token);
+    resetInstance();
+    this.getUser();
+  }
+
   logout() {
     localStorage.removeItem("token");
+    resetInstance();
     this.setState({
       user: null
     });
@@ -90,7 +97,7 @@ class App extends React.Component {
       <HashRouter>
         <Switch>
           {!this.state.user &&
-            <Route render={() => <AuthPage loginCallback={this.getUser} />} />
+            <Route render={() => <AuthPage login={this.login} />} />
           }
           {this.state.user &&
             <UserContext.Provider value={this.state}>

@@ -16,13 +16,13 @@ class AuthPage extends React.Component {
       showLogin: true,
     };
 
-    this.login = this.login.bind(this);
+    this.getToken = this.getToken.bind(this);
     this.createUser = this.createUser.bind(this);
     this.showSignUp = this.showSignUp.bind(this);
     this.showLogin = this.showLogin.bind(this);
   }
 
-  login(email, password) {
+  getToken(email, password) {
     getToken({
       auth: {
         email: email,
@@ -60,8 +60,7 @@ class AuthPage extends React.Component {
 
   handleSubmitSuccess(response) {
     const { jwt } = response;
-    localStorage.setItem("token", jwt);
-    this.props.loginCallback();
+    this.props.login(jwt);
   }
 
   showSignUp(e) {
@@ -101,7 +100,7 @@ class AuthPage extends React.Component {
           <div className='login-content'>
             <h1>Welcome to {`${config.owner}`}&#39;s music library.</h1>
             <div className='login-form-container'>
-              {showLogin && <Login handleLogin={this.login} showSignUp={this.showSignUp} />}
+              {showLogin && <Login handleLogin={this.getToken} showSignUp={this.showSignUp} />}
               {!showLogin && <SignUp handleSignUp={this.createUser} showLogin={this.showLogin} />}
               {message &&
                 <Message message={message} error={error} />
@@ -116,7 +115,7 @@ class AuthPage extends React.Component {
 }
 
 AuthPage.propTypes = {
-  loginCallback: PropTypes.func.isRequired
+  login: PropTypes.func.isRequired
 };
 
 export default AuthPage;

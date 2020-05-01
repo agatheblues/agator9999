@@ -17,12 +17,22 @@ export const sourceList = [
  * Create axios instance for Discogs API requests
  * @return {func}              Axios instance
  */
-const getInstance = () => axios.create({
-  baseURL: 'https://api.discogs.com/',
-  headers: {
-    'Authorization': `Discogs key=${discogsConfig.CONSUMER_KEY}, secret=${discogsConfig.CONSUMER_SECRET}`
-  }
-});
+let discogsInstance = null;
+
+const getInstance = () => {
+  if (discogsInstance) return discogsInstance;
+  createInstance();
+  return discogsInstance;
+}
+
+const createInstance = () => {
+  discogsInstance = axios.create({
+    baseURL: 'https://api.discogs.com/',
+    headers: {
+      'Authorization': `Discogs key=${discogsConfig.CONSUMER_KEY}, secret=${discogsConfig.CONSUMER_SECRET}`
+    }
+  });
+}
 
 /**
  * Get source from source array
