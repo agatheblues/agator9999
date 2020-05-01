@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import PropTypes from 'prop-types';
+import { UserContext } from '../context/UserContext';
 import CardGrid from '../components/CardGrid/CardGrid';
 import ProfileCard from '../components/ProfileCard/ProfileCard';
 
@@ -11,13 +11,14 @@ class HomePage extends React.Component {
     this.handleClickLogout = this.handleClickLogout.bind(this);
   }
 
-  handleClickLogout(e) {
-    e.preventDefault();
-    this.props.logout();
+  handleClickLogout(logout) {
+    return (e) => {
+      e.preventDefault();
+      logout();
+    }
   }
 
-  renderAdminMenu(admin) {
-    if (!admin) return null;
+  renderAdminMenu() {
     return (
       <nav>
         <ul className='menu-wrapper'>
@@ -29,30 +30,24 @@ class HomePage extends React.Component {
   }
 
   render() {
-    const { user: { imgUrl, username }, admin } = this.props;
-
     return (
       <div className='content-container'>
-        <div>
-          <div className='menu-container'>
-            <ProfileCard
-              imgUrl={imgUrl}
-              name={username}
-              handleClick={this.handleClickLogout}
-            />
-            {this.renderAdminMenu(admin)}
-          </div>
-          <CardGrid />
-        </div>
+        <UserContext.Consumer>
+          {({ user, admin, logout }) =>
+            <div className='menu-container'>
+              <ProfileCard
+                imgUrl={user.imgUrl}
+                name={user.username}
+                handleClick={this.handleClickLogout(logout)}
+              />
+              {admin && this.renderAdminMenu()}
+            </div>
+          }
+        </UserContext.Consumer>
+        <CardGrid />
       </div>
     );
   }
 }
-
-HomePage.propTypes = {
-  user: PropTypes.object.isRequired,
-  admin: PropTypes.bool.isRequired,
-  logout: PropTypes.func.isRequired
-};
 
 export default HomePage;

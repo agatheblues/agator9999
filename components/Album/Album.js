@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { ArtistContext } from '../../context/ArtistContext';
+import { UserContext } from '../../context/UserContext';
 import Message from '../Message/Message';
 import SpotifyUpdateAlbum from '../SpotifyUpdateAlbum/SpotifyUpdateAlbum';
 import CopyToClipboard from '../CopyToClipboard/CopyToClipboard';
@@ -81,7 +82,8 @@ class Album extends React.Component {
     });
   }
 
-  handleRemoveSubmit() {
+  handleRemoveSubmit(e) {
+    e.preventDefault();
     this.props.deleteAlbum(this.props.album.id)
   }
 
@@ -274,9 +276,13 @@ Album.propTypes = {
 
 const AlbumConsumer = (props) => {
   return (
-    <ArtistContext.Consumer>
-      {({ deleteAlbum }) => <Album {...props} {...{ deleteAlbum }} />}
-    </ArtistContext.Consumer>
+    <UserContext.Consumer>
+      {({ admin }) =>
+        <ArtistContext.Consumer>
+          {({ deleteAlbum }) => <Album {...props} {...{ deleteAlbum }} {...{ admin }} />}
+        </ArtistContext.Consumer>
+      }
+    </UserContext.Consumer>
   );
 }
 

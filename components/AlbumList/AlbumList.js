@@ -5,7 +5,7 @@ import Button from '../Button/Button';
 import EmptyList from '../EmptyList/EmptyList';
 
 
-const AlbumList = ({ albums, admin }) => {
+const AlbumList = ({ albums }) => {
   if (albums.length === 0) {
     return (
       <div className='content-container'>
@@ -18,13 +18,12 @@ const AlbumList = ({ albums, admin }) => {
   }
 
   return albums.map((album, index) =>
-    <Album key={index} album={album} admin={admin} />
+    <Album key={index} album={album} />
   );
 }
 
 AlbumList.propTypes = {
-  albums: PropTypes.array.isRequired,
-  admin: PropTypes.bool.isRequired
+  albums: PropTypes.array.isRequired
 };
 
 export default AlbumList;

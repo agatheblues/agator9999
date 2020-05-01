@@ -80,16 +80,16 @@ class App extends React.Component {
   }
 
   renderPage(Page, adminPage = true) {
-    return (props) => (
-      <UserContext.Provider value={this.state}>
-        <UserContext.Consumer>
-          {({ user, admin, logout }) => {
-            if (adminPage && !admin) return <Redirect to="/404" />;
-            return <Page {...props} user={user} admin={admin} logout={logout} />;
-          }}
-        </UserContext.Consumer>
-      </UserContext.Provider>
-    )
+    return (props) => {
+      const { admin } = this.state;
+      if (adminPage && !admin) return <Redirect to="/404" />;
+
+      return (
+        <UserContext.Provider value={this.state}>
+          <Page {...props} />
+        </UserContext.Provider>
+      );
+    }
   }
 
   render() {

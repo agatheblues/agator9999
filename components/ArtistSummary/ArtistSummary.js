@@ -1,5 +1,6 @@
 import React from 'react';
 import { ArtistContext } from '../../context/ArtistContext';
+import { UserContext } from '../../context/UserContext';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 require('./ArtistSummary.scss');
@@ -38,7 +39,7 @@ const renderMergeButton = (spotify_id, discogs_id, id) => {
   );
 };
 
-const ArtistSummary = (artist, admin) => {
+const ArtistSummary = (artist, admin, showArtistDeleted) => {
   const { id, img_url, total_albums, total_tracks, name, discogs_id, spotify_id } = artist;
 
   return (
@@ -65,14 +66,19 @@ const ArtistSummary = (artist, admin) => {
 
 ArtistSummary.propTypes = {
   artist: PropTypes.object.isRequired,
-  admin: PropTypes.bool.isRequired
+  admin: PropTypes.bool.isRequired,
+  showArtistDeleted: PropTypes.bool.isRequired
 };
 
-const ArtistSummaryConsumer = ({ admin }) => {
+const ArtistSummaryConsumer = ({ showArtistDeleted }) => {
   return (
-    <ArtistContext.Consumer>
-      {({ artist }) => ArtistSummary(artist, admin)}
-    </ArtistContext.Consumer>
+    <UserContext.Consumer>
+      {({ admin }) =>
+        <ArtistContext.Consumer>
+          {({ artist }) => ArtistSummary(artist, admin, showArtistDeleted)}
+        </ArtistContext.Consumer>
+      }
+    </UserContext.Consumer>
   );
 };
 
