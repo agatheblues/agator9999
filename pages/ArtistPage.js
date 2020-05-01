@@ -9,7 +9,7 @@ import AlbumList from '../components/AlbumList/AlbumList';
 import PageNotFound from '../components/PageNotFound/PageNotFound';
 import Message from '../components/Message/Message';
 import Loading from '../components/Loading/Loading';
-
+import EmptyList from '../components/EmptyList/EmptyList';
 
 class ArtistPage extends React.Component {
 
@@ -30,7 +30,7 @@ class ArtistPage extends React.Component {
   getCurrentArtist(id) {
     getArtist(id)
       .then((response) => this.handleGetArtistSuccess(response))
-      .catch(() => this.handleGetArtistError());
+      .catch((error) => this.handleGetArtistError(error));
   }
 
   /**
@@ -67,12 +67,18 @@ class ArtistPage extends React.Component {
     });
   }
 
-  handleGetArtistError() {
-    this.setState({
-      error: true,
-      loaded: true,
-      message: 'Oops! There was a problem while retrieving data for this artist.'
-    });
+  handleGetArtistError(error) {
+    if (error.response.status === 404) {
+      this.setState({
+        loaded: true
+      })
+    } else {
+      this.setState({
+        error: true,
+        loaded: true,
+        message: 'Oops! There was a problem while retrieving data for this artist.'
+      });
+    }
   }
 
   handleRemoveArtistSuccess() {
@@ -99,13 +105,17 @@ class ArtistPage extends React.Component {
     }
   }
 
+  renderDeletedArtist() {
+    return (
+      <div className='content-container'>
+        <EmptyList message='This artist does not have any albums.' />
+        <Link to='/'>This artist was deleted. Go back to artists</Link>
+      </div>
+    );
+  }
   render() {
     const { showArtistDeleted, loaded, error, artist, message } = this.state;
-
-    // TODO: when artist got deleted, show a blured overlay with a link back to artists
-    if (showArtistDeleted) {
-      return <Link to='/'>This artist was deleted. Go back to artists</Link>;
-    }
+    console.log(this.state);
 
     if (!loaded) {
       return <Loading fullPage={true} label={'Loading artist...'} />;
@@ -125,8 +135,9 @@ class ArtistPage extends React.Component {
 
     return (
       <ArtistContext.Provider value={this.state}>
-        <ArtistSummary admin={this.props.admin} />
-        <AlbumList albums={artist.albums} admin={this.props.admin} />
+        <ArtistSummary showArtistDeleted={showArtistDeleted} />
+        {!showArtistDeleted && <AlbumList albums={artist.albums} />}
+        {showArtistDeleted && this.renderDeletedArtist()}
       </ArtistContext.Provider>
     );
   }
@@ -137,8 +148,7 @@ ArtistPage.propTypes = {
     params: PropTypes.shape({
       id: PropTypes.node,
     }).isRequired,
-  }).isRequired,
-  admin: PropTypes.bool.isRequired
+  }).isRequired
 };
 
 export default ArtistPage;
