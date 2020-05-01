@@ -1,20 +1,29 @@
 import axios from 'axios';
 import { databaseConfig } from '../config';
 
-// const TOKEN = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1ODg2MjAzOTIsInN1YiI6Mn0.nS3QE7taSGpOrouGaRfeV1CD-d1qKt8qfK3eB-gMxbE';
 /**
  * Create axios instance for Database requests
- * @return {func}              Axios instance
+ * @return {func}              Axios apiInstance
  */
-function getInstance() {
+let apiInstance = null;
+
+const getInstance = () => {
+  if (apiInstance) return apiInstance;
+  createInstance();
+  return apiInstance;
+}
+
+const createInstance = () => {
   const token = localStorage.token;
 
-  return axios.create({
+  apiInstance = axios.create({
     baseURL: databaseConfig.databaseURL,
     timeout: 10000,
     headers: { Authorization: `Bearer ${token}` }
   });
 }
+
+export const resetInstance = () => { apiInstance = null; };
 
 /**
  * Get a token by passing an email and password
