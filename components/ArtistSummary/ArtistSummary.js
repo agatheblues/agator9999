@@ -1,4 +1,5 @@
 import React from 'react';
+import classNames from 'classnames';
 import { ArtistContext } from '../../context/ArtistContext';
 import { UserContext } from '../../context/UserContext';
 import PropTypes from 'prop-types';
@@ -41,22 +42,31 @@ const renderMergeButton = (spotify_id, discogs_id, id) => {
 
 const ArtistSummary = (artist, admin, showArtistDeleted) => {
   const { id, img_url, total_albums, total_tracks, name, discogs_id, spotify_id } = artist;
+  const artistBannerWrapper = classNames({
+    'artist-banner-wrapper': true,
+    'artist-banner-wrapper--deleted': showArtistDeleted
+  });
+
+  const artistBannerContentWrapper = classNames({
+    'artist-banner-content-wrapper': true,
+    'artist-banner-content-wrapper--deleted': showArtistDeleted
+  });
 
   return (
     <div className='artist-banner-container' style={{ 'backgroundImage': `url('${img_url}')` }}>
-      <div className='artist-banner-wrapper'>
+      <div className={artistBannerWrapper}>
         <div className='artist-banner-back-wrapper'>
           <div className='artist-banner-back content-container'>
             <Link to='/'>&#9839; Back to library</Link>
-            {admin && renderMergeButton(discogs_id, spotify_id, id)}
+            {admin && !showArtistDeleted && renderMergeButton(discogs_id, spotify_id, id)}
           </div>
         </div>
 
-        <div className='artist-banner-content-wrapper'>
+        <div className={artistBannerContentWrapper}>
           <div className='artist-banner-content content-container'>
             <h1>{name}</h1>
             <p>{`${total_albums} albums, ${total_tracks} tracks`}</p>
-            {renderListeningUri(spotify_id)}
+            {!showArtistDeleted && renderListeningUri(spotify_id)}
           </div>
         </div>
       </div>

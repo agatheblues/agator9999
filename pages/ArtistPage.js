@@ -1,5 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { getArtist, deleteAlbum } from '../helpers/ApiHelper';
 import { updateAlbumWithDiscogs } from '../helpers/DataHelper';
@@ -108,14 +107,12 @@ class ArtistPage extends React.Component {
   renderDeletedArtist() {
     return (
       <div className='content-container'>
-        <EmptyList message='This artist does not have any albums.' />
-        <Link to='/'>This artist was deleted. Go back to artists</Link>
+        <EmptyList message='This artist was deleted: it does not have any album.' link={'/'} linkText={'Back to library'} />
       </div>
     );
   }
   render() {
     const { showArtistDeleted, loaded, error, artist, message } = this.state;
-    console.log(this.state);
 
     if (!loaded) {
       return <Loading fullPage={true} label={'Loading artist...'} />;
