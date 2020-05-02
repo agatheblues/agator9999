@@ -41,7 +41,7 @@ export const getUser = () => getInstance().get('/users/current');
 export const createUser = (data) => getInstance().post('/users', data);
 
 /**
-* Get list of all artists stored in Firebase
+* Get list of all artists
 * @return {Promise}
 */
 export const getArtists = () => getInstance().get('/artists');
