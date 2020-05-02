@@ -1,12 +1,23 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { getArtists } from '../helpers/ApiHelper';
 import { UserContext } from '../context/UserContext';
 import CardGrid from '../components/CardGrid/CardGrid';
 import ProfileCard from '../components/ProfileCard/ProfileCard';
+import Message from '../components/Message/Message';
+import Loading from '../components/Loading/Loading';
 
 class HomePage extends React.Component {
   constructor() {
     super();
+
+    this.state = {
+      artists: [],
+      totalArtists: 0,
+      totalAlbums: 0,
+      loaded: false,
+      error: false
+    };
 
     this.handleClickLogout = this.handleClickLogout.bind(this);
   }
@@ -16,6 +27,31 @@ class HomePage extends React.Component {
       e.preventDefault();
       logout();
     }
+  }
+
+  getArtistsList() {
+    getArtists()
+      .then((response) => this.handleSuccess(response))
+      .catch(() => this.handleError());
+  }
+
+  handleSuccess(response) {
+    const { data: { artists, total_albums, total_artists } } = response;
+
+    this.setState({
+      artists: artists,
+      totalArtists: total_artists,
+      totalAlbums: total_albums,
+      loaded: true,
+      error: false
+    });
+  }
+
+  handleError() {
+    this.setState({
+      loaded: true,
+      error: true
+    });
   }
 
   renderAdminMenu() {
@@ -29,7 +65,13 @@ class HomePage extends React.Component {
     );
   }
 
+  componentDidMount() {
+    this.getArtistsList();
+  }
+
   render() {
+    const { loaded, error, artists, totalAlbums, totalArtists } = this.state;
+
     return (
       <div className='content-container'>
         <UserContext.Consumer>
@@ -44,7 +86,9 @@ class HomePage extends React.Component {
             </div>
           }
         </UserContext.Consumer>
-        <CardGrid />
+        {!loaded && !error && <Loading fullPage={false} label={'Loading artists...'} />}
+        {loaded && error && <Message message='Oops! Something went wrong while loading your library' error={error} />}
+        {loaded && !error && <CardGrid artists={artists} totalAlbums={totalAlbums} totalArtists={totalArtists} />}
       </div>
     );
   }
