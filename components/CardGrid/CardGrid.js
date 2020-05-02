@@ -1,8 +1,6 @@
 import React from 'react';
-import { getArtists } from '../../helpers/ApiHelper';
 import Card from '../Card/Card';
-import Message from '../Message/Message';
-import Loading from '../Loading/Loading';
+import PropTypes from 'prop-types';
 import Search from '../Search/Search';
 import SortBy from '../SortBy/SortBy';
 import EmptyList from '../EmptyList/EmptyList';
@@ -10,16 +8,13 @@ require('./CardGrid.scss');
 
 class CardGrid extends React.Component {
 
-  constructor() {
+  constructor(props) {
     super();
 
     this.state = {
-      artists: [],
-      visibleArtists: [],
-      loaded: false,
-      error: false,
-      albumCount: 0,
-      artistCount: 0,
+      visibleArtists: props.artists,
+      albumCount: props.totalAlbums,
+      artistCount: props.totalArtists,
       activeSort: 'recently'
     };
 
@@ -28,38 +23,12 @@ class CardGrid extends React.Component {
     this.sortArtistRecently = this.sortArtistRecently.bind(this);
   }
 
-  getArtistsList() {
-    getArtists()
-      .then((response) => this.handleSuccess(response))
-      .catch((error) => this.handleError());
-  }
-
-  handleSuccess(response) {
-    const { data: { artists, total_albums, total_artists } } = response;
-
-    this.setState({
-      artists: artists,
-      visibleArtists: artists,
-      artistCount: total_artists,
-      albumCount: total_albums,
-      loaded: true,
-      error: false
-    });
-  }
-
-  handleError() {
-    this.setState({
-      loaded: true,
-      error: true
-    });
-  }
-
   /**
    * Filters list of artists by artist name
    * @param  {String} input User search input
    */
   filterArtists(input) {
-    const filteredArtists = this.state.artists.filter((artist) => {
+    const filteredArtists = this.props.artists.filter((artist) => {
       return artist.name.toLowerCase().indexOf(input.toLowerCase()) != -1;
     });
     const albumCount = filteredArtists.reduce((acc, artist) => acc + artist.total_albums, 0)
@@ -108,14 +77,11 @@ class CardGrid extends React.Component {
     });
   }
 
-  componentDidMount() {
-    this.getArtistsList();
-  }
-
   renderCards() {
-    const { artists, loaded, error, artistCount, visibleArtists } = this.state;
+    const { artistCount, visibleArtists } = this.state;
+    const { artists } = this.props;
 
-    if ((artists.length != 0) && loaded && !error && (artistCount != 0)) {
+    if ((artists.length != 0) && (artistCount != 0)) {
       return (
         <div className='grid-container'>
           {
@@ -127,20 +93,12 @@ class CardGrid extends React.Component {
       );
     }
 
-    if ((artists.length != 0) && loaded && !error && (artistCount == 0)) {
+    if ((artists.length != 0) && (artistCount == 0)) {
       return <EmptyList message={'No results!'} />;
     }
 
-    if ((artists.length == 0) && loaded && !error) {
+    if (artists.length == 0) {
       return <EmptyList message={'There is 0 artist in your library.'} />;
-    }
-
-    if (!loaded && !error) {
-      return <Loading fullPage={false} label={'Loading artists...'} />;
-    }
-
-    if (loaded && error) {
-      return (<Message message='Oops! Something went wrong while loading your library' error={error} />);
     }
   }
 
@@ -178,5 +136,11 @@ class CardGrid extends React.Component {
     );
   }
 }
+
+CardGrid.propTypes = {
+  artists: PropTypes.array.isRequired,
+  totalArtists: PropTypes.number.isRequired,
+  totalAlbums: PropTypes.number.isRequired
+};
 
 export default CardGrid;
