@@ -126,7 +126,6 @@ class Album extends React.Component {
    * @return {String} HTML Markup
    */
   renderDiscogsForm(albumId) {
-    // TODO: Link to discogs ability (PATCH album)
     return (
       <div>
         <div className='album-minor-details'>
@@ -221,8 +220,7 @@ class Album extends React.Component {
     );
   }
 
-  // TODO: Update album when discogs has been added
-  componentWillUpdate(nextProps, nextState) {
+  componentWillUpdate(nextProps) {
     if (!this.props.album) return;
 
     // If album has received a data update
