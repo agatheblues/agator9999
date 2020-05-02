@@ -5,7 +5,6 @@ import Message from '../Message/Message';
 import InputText from '../InputText/InputText';
 import Dropdown from '../Dropdown/Dropdown';
 import * as dg from '../../helpers/DiscogsHelper';
-import * as fb from '../../helpers/FirebaseHelper';
 import { checkDiscogsUri } from '../../helpers/ErrorHelper';
 
 class SpotifyUpdateAlbum extends React.Component {

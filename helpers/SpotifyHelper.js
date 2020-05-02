@@ -1,6 +1,5 @@
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
-import * as fb from './FirebaseHelper';
 import { splitArrayInChunks } from './utils';
 import { spotifyConfig } from '../config';
 
