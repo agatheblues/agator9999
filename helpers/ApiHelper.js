@@ -36,6 +36,11 @@ export const getToken = (data) => getInstance().post('/user_token', data);
 export const getUser = () => getInstance().get('/users/current');
 
 /**
+ * Get all users
+ */
+export const getUsers = () => getInstance().get('/users');
+
+/**
  * Create a user
  */
 export const createUser = (data) => getInstance().post('/users', data);
