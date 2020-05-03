@@ -58,6 +58,7 @@ class HomePage extends React.Component {
     return (
       <nav>
         <ul className='menu-wrapper'>
+          <li><Link to='/admin'>&#9872; Administrate</Link></li>
           <li><Link to='/spotify/sync'>&#8635; Sync. Spotify Albums</Link></li>
           <li><Link to='/album/create'>&#xFF0B; New album</Link></li>
         </ul>

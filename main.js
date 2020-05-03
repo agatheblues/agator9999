@@ -10,6 +10,7 @@ import CreateAlbumPage from './pages/CreateAlbumPage';
 import SpotifySyncPage from './pages/SpotifySyncPage';
 import HomePage from './pages/HomePage';
 import AuthPage from './pages/AuthPage';
+import AdminPage from './pages/AdminPage';
 import Loading from './components/Loading/Loading';
 import PageNotFound from './components/PageNotFound/PageNotFound';
 import SpotifyLogin from './components/SpotifyLogin/SpotifyLogin';
@@ -107,6 +108,7 @@ class App extends React.Component {
           <Route exact path="/artist/:id" render={this.renderPage(ArtistPage, false)} />
           <Route exact path="/artist/:id/merge" render={this.renderPage(ArtistMergePage)} />
           <Route exact path="/artist/:id/unmerge" render={this.renderPage(ArtistUnmergePage)} />
+          <Route exact path="/admin" render={this.renderPage(AdminPage)} />
           <Route exact path="/404" component={PageNotFound} />
           <Route path="*" component={PageNotFound} />
         </Switch>

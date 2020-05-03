@@ -1,0 +1,26 @@
+@import "variables";
+
+.table-container {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table-container thead {
+  font-weight: 600;
+  line-height: 1.1;
+  color: $black;
+  border-bottom: solid 1px $orange;
+  font-size: 14px;
+}
+
+.table-container th {
+  text-align: left;
+}
+
+.table-container tbody {
+  color: $black;
+}
+
+.table-container td, th {
+  padding: 10px;
+}
