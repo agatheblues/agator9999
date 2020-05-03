@@ -50,6 +50,11 @@ class AuthPage extends React.Component {
         error: true,
         message: 'Email or password not matching.'
       });
+    } else if (response.status === 401) {
+      this.setState({
+        error: true,
+        message: 'Sorry! An admin has to approve your account before you can login.'
+      });
     } else {
       this.setState({
         error: true,
