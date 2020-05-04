@@ -1,7 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import Button from '../Button/Button';
-import Message from '../Message/Message';
 require('./Admin.scss');
 
 class Admin extends React.Component {
@@ -9,24 +7,17 @@ class Admin extends React.Component {
   constructor() {
     super();
 
-    this.state = {
-      error: false,
-      message: null
-    };
+    this.handleConfirmClick = this.handleConfirmClick.bind(this);
   }
 
   formatDate(dateString) {
     return new Date(dateString).toLocaleString();
   }
 
-  handleSubmit(e) {
+  handleConfirmClick(e) {
     e.preventDefault();
-
-    // this.props.updateUser(this.props.artist, data);
-  }
-
-  handleDeleteClick() {
-
+    const id = e.target.id;
+    this.props.confirmUser(id);
   }
 
   renderUser(id, username, email, role, confirmedAt) {
@@ -36,25 +27,25 @@ class Admin extends React.Component {
         <td>{username}</td>
         <td>{email}</td>
         <td>{role}</td>
-        <td>{confirmedAt == null ? 'unconfirmed' : this.formatDate(confirmedAt)}</td>
+        <td>{confirmedAt == null ? null : this.formatDate(confirmedAt)}</td>
         <td>
-          <a href='' className='unmerge-button' id={id} onClick={this.handleDeleteClick}>{'\u{2A2F}'}</a>
+          {confirmedAt == null &&
+            <a href='' id={id} onClick={this.handleConfirmClick}>{'\u{02713}'}&nbsp;Confirm</a>
+          }
         </td>
       </tr>
     );
   }
 
   renderUsers(users) {
-    console.log(users)
     return users.map(({ id, username, email, role, confirmed_at }) => this.renderUser(id, username, email, role, confirmed_at))
   }
 
   render() {
     const { users } = this.props;
-    const { message, error } = this.state;
 
     return (
-      <div className='form-container'>
+      <div>
         <table className='table-container'>
           <thead>
             <tr>
@@ -70,7 +61,6 @@ class Admin extends React.Component {
             {this.renderUsers(users)}
           </tbody>
         </table>
-        {message && <Message message={message} error={error} />}
         <p className='note'>A user cannot login until an admin has confirmed the user.</p>
       </div>
     );
@@ -79,7 +69,7 @@ class Admin extends React.Component {
 
 Admin.propTypes = {
   users: PropTypes.array.isRequired,
-  // updateArtist: PropTypes.func.isRequired
+  confirmUser: PropTypes.func.isRequired
 };
 
 
