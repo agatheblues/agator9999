@@ -26,7 +26,7 @@ class AdminPage extends React.Component {
   }
 
   confirmUser(id) {
-    updateUser(id, { confirmedAt: new Date(Date.now()) })
+    updateUser(id, { confirmed_at: new Date(Date.now()) })
       .then(() => getUsers())
       .then(({ data }) => this.handleUpdateUserSuccess(data))
       .catch(() => this.handleUpdateUserError(error))
