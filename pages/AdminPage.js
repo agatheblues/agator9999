@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { getUsers } from '../helpers/ApiHelper';
+import { getUsers, updateUser } from '../helpers/ApiHelper';
 import Loading from '../components/Loading/Loading';
 import Admin from '../components/Admin/Admin';
 import Message from '../components/Message/Message';
@@ -14,8 +14,9 @@ class AdminPage extends React.Component {
       error: false,
       message: null,
       loaded: false,
-      updateUser: this.updateUser.bind(this)
     };
+
+    this.confirmUser = this.confirmUser.bind(this);
   }
 
   getUsers() {
@@ -24,10 +25,11 @@ class AdminPage extends React.Component {
       .catch(() => this.handleGetUsersError())
   }
 
-  updateUser(user) {
-    updateArtist(user.id, {})
+  confirmUser(id) {
+    updateUser(id, { confirmedAt: new Date(Date.now()) })
+      .then(() => getUsers())
       .then(({ data }) => this.handleUpdateUserSuccess(data))
-      .catch(() => this.handleUpdateUserError())
+      .catch(() => this.handleUpdateUserError(error))
   }
 
   handleGetUsersError() {
@@ -52,11 +54,12 @@ class AdminPage extends React.Component {
     });
   }
 
-  handleUpdateUserSuccess(user) {
-    console.log('success!')
-    // this.setState({
-    //   users: users
-    // });
+  handleUpdateUserSuccess(data) {
+    this.setState({
+      users: data.users,
+      error: false,
+      message: 'User updated.'
+    });
   }
 
   componentDidMount() {
@@ -67,14 +70,6 @@ class AdminPage extends React.Component {
     const { users, loaded, error, message } = this.state;
 
     if (!loaded) return <Loading fullPage={true} label={'Loading users...'} />;
-
-    if (error) {
-      return (
-        <div className='content-container'>
-          <Message message={message} error={error} />
-        </div>
-      );
-    }
 
     return (
       <div className='content-container'>
@@ -87,7 +82,10 @@ class AdminPage extends React.Component {
             <li id='users' className={'active'}>Users</li>
           </ul>
         </nav>
-        <Admin users={users} />
+        <div className='form-container'>
+          <Admin users={users} confirmUser={this.confirmUser} />
+          {message && <Message message={message} error={error} />}
+        </div>
       </div>
     );
   }

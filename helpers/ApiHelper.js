@@ -46,6 +46,11 @@ export const getUsers = () => getInstance().get('/users');
 export const createUser = (data) => getInstance().post('/users', data);
 
 /**
+ * Update a user
+ */
+export const updateUser = (id, data) => getInstance().patch(`/users/${id}`, data);
+
+/**
 * Get list of all artists
 * @return {Promise}
 */
