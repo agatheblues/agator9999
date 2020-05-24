@@ -14,12 +14,3 @@ export const spotifyConfig = {
   'REDIRECT_URI': '',
   'SCOPE': 'user-read-private user-read-email user-library-read'
 };
-
-export const firebaseConfig = {
-  'apiKey': '',
-  'authDomain': '',
-  'databaseURL': '',
-  'projectId': '',
-  'storageBucket': '',
-  'messagingSenderId': ''
-};

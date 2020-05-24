@@ -3,36 +3,26 @@ import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 require('./Card.scss');
 
-
-function sourcesReducer(accumulator, currentValue, currentIndex, array) {
-  if (currentIndex == array.length - 1) {
-    return accumulator + ' ' + currentValue;
-  }
-
-  return accumulator + ' ' + currentValue + ',';
-}
-
-const Card = function({id, name, imgUrl, totalAlbums, sources}) {
-  let albums = (totalAlbums > 1) ? totalAlbums + ' albums' : totalAlbums + ' album';
-
-  let sourceString;
-  if (sources) {
-    sourceString = Object.keys(sources).reduce(sourcesReducer, 'Sources: ');
-  }
+const Card = function ({ id, name, imgUrl, totalAlbums, sources }) {
+  const albums = (totalAlbums > 1) ? totalAlbums + ' albums' : totalAlbums + ' album';
+  const sourceString = sources ? Object.keys(sources)
+    .filter(key => sources[key])
+    .join(', ') : null;
+  const src = imgUrl ? imgUrl : '/static/images/missing.jpg';
 
   return (
     <div className='card-container'>
       <Link to={'/artist/' + id} className='card-link'>
         <div className='card-wrapper'>
-          <div className='card-image' style={{ 'backgroundImage': `url('${imgUrl}'), url('/static/images/loading-artist.png')`}}>
+          <div className='card-image' style={{ 'backgroundImage': `url('${src}'), url('/static/images/loading-artist.png')` }}>
           </div>
           <div className='card-details'>
             <p>{name}</p>
             {albums &&
               <p>{albums}</p>
             }
-            {sources &&
-              <p>{sourceString}</p>
+            {sourceString &&
+              <p className='capitalize'>{sourceString}</p>
             }
           </div>
         </div>
@@ -42,7 +32,7 @@ const Card = function({id, name, imgUrl, totalAlbums, sources}) {
 };
 
 Card.propTypes = {
-  id: PropTypes.string.isRequired,
+  id: PropTypes.number.isRequired,
   name: PropTypes.string.isRequired,
   totalAlbums: PropTypes.number,
   imgUrl: PropTypes.string,

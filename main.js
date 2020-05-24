@@ -1,163 +1,118 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { HashRouter, Route, Switch, Redirect } from 'react-router-dom';
-import { init, getUser, getFbSignOut, getAuth } from './helpers/FirebaseHelper.js';
-import SpotifySync from './components/SpotifySync/SpotifySync';
-import Home from './components/Home/Home';
-import SpotifyLogin from './components/SpotifyLogin/SpotifyLogin';
-import CreateAlbum from './components/CreateAlbum/CreateAlbum';
-import Artist from './components/Artist/Artist';
-import ArtistMerge from './components/ArtistMerge/ArtistMerge';
-import ArtistUnmerge from './components/ArtistUnmerge/ArtistUnmerge';
-import FirebaseSignIn from './components/FirebaseSignIn/FirebaseSignIn';
+import { UserContext } from './context/UserContext';
+import { getUser, resetInstance } from './helpers/ApiHelper';
+import ArtistPage from './pages/ArtistPage';
+import ArtistMergePage from './pages/ArtistMergePage';
+import ArtistUnmergePage from './pages/ArtistUnmergePage';
+import CreateAlbumPage from './pages/CreateAlbumPage';
+import SpotifySyncPage from './pages/SpotifySyncPage';
+import HomePage from './pages/HomePage';
+import AuthPage from './pages/AuthPage';
+import AdminPage from './pages/AdminPage';
 import Loading from './components/Loading/Loading';
 import PageNotFound from './components/PageNotFound/PageNotFound';
+import SpotifyLogin from './components/SpotifyLogin/SpotifyLogin';
 
 require('./main.scss');
 
 class App extends React.Component {
-  constructor(props){
+  constructor(props) {
     super(props);
-
-    init();
 
     this.state = {
       user: null,
-      isAdmin: false,
-      loaded: false
+      admin: true,
+      loaded: false,
+      logout: this.logout.bind(this)
     };
 
-    this.setUserToState = this.setUserToState.bind(this);
-    this.logout = this.logout.bind(this);
-    this.renderHome = this.renderHome.bind(this);
-    this.renderSpotifySync = this.renderSpotifySync.bind(this);
-    this.renderSpotifyLogin = this.renderSpotifyLogin.bind(this);
-    this.renderCreateAlbum = this.renderCreateAlbum.bind(this);
-    this.renderArtist = this.renderArtist.bind(this);
-    this.renderArtistMerge = this.renderArtistMerge.bind(this);
-    this.renderArtistUnmerge = this.renderArtistUnmerge.bind(this);
+    this.login = this.login.bind(this);
+    this.renderPage = this.renderPage.bind(this);
+    this.getUser = this.getUser.bind(this);
   }
 
-  checkIfAdmin(data) {
-    let isAdmin = false;
-
-    data.forEach(function(item) {
-      isAdmin = item.val().isAdmin;
-    });
-
-    return isAdmin;
-  }
-
-  setUserToState(user, data) {
+  getUser() {
     this.setState({
-      user,
+      loaded: false
+    }, () =>
+      getUser()
+        .then(({ data }) => this.handleGetUserSuccess(data))
+        .catch((error) => this.handleGetUserError(error))
+    );
+  }
+
+  handleGetUserSuccess(data) {
+    const { username, role } = data;
+
+    this.setState({
       loaded: true,
-      isAdmin: this.checkIfAdmin(data)
+      user: {
+        username: username,
+        imgUrl: 'https://placekitten.com/300/300'
+      },
+      admin: role === 'admin'
     });
   }
 
-
-  persistUserAuth() {
-    getAuth()
-      .onAuthStateChanged((user) => {
-        if (user) {
-          getUser(user.email)
-            .then((data) => this.setUserToState(user, data));
-        } else {
-          this.setState({
-            loaded: true
-          });
-        }
-      });
+  handleGetUserError() {
+    this.setState({
+      loaded: true
+    });
   }
 
+  login(token) {
+    localStorage.setItem("token", token);
+    resetInstance();
+    this.getUser();
+  }
 
   logout() {
-    getFbSignOut()
-      .then(() => {
-        this.setState({
-          user: null,
-          isAdmin: false,
-          loaded: true
-        });
-      });
+    localStorage.removeItem("token");
+    resetInstance();
+    this.setState({
+      user: null
+    });
   }
-
 
   componentDidMount() {
-    this.persistUserAuth();
+    this.getUser();
   }
 
+  renderPage(Page, adminPage = true) {
+    return (props) => {
+      const { admin } = this.state;
+      if (adminPage && !admin) return <Redirect to="/404" />;
 
-  renderHome() {
-    return <Home user={this.state.user} logout={this.logout} isAdmin={this.state.isAdmin}/>;
-  }
-
-
-  renderSpotifySync() {
-    if (!this.state.isAdmin) {
-      return <Redirect to="/404" />;
+      return (
+        <UserContext.Provider value={this.state}>
+          <Page {...props} />
+        </UserContext.Provider>
+      );
     }
-    return <SpotifySync />;
   }
-
-
-  renderSpotifyLogin() {
-    if (!this.state.isAdmin) {
-      return <Redirect to="/404" />;
-    }
-    return <SpotifyLogin />;
-  }
-
-
-  renderCreateAlbum() {
-    if (!this.state.isAdmin) {
-      return <Redirect to="/404" />;
-    }
-    return <CreateAlbum />;
-  }
-
-
-  renderArtist(props) {
-    return <Artist {...props} isAdmin={this.state.isAdmin} />;
-  }
-
-
-  renderArtistMerge(props) {
-    if (!this.state.isAdmin) {
-      return <Redirect to="/404" />;
-    }
-    return <ArtistMerge {...props} isAdmin={this.state.isAdmin} />;
-  }
-
-  renderArtistUnmerge(props) {
-    if (!this.state.isAdmin) {
-      return <Redirect to="/404" />;
-    }
-    return <ArtistUnmerge {...props} isAdmin={this.state.isAdmin} />;
-  }
-
 
   render() {
-
-    if (!this.state.loaded) return <Loading fullPage={true} label={'Loading...'}/>;
-    if (!this.state.user)   return <FirebaseSignIn />;
+    if (!this.state.loaded) return <Loading fullPage={true} label={'Loading...'} />;
+    if (!this.state.user) return <AuthPage login={this.login} />;
 
     return (
       <HashRouter>
         <Switch>
-          <Route exact path="/" render={this.renderHome}/>
-          <Route exact path="/spotify/sync" render={this.renderSpotifySync} />
-          <Route exact path="/spotify/login" render={this.renderSpotifyLogin} />
-          <Route path="/:access_token(access_token=.*)" render={this.renderSpotifyLogin} />
-          <Route exact path="/album/create" render={this.renderCreateAlbum} />
-          <Route exact path="/artist/:id" render={this.renderArtist}/>
-          <Route exact path="/artist/:id/merge" render={this.renderArtistMerge} />
-          <Route exact path="/artist/:id/unmerge" render={this.renderArtistUnmerge} />
+          <Route exact path="/" render={this.renderPage(HomePage, false)} />
+          <Route exact path="/spotify/sync" render={this.renderPage(SpotifySyncPage)} />
+          <Route exact path="/spotify/login" render={this.renderPage(SpotifyLogin)} />
+          <Route path="/:access_token(access_token=.*)" render={this.renderPage(SpotifyLogin)} />
+          <Route exact path="/album/create" render={this.renderPage(CreateAlbumPage)} />
+          <Route exact path="/artist/:id" render={this.renderPage(ArtistPage, false)} />
+          <Route exact path="/artist/:id/merge" render={this.renderPage(ArtistMergePage)} />
+          <Route exact path="/artist/:id/unmerge" render={this.renderPage(ArtistUnmergePage)} />
+          <Route exact path="/admin" render={this.renderPage(AdminPage)} />
           <Route exact path="/404" component={PageNotFound} />
-          <Route component={PageNotFound} />
+          <Route path="*" component={PageNotFound} />
         </Switch>
-      </HashRouter>
+      </HashRouter >
     );
   }
 }

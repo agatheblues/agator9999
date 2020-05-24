@@ -1,12 +1,11 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
-import SpotifyCreateAlbum from '../SpotifyCreateAlbum/SpotifyCreateAlbum';
-import DiscogsCreateAlbum from '../DiscogsCreateAlbum/DiscogsCreateAlbum';
+import SpotifyCreateAlbum from '../components/SpotifyCreateAlbum/SpotifyCreateAlbum';
+import DiscogsCreateAlbum from '../components/DiscogsCreateAlbum/DiscogsCreateAlbum';
 
-class CreateAlbum extends React.Component {
+class CreateAlbumPage extends React.Component {
 
-  constructor(props) {
+  constructor() {
     super();
     this.state = {
       source: 'spotify'
@@ -29,12 +28,12 @@ class CreateAlbum extends React.Component {
    */
   renderForm() {
     switch (this.state.source) {
-    case 'spotify':
-      return <SpotifyCreateAlbum />;
-    case 'discogs':
-      return <DiscogsCreateAlbum />;
-    default:
-      return <p>Oops! This platform does not exist.</p>;
+      case 'spotify':
+        return <SpotifyCreateAlbum />;
+      case 'discogs':
+        return <DiscogsCreateAlbum />;
+      default:
+        return <p>Oops! This platform does not exist.</p>;
     }
   }
 
@@ -54,7 +53,7 @@ class CreateAlbum extends React.Component {
         </nav>
 
         <div className='form-container'>
-          { this.renderForm() }
+          {this.renderForm()}
         </div>
       </div>
     );
@@ -62,4 +61,4 @@ class CreateAlbum extends React.Component {
 }
 
 
-export default CreateAlbum;
+export default CreateAlbumPage;

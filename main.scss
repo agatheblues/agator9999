@@ -95,6 +95,10 @@ a.link-button {
   padding: 10px 30px 10px 30px;
 }
 
+a.link-button--inverted {
+  color: $white;
+}
+
 a.icon:hover {
   text-decoration: none;
 }
@@ -227,7 +231,7 @@ ul.vertical-list {
 .form-row-container {
   display: flex;
   flex-wrap: wrap;
-  margin: 0 0 10px 0;
+  margin: 10px 0 10px 0;
 
   label {
     line-height: 1.8;

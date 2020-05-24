@@ -1,8 +1,7 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-import * as api from '../../helpers/SpotifyHelper';
+import { getAccessToken } from '../../helpers/SpotifyHelper';
 import * as dg from '../../helpers/DiscogsHelper';
-import * as fb from '../../helpers/FirebaseHelper';
+import { createSpotifyDiscogsAlbum } from '../../helpers/DataHelper';
 import Button from '../Button/Button';
 import SpotifyLogin from '../SpotifyLogin/SpotifyLogin';
 import Message from '../Message/Message';
@@ -11,23 +10,12 @@ import Dropdown from '../Dropdown/Dropdown';
 import Loading from '../Loading/Loading';
 import { checkSpotifyUri, checkDiscogsUri } from '../../helpers/ErrorHelper';
 
-
-function saveArtists(token, albumData) {
-  const artists = fb.formatArtists(albumData[0].artists, fb.formatSpotifyArtist);
-  const albumSummary = fb.formatSpotifySingleAlbumSummary(albumData[0]);
-  const id = albumData[0].id;
-
-  fb.updateOrSetArtistsFromSingleAlbum(artists, albumSummary, 'spotify', id)
-    .then(() => api.getArtistsImages(token, fb.getArtistIds(albumData[0].artists), 'spotify'));
-};
-
-
 class SpotifyCreateAlbum extends React.Component {
-  constructor(props) {
+  constructor() {
     super();
 
     // Get accessToken
-    this.accessToken = api.getAccessToken();
+    this.accessToken = getAccessToken();
 
     // set local state
     this.state = {
@@ -47,15 +35,6 @@ class SpotifyCreateAlbum extends React.Component {
     this.handleErrorReleaseType = this.handleErrorReleaseType.bind(this);
     this.handleValueFor = this.handleValueFor.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
-  }
-
-  /**
-   * Extract album Spotify Id from spotify URI
-   * @param  {String} s Spotify URI
-   * @return {String}   Spotify ID
-   */
-  getSpotifyId(s) {
-    return s.substring(14);
   }
 
   /**
@@ -107,10 +86,10 @@ class SpotifyCreateAlbum extends React.Component {
    * Handle Submit error
    * @param  {String} message Error message
    */
-  handleSubmitError(message) {
+  handleSubmitError(error) {
     this.setState({
       errorSubmit: true,
-      messageSubmit: message,
+      messageSubmit: error.data.message,
       loaded: true
     });
   }
@@ -146,30 +125,15 @@ class SpotifyCreateAlbum extends React.Component {
   }
 
   /**
-   * Get album from Spotify, save it to firebase if does not exists
-   * Save or update artist to Firebase
-   * Get artist images
-   * Get Discogs Album
-   * Update Spotify album with Discogs metadata
+   * Create an album based on spotify and discogs data.
    */
-  saveSpotifyAlbumAndArtists() {
+  createAlbum() {
     const token = this.accessToken;
-    const releaseType = this.state.selectedReleaseType;
+    const { selectedReleaseType, spotifyUri, discogsUri } = this.state;
 
-    Promise.all([
-      api.getAlbum(token, this.getSpotifyId(this.state.spotifyUri)),
-      dg.getRelease(this.state.discogsUri, releaseType)
-    ])
-      .then(function(values) {
-        // Just in case
-        if (values.length != 2) { throw({ message : 'Oops! Something went wrong while retrieving data from Spotify or Discogs.'});}
-
-        const albumData = values.map(v => v.data);
-        return fb.setAlbumIfNotExists(fb.formatSpotifyDiscogsAlbum(albumData[0], albumData[1], releaseType), true)
-          .then(() => saveArtists(token, albumData));
-      })
+    createSpotifyDiscogsAlbum(spotifyUri, discogsUri, selectedReleaseType, token)
       .then(() => this.handleSubmitSuccess())
-      .catch((error) => this.handleSubmitError(error.message));
+      .catch((error) => this.handleSubmitError(error.response));
   }
 
   /**
@@ -198,7 +162,7 @@ class SpotifyCreateAlbum extends React.Component {
       loaded: false
     });
 
-    this.saveSpotifyAlbumAndArtists();
+    this.createAlbum();
   }
 
   render() {
@@ -244,18 +208,18 @@ class SpotifyCreateAlbum extends React.Component {
             />
           </div>
 
-          <Message message={this.state.errorDiscogsUri} error={true} style={'input-msg'}/>
+          <Message message={this.state.errorDiscogsUri} error={true} style={'input-msg'} />
 
           {!this.state.loaded &&
             <Loading fullPage={false} label={'Creating album...'} />
           }
 
           {this.state.messageSubmit &&
-            <Message message={this.state.messageSubmit} error={this.state.errorSubmit}/>
+            <Message message={this.state.messageSubmit} error={this.state.errorSubmit} />
           }
 
           <div className='submit-container'>
-            <Button label='OK' handleClick={this.handleSubmit}/>
+            <Button label='OK' handleClick={this.handleSubmit} />
           </div>
         </form>
 

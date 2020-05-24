@@ -1,24 +1,20 @@
 import React from 'react';
+import classNames from 'classnames';
+import { ArtistContext } from '../../context/ArtistContext';
+import { UserContext } from '../../context/UserContext';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 require('./ArtistSummary.scss');
 
-/**
- * Sums up the total number of tracks over several albums
- * @param  {Integer} totalTracks Initial total tracks
- * @param  {Object} album        Current album
- * @return {Integer}             Sum of tracks per album
- */
-const reducer = (totalTracks, album) => totalTracks + album.totalTracks;
 
 /**
  * Renders the listening URI for an artist
- * @param  {Object} artist Artist from FB
- * @return {String}        HTML Markup
+ * @param  {String} spotify_id Artist's spotify_id
+ * @return {String}            HTML Markup
  */
-const renderListeningUri = function(artist) {
-  if (artist.sources.hasOwnProperty('spotify')) {
-    const url = 'https://open.spotify.com/go?uri=spotify:artist:' + artist.sources.spotify;
+const renderListeningUri = (spotify_id) => {
+  if (spotify_id) {
+    const url = 'https://open.spotify.com/go?uri=spotify:artist:' + spotify_id;
     return (
       <p>
         <a
@@ -34,8 +30,8 @@ const renderListeningUri = function(artist) {
   return <p className='not-available not-available--line'>&#9836;</p>;
 };
 
-const renderMergeButton = function(artist, id) {
-  if (artist.sources.hasOwnProperty('spotify') && artist.sources.hasOwnProperty('discogs')) {
+const renderMergeButton = (spotify_id, discogs_id, id) => {
+  if (spotify_id && discogs_id) {
     return <Link to={`/artist/${id}/unmerge`}>&#x2702; Unmerge</Link>;
   }
 
@@ -44,38 +40,56 @@ const renderMergeButton = function(artist, id) {
   );
 };
 
+const ArtistSummary = (artist, admin, showArtistDeleted) => {
+  const { id, img_url, total_albums, total_tracks, name, discogs_id, spotify_id } = artist;
+  const artistBannerWrapper = classNames({
+    'artist-banner-wrapper': true,
+    'artist-banner-wrapper--deleted': showArtistDeleted
+  });
 
-const ArtistSummary = function({ artist, id }) {
-
-  // Get artist total amount of tracks
-  let totalAlbums =  (artist.hasOwnProperty('albums')) ? Object.keys(artist.albums).length : 0;
-  let totalTracks = (artist.hasOwnProperty('albums')) ? artist.albums.reduce(reducer, 0) : 0;
+  const artistBannerContentWrapper = classNames({
+    'artist-banner-content-wrapper': true,
+    'artist-banner-content-wrapper--deleted': showArtistDeleted
+  });
 
   return (
-    <div className='artist-banner-container' style={{ 'backgroundImage': `url('${artist.imgUrl}')`}}>
-      <div className='artist-banner-wrapper'>
+    <div className='artist-banner-container' style={{ 'backgroundImage': `url('${img_url}')` }}>
+      <div className={artistBannerWrapper}>
         <div className='artist-banner-back-wrapper'>
           <div className='artist-banner-back content-container'>
             <Link to='/'>&#9839; Back to library</Link>
-            { renderMergeButton(artist, id) }
+            {admin && !showArtistDeleted && renderMergeButton(discogs_id, spotify_id, id)}
           </div>
         </div>
 
-        <div className='artist-banner-content-wrapper'>
+        <div className={artistBannerContentWrapper}>
           <div className='artist-banner-content content-container'>
-            <h1>{artist.name}</h1>
-            <p>{`${totalAlbums} albums, ${totalTracks} tracks`}</p>
-            { renderListeningUri(artist) }
+            <h1>{name}</h1>
+            <p>{`${total_albums} albums, ${total_tracks} tracks`}</p>
+            {!showArtistDeleted && renderListeningUri(spotify_id)}
           </div>
         </div>
       </div>
     </div>
   );
-};
+}
 
 ArtistSummary.propTypes = {
   artist: PropTypes.object.isRequired,
-  id: PropTypes.string.isRequired
+  admin: PropTypes.bool.isRequired,
+  showArtistDeleted: PropTypes.bool.isRequired
 };
 
-export default ArtistSummary;
+const ArtistSummaryConsumer = ({ showArtistDeleted }) => {
+  return (
+    <UserContext.Consumer>
+      {({ admin }) =>
+        <ArtistContext.Consumer>
+          {({ artist }) => ArtistSummary(artist, admin, showArtistDeleted)}
+        </ArtistContext.Consumer>
+      }
+    </UserContext.Consumer>
+  );
+};
+
+export default ArtistSummaryConsumer;

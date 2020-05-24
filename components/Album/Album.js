@@ -1,11 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { ArtistContext } from '../../context/ArtistContext';
+import { UserContext } from '../../context/UserContext';
 import Message from '../Message/Message';
 import SpotifyUpdateAlbum from '../SpotifyUpdateAlbum/SpotifyUpdateAlbum';
 import CopyToClipboard from '../CopyToClipboard/CopyToClipboard';
 import DropdownMenu from '../DropdownMenu/DropdownMenu';
 import Button from '../Button/Button';
-import { getRef, removeAlbum } from '../../helpers/FirebaseHelper';
 require('./Album.scss');
 
 
@@ -21,31 +22,30 @@ class Album extends React.Component {
 
     this.timer = null;
 
-    this.state = {
-      error: false,
-      hasAlbumData: false,
-      albumData: null,
-      showDiscogsForm: false,
-      showRemoveForm: false,
-      message: null
-    };
-
-    this.handleHideDiscogsClick = this.handleHideDiscogsClick.bind(this);
-    this.handleHideRemoveClick = this.handleHideRemoveClick.bind(this);
-    this.handleRemoveSubmit = this.handleRemoveSubmit.bind(this);
-
     this.dropdownItems = [
       {
         'label': 'Remove album',
         'handleSelectedValue': this.handleShowRemoveClick.bind(this)
       }
     ];
+
+    this.state = {
+      error: false,
+      showDiscogsForm: false,
+      showRemoveForm: false,
+      message: null,
+    };
+
+    this.handleHideDiscogsClick = this.handleHideDiscogsClick.bind(this);
+    this.handleHideRemoveClick = this.handleHideRemoveClick.bind(this);
+    this.handleRemoveSubmit = this.handleRemoveSubmit.bind(this);
+    this.formatDate = this.formatDate.bind(this);
   }
 
 
   /**
    * Formats a date string to Month, YYYY
-   * @param  {String} dateString Date, as saved in FB
+   * @param  {String} dateString Date
    * @return {String}            Formatted date
    */
   formatDate(dateString) {
@@ -53,7 +53,6 @@ class Album extends React.Component {
     let month = this.months[date.getMonth()];
     return month + ', ' + date.getFullYear();
   }
-
 
   handleShowRemoveClick() {
     this.setState({
@@ -69,33 +68,6 @@ class Album extends React.Component {
     });
   }
 
-  /**
-   * On successful album retrieval from firebase, set album to state
-   * @param  {Object} album Album, from Firebase
-   */
-  handleGetAlbumSuccess(album) {
-    album.added_at = this.formatDate(album.added_at);
-    album.release_date = album.release_date.substr(0, 4); // Get year only
-
-    if (!album.sources.hasOwnProperty('discogs')) {
-      this.dropdownItems.push({
-        'label': 'Link to Discogs',
-        'handleSelectedValue': this.handleShowDiscogsClick.bind(this)
-      });
-    }
-
-    this.setState({
-      hasAlbumData: true,
-      albumData: album,
-      showDiscogsForm: false
-    });
-  }
-
-
-  /**
-   * On click, show the Link to Discogs form
-   * @param  {Event} event Click event
-   */
   handleShowDiscogsClick() {
     this.setState({
       showDiscogsForm: true,
@@ -103,10 +75,6 @@ class Album extends React.Component {
     });
   }
 
-  /**
-   * On click, hide the Link to Discogs form
-   * @param  {Event} event Click event
-   */
   handleHideDiscogsClick(event) {
     event.preventDefault();
     this.setState({
@@ -114,69 +82,42 @@ class Album extends React.Component {
     });
   }
 
-  handleRemoveError() {
-    this.setState({
-      error: true,
-      message: 'Oops! Something went wrong while removing the album.'
-    });
-  }
-
-  handleRemoveSubmit() {
-    removeAlbum(this.props.artistId, this.props.id)
-      .catch((error) => this.handleRemoveError() );
-  }
-
-  /**
-   * Parses the Genre or Style array and generates a string in this form:
-   * MyAccumulator / Genre1, Genre2, Genre3
-   * @param  {string} accumulator  Label of the genre/style
-   * @param  {string} currentValue Value of genre or style
-   * @param  {int} currentIndex    Index of genre or style
-   * @param  {Array} array         Genres or styles array
-   * @return {String}              Concatenated genres or styles list
-   */
-  genreStyleReducer(accumulator, currentValue, currentIndex, array) {
-    if (currentIndex == array.length - 1) {
-      return accumulator + ' ' + currentValue;
-    }
-
-    return accumulator + ' ' + currentValue + ',';
+  handleRemoveSubmit(e) {
+    e.preventDefault();
+    this.props.deleteAlbum(this.props.album.id)
   }
 
   /**
    * Renders Genres or Styles tags details
-   * @param  {String} propertyName Name of the tag type in albumData object
+   * @param  {Array} values List of genres or styles objects
    * @param  {String} labelName    Title of the tags line
    * @return {String}              Genres or Styles Paragraph
    */
-  renderGenresOrStyles(propertyName, labelName) {
-    if (!this.state.albumData.hasOwnProperty(propertyName) ||
-       (this.state.albumData.genres.length == 0)) {
-      return <p className='not-available'>{`${labelName} /`}</p>;
+  renderGenresOrStyles(values, labelName) {
+    if (values.length === 0) {
+      return <p className='not-available'>{labelName} /</p>;
     }
 
-    return <p>{this.state.albumData[propertyName].reduce(this.genreStyleReducer, labelName + ' /')}</p>;
+    const list = values.map(v => v.name).join(', ');
+    return <p>{labelName} / {list}</p>;
   }
 
   /**
    * Renders Album cover image or placeholder
    * @return {String} Album image markup
    */
-  renderAlbumCover() {
-    if (!this.state.hasAlbumData) return null;
-    const hasImage = this.state.albumData.hasOwnProperty('images') && this.state.albumData.images.imgUrl;
-    let src = hasImage ? this.state.albumData.images.imgUrl :  '/static/images/missing-album.jpg';
-
-    return <img src={src} alt={'Album Cover'} className='album-cover'/>;
+  renderAlbumCover(img_url) {
+    const src = img_url ? img_url : '/static/images/missing-album.jpg';
+    return <img src={src} alt={'Album Cover'} className='album-cover' />;
   }
 
   /**
    * Renders a CopyToClipboard component to copy spotify URI
+   * @params {String} spotify_id
    * @return {String} CopyToClipboard component
    */
-  renderCopyToClipboard() {
-    if (!this.state.albumData.sources.hasOwnProperty('spotify')) return null;
-    return <CopyToClipboard value={`spotify:album:${this.state.albumData.sources.spotify}`}/>;
+  renderCopyToClipboard(spotify_id) {
+    return <CopyToClipboard value={`spotify:album:${spotify_id}`} />;
   }
 
   /**
@@ -184,25 +125,20 @@ class Album extends React.Component {
    * loaded, and the album is not yet linked to a Discogs id.
    * @return {String} HTML Markup
    */
-  renderDiscogsForm() {
-    if (this.state.albumData.sources.hasOwnProperty('discogs')) return null;
-    if (!this.state.showDiscogsForm) return;
-
-    // Open
+  renderDiscogsForm(albumId) {
     return (
       <div>
         <div className='album-minor-details'>
           <p><a href='' onClick={this.handleHideDiscogsClick}>&#xFF0D; Link to Discogs</a></p>
         </div>
-        <SpotifyUpdateAlbum spotifyId={this.state.albumData.sources.spotify} />
+        <ArtistContext.Consumer>
+          {({ updateAlbum }) => <SpotifyUpdateAlbum id={albumId} {...{ updateAlbum }} />}
+        </ArtistContext.Consumer>
       </div>
     );
   }
 
   renderRemoveForm() {
-    if (!this.state.showRemoveForm) return;
-
-    // Open
     return (
       <div>
         <div className='album-minor-details'>
@@ -218,27 +154,31 @@ class Album extends React.Component {
     );
   }
 
-  renderOpenLink() {
-    if (this.state.albumData.sources.hasOwnProperty('spotify')) {
-      return (
-        <p className='album-open-link'>
-          <a href={`https://open.spotify.com/go?uri=spotify:album:${this.state.albumData.sources.spotify}`}
-            target='_blank'
-            rel='noopener noreferrer'>&#9836; Open in <span className='capitalize'>spotify</span>
-          </a>
-        </p>
-      );
-    }
-
+  renderOpenLink(url, source) {
     return (
       <p className='album-open-link'>
-        <a href={this.state.albumData.url}
+        <a href={url}
           target='_blank'
-          rel='noopener noreferrer'>&#9836; Open in <span className='capitalize'>{this.state.albumData.streaming_source}</span>
+          rel='noopener noreferrer'>
+          &#9836; <span>Open in {source}</span>
         </a>
       </p>
     );
+  }
 
+  renderOpenLinks(spotify_id, bandcamp_url, youtube_url) {
+    return (
+      <div>
+        {
+          spotify_id && this.renderOpenLink(
+            `https://open.spotify.com/go?uri=spotify:album:${spotify_id}`,
+            'Spotify'
+          )
+        }
+        {bandcamp_url && this.renderOpenLink(bandcamp_url, 'Bandcamp')}
+        {youtube_url && this.renderOpenLink(youtube_url, 'Youtube')}
+      </div>
+    );
   }
 
   /**
@@ -246,53 +186,46 @@ class Album extends React.Component {
    * else render album details
    * @return {String} HTML Markup
    */
-  renderAlbumDetails() {
-    if (!this.state.hasAlbumData) return null;
-    if (this.state.hasAlbumData && !this.state.albumData) return <Message
-      message='Oops! There was a problem while retrieving data for this album.'
-      error={false}
-    />;
+  renderAlbumDetails(admin, showDiscogsForm, showRemoveForm, message, error) {
+    const { name, id, release_date, total_tracks, added_at, spotify_id, discogs_id, genres, styles, bandcamp_url, youtube_url } = this.props.album;
+
+    const dropdownList = discogs_id ? this.dropdownItems : this.dropdownItems.concat([{
+      'label': 'Link to Discogs',
+      'handleSelectedValue': this.handleShowDiscogsClick.bind(this)
+    }]);
 
     return (
       <div>
-        <div className='album-main'>
-          <h2>{this.state.albumData.name}</h2>
-          <DropdownMenu id={this.props.id} list={this.dropdownItems}/>
+        {admin && <div className='album-main'>
+          <h2>{name}</h2>
+          <DropdownMenu id={id} list={dropdownList} />
         </div>
-        <div className='album-main-details'>
-          <p>{this.state.albumData.release_date}&emsp;/&emsp;{this.props.totalTracks} tracks</p>
-          { this.renderOpenLink() }
-          { this.renderCopyToClipboard() }
-        </div>
-        <div className='album-minor-details'>
-          <p>{`Added on ${this.state.albumData.added_at}`}</p>
-        </div>
-        <div className='album-minor-details'>
-          { this.renderGenresOrStyles('genres', 'Genres') }
-          { this.renderGenresOrStyles('styles', 'Styles') }
-        </div>
-        {this.renderDiscogsForm()}
-        {this.renderRemoveForm()}
-        {this.state.message &&
-          <Message message={this.state.message} error={this.state.error}/>
         }
+        <div className='album-main-details'>
+          <p>{release_date.substr(0, 4)}&emsp;/&emsp;{total_tracks} tracks</p>
+          {this.renderOpenLinks(spotify_id, bandcamp_url, youtube_url)}
+          {spotify_id && this.renderCopyToClipboard(spotify_id)}
+        </div>
+        <div className='album-minor-details'>
+          <p>{`Added on ${this.formatDate(added_at)}`}</p>
+        </div>
+        <div className='album-minor-details'>
+          {this.renderGenresOrStyles(genres, 'Genres')}
+          {this.renderGenresOrStyles(styles, 'Styles')}
+        </div>
+        {admin && !discogs_id && showDiscogsForm && this.renderDiscogsForm(id)}
+        {admin && showRemoveForm && this.renderRemoveForm()}
+        {admin && message && <Message message={message} error={error} />}
       </div>
     );
   }
 
-  componentDidMount() {
-    getRef('albums/' + this.props.id)     // Fetch album data from fb
-      .on('value', (snapshot) => {        // Add listener for changes
-        this.handleGetAlbumSuccess(snapshot.val());
-      });
-  }
-
-  componentWillUpdate(nextProps, nextState) {
-    if (!this.state.hasAlbumData) return;
+  componentWillUpdate(nextProps) {
+    if (!this.props.album) return;
 
     // If album has received a data update
-    if (!this.state.albumData.hasOwnProperty('discogs_id') &&
-        nextState.albumData.hasOwnProperty('discogs_id')) {
+    if (!this.props.album.hasOwnProperty('discogs_id') &&
+      nextProps.album.hasOwnProperty('discogs_id')) {
 
       this.setState({
         error: false,
@@ -312,19 +245,20 @@ class Album extends React.Component {
     if (this.timer) {
       clearTimeout(this.timer);
     }
-
-    getRef('albums/' + this.props.id).off('value');
   }
 
   render() {
+    const { showDiscogsForm, showRemoveForm, message, error } = this.state;
+    const { album: { img_url }, admin } = this.props;
+
     return (
       <div className='content-container'>
         <div className='album-wrapper'>
           <div className='album-cover-container'>
-            { this.renderAlbumCover() }
+            {this.renderAlbumCover(img_url)}
           </div>
           <div className='album-detail-container'>
-            { this.renderAlbumDetails() }
+            {this.renderAlbumDetails(admin, showDiscogsForm, showRemoveForm, message, error)}
           </div>
         </div>
       </div>
@@ -333,10 +267,21 @@ class Album extends React.Component {
 }
 
 Album.propTypes = {
-  artistId: PropTypes.string.isRequired,
-  id: PropTypes.string.isRequired,
-  totalTracks: PropTypes.number.isRequired,
-  isAdmin: PropTypes.bool.isRequired
+  album: PropTypes.object.isRequired,
+  admin: PropTypes.bool.isRequired,
+  deleteAlbum: PropTypes.func.isRequired
 };
 
-export default Album;
+const AlbumConsumer = (props) => {
+  return (
+    <UserContext.Consumer>
+      {({ admin }) =>
+        <ArtistContext.Consumer>
+          {({ deleteAlbum }) => <Album {...props} {...{ deleteAlbum }} {...{ admin }} />}
+        </ArtistContext.Consumer>
+      }
+    </UserContext.Consumer>
+  );
+}
+
+export default AlbumConsumer;
