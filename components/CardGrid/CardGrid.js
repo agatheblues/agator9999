@@ -1,5 +1,6 @@
 import React from 'react';
-import Card from '../Card/Card';
+import ArtistCard from '../ArtistCard/ArtistCard';
+import AlbumCard from '../AlbumCard/AlbumCard';
 import PropTypes from 'prop-types';
 import Search from '../Search/Search';
 import SortBy from '../SortBy/SortBy';
@@ -12,57 +13,56 @@ class CardGrid extends React.Component {
     super();
 
     this.state = {
-      visibleArtists: props.artists,
-      albumCount: props.totalAlbums,
-      artistCount: props.totalArtists,
+      visibleItems: props.items,
+      count: props.total,
       activeSort: 'recently'
     };
 
-    this.filterArtists = this.filterArtists.bind(this);
-    this.sortArtistAlphabetically = this.sortArtistAlphabetically.bind(this);
-    this.sortArtistRecently = this.sortArtistRecently.bind(this);
+    this.filterItems = this.filterItems.bind(this);
+    this.sortItemsAlphabetically = this.sortItemsAlphabetically.bind(this);
+    this.sortItemsRecently = this.sortItemsRecently.bind(this);
   }
 
   /**
-   * Filters list of artists by artist name
+   * Filters list of items by name
    * @param  {String} input User search input
    */
-  filterArtists(input) {
-    const filteredArtists = this.props.artists.filter((artist) => {
-      return artist.name.toLowerCase().indexOf(input.toLowerCase()) != -1;
+  filterItems(input) {
+    const filteredItems = this.props.items.filter((item) => {
+      return item.name.toLowerCase().indexOf(input.toLowerCase()) != -1;
     });
-    const albumCount = filteredArtists.reduce((acc, artist) => acc + artist.total_albums, 0)
 
     this.setState({
-      visibleArtists: filteredArtists,
-      artistCount: filteredArtists.length,
-      albumCount: albumCount
+      visibleItems: filteredItems,
+      count: filteredItems.length,
     });
   }
 
   /**
-   * Sorts list of artists alphabetically
+   * Sorts list of items alphabetically
    * @param  {Integer} order 1 or -1 (asc or desc)
    */
-  sortArtistAlphabetically(order) {
-    const sortedArtists = this.state.visibleArtists.sort((a, b) => {
+  sortItemsAlphabetically(order) {
+    const sortedItems = this.state.visibleItems.sort((a, b) => {
       return (a.name.toLowerCase() > b.name.toLowerCase()) ? order : -order;
     });
 
     this.setState({
-      visibleArtists: sortedArtists,
+      visibleItems: sortedItems,
       activeSort: 'alphabetically'
     });
   }
 
   /**
-   * Sorts list of artists by updated_at date
+   * Sorts list of items by updated_at date
    * @param  {Integer} order  1 or -1 (asc or desc)
    * @return {array}          Sorted list of artists
    */
   sortListByDate(order) {
-    return this.state.visibleArtists.sort((a, b) => {
-      return order * (new Date(b.updated_at) - new Date(a.updated_at));
+    return this.state.visibleItems.sort((a, b) => {
+      return this.props.resource === 'artists' ?
+        order * (new Date(b.updated_at) - new Date(a.updated_at)) :
+        order * (new Date(b.added_at) - new Date(a.added_at));
     });
   }
 
@@ -70,77 +70,76 @@ class CardGrid extends React.Component {
    * Set sorted by date artists to state
    * @param  {Integer} order  1 or -1 (asc or desc)
    */
-  sortArtistRecently(order) {
+  sortItemsRecently(order) {
     this.setState({
-      visibleArtists: this.sortListByDate(order),
+      visibleItems: this.sortListByDate(order),
       activeSort: 'recently'
     });
   }
 
-  renderCards() {
-    const { artistCount, visibleArtists } = this.state;
-    const { artists } = this.props;
-
-    if ((artists.length != 0) && (artistCount != 0)) {
-      return (
-        <div className='grid-container'>
-          {
-            visibleArtists.map(({ id, name, img_url, total_albums }) =>
-              <Card key={id} id={id} name={name} imgUrl={img_url} totalAlbums={total_albums} />
-            )
-          }
-        </div>
-      );
+  renderCards(count, visibleItems, items, resource) {
+    if (items.length == 0) {
+      return <EmptyList message={`There are no ${resource} in your library.`} />;
     }
 
-    if ((artists.length != 0) && (artistCount == 0)) {
+    if (count == 0) {
       return <EmptyList message={'No results!'} />;
     }
 
-    if (artists.length == 0) {
-      return <EmptyList message={'There is 0 artist in your library.'} />;
-    }
+    return (
+      <div className='cardgrid-wrapper'>
+        {resource === 'artists' && visibleItems.map(({ id, name, img_url, total_albums }) =>
+          <ArtistCard key={id} id={id} name={name} imgUrl={img_url} totalAlbums={total_albums} />
+        )
+        }
+        {resource === 'albums' && visibleItems.map(({ id, name, img_url }) =>
+          <AlbumCard key={id} id={id} name={name} imgUrl={img_url} />
+        )
+        }
+      </div>
+    );
   }
 
-  renderCounts() {
-    return <p>{`${this.state.artistCount} artists, ${this.state.albumCount} albums`}</p>;
+  renderCount(count, resource) {
+    return <p>{`${count} ${resource}`}</p>;
   }
 
   render() {
+    const { activeSort, count, visibleItems } = this.state;
+    const { items, resource } = this.props;
+
     return (
       <div>
-        <div className='title--marginlr'>
-          <h1 className='title'>Artists</h1>
-          {this.renderCounts()}
-          <Search filter={this.filterArtists} placeholder='Search for an artist' />
+        <div className='cardgrid-container'>
+          {this.renderCount(count, resource)}
+          <Search filter={this.filterItems} placeholder={`Search for ${resource}`} />
           <div className='sort-controls-container'>
             <SortBy
               type='recently'
-              sort={this.sortArtistRecently}
+              sort={this.sortItemsRecently}
               labelUp='Recently Added'
               labelDown='Recently Added'
-              activeSort={this.state.activeSort}
+              activeSort={activeSort}
             />
             <SortBy
               type='alphabetically'
-              sort={this.sortArtistAlphabetically}
+              sort={this.sortItemsAlphabetically}
               labelUp='Z - A'
               labelDown='A - Z'
-              activeSort={this.state.activeSort}
+              activeSort={activeSort}
             />
           </div>
         </div>
-
-        {this.renderCards()}
+        {this.renderCards(count, visibleItems, items, resource)}
       </div>
     );
   }
 }
 
 CardGrid.propTypes = {
-  artists: PropTypes.array.isRequired,
-  totalArtists: PropTypes.number.isRequired,
-  totalAlbums: PropTypes.number.isRequired
+  resource: PropTypes.string.isRequired,
+  items: PropTypes.array.isRequired,
+  total: PropTypes.number.isRequired,
 };
 
 export default CardGrid;

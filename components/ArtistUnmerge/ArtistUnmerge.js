@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { ArtistUnmergeContext } from '../../context/ArtistUnmergeContext';
 import Button from '../Button/Button';
 import Message from '../Message/Message';
-import Card from '../Card/Card';
+import ArtistCard from '../ArtistCard/ArtistCard';
 require('./ArtistUnmerge.scss');
 
 class ArtistUnmerge extends React.Component {
@@ -63,7 +63,7 @@ class ArtistUnmerge extends React.Component {
     const { img_url, name, id, total_albums } = artist;
 
     return (
-      <Card
+      <ArtistCard
         id={id}
         name={name}
         imgUrl={img_url}
