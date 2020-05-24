@@ -87,13 +87,19 @@ export const deleteAlbum = (id) => getInstance().delete(`/albums/${id}`)
 export const createAlbum = (data) => getInstance().post('/albums', data);
 
 /**
- * Create many albums
- * @return {Promise}
-*/
-export const createAlbums = (data) => getInstance().post('/batch/albums', { albums: data });
-
-/**
  * Update an album
  * @return {Promise}
 */
 export const updateAlbum = (id, data) => getInstance().patch(`/albums/${id}`, data);
+
+/**
+ * Batch create many albums
+ * @return {Promise}
+*/
+export const createAlbumsBatch = (data) => getInstance().post('/batches', { albums: data });
+
+/**
+ * Get a batch
+ * @return {Promise}
+*/
+export const getBatch = (id) => getInstance().get(`/batches/${id}`);

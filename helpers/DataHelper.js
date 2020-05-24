@@ -2,7 +2,7 @@ import * as discogs from './DiscogsHelper';
 import * as spotify from './SpotifyHelper';
 import * as api from './ApiHelper';
 import * as format from './FormatHelper';
-import { splitArrayInChunks, flatten } from './utils';
+import { flatten } from './utils';
 
 /**
  * Create an album from Discogs. 
@@ -93,9 +93,7 @@ export const synchronizeSpotifyCollection = (accessToken, limit) => {
       const artistsData = flatten(response.map(({ data: { artists } }) => artists));
       const albumsList = assignArtistsToAlbums(albums, artistsData);
 
-      // Create batches of 25 albums
-      const albumChunks = splitArrayInChunks(albumsList, 25);
-      return Promise.all(albumChunks.map((chunk) => api.createAlbums(chunk)));
+      return api.createAlbumsBatch(albumsList);
     });
 }
 

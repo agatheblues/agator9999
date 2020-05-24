@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import Synchronize from '../components/Synchronize/Synchronize';
 import { getAccessToken } from '../helpers/SpotifyHelper.js';
 import { synchronizeSpotifyCollection } from '../helpers/DataHelper.js';
+import { getBatch } from '../helpers/ApiHelper.js';
 
 class SpotifySyncPage extends React.Component {
 
@@ -42,7 +43,7 @@ class SpotifySyncPage extends React.Component {
     this.updateMessage(false, null, 'Loading collection...');
 
     synchronizeSpotifyCollection(this.accessToken, this.limit)
-      .then(() => this.handleAlbumSyncSuccess())
+      .then(({ data }) => this.handleAlbumSyncSuccess(data))
       .catch((error) => this.handleError(error));
   }
 
@@ -52,8 +53,9 @@ class SpotifySyncPage extends React.Component {
    * @param  {int} totalAlbums  Total number of albums to fetch
    * @param  {int} offset      Current pagination offset
    */
-  handleAlbumSyncSuccess() {
-    this.updateMessage(false, 'Loading collection was successful!', null);
+  handleAlbumSyncSuccess(data) {
+    const batchId = data.batch_id;
+    this.checkBatchStatus(data.batch_id);
   }
 
   /**
@@ -62,6 +64,20 @@ class SpotifySyncPage extends React.Component {
    */
   handleError(error) {
     this.updateMessage(true, error.message, null);
+  }
+
+  checkBatchStatus(batchId) {
+    getBatch(batchId)
+      .then(({ data }) => {
+        if (data.status === 'complete') {
+          this.updateMessage(false, 'Loading collection was successful!', null);
+        } else {
+          setTimeout(() => {
+            this.checkBatchStatus(batchId)
+          }, 2000);
+        }
+      })
+      .catch((error) => this.handleError(error));
   }
 
   render() {
