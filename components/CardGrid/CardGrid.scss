@@ -1,11 +1,12 @@
-@import "variables";
+.cardgrid-container {
+  margin: 0px 20px 0 20px;
+}
 
-.grid-container {
+.cardgrid-wrapper {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
 }
-
 
 .cardgrid-message {
   margin-left: 20px;

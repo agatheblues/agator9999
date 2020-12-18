@@ -75,6 +75,12 @@ export const mergeArtists = (id1, id2) => getInstance().post(`/artists/${id1},${
 export const updateArtist = (id, data) => getInstance().patch(`/artists/${id}`, data);
 
 /**
+* Get list of all albums
+* @return {Promise}
+*/
+export const getAlbums = () => getInstance().get('/albums');
+
+/**
  * Delete an album
  * @return {Promise}
  */

@@ -1,3 +1,5 @@
+@import "variables";
+
 .profile-container {
   display: flex;
   align-items: center;
@@ -10,4 +12,14 @@
 
 .profile-id {
   padding: 0 10px 0 10px;
+}
+
+.profile--block {
+  display: block;
+  padding: 5px 10px 5px 10px;
+}
+
+.profile-counts {
+  margin: 10px 0 5px 0;
+  color: $dark-grey;
 }

@@ -4,7 +4,7 @@ import classNames from 'classnames';
 import { ArtistMergeContext } from '../../context/ArtistMergeContext';
 import Button from '../Button/Button';
 import Message from '../Message/Message';
-import Card from '../Card/Card';
+import ArtistCard from '../ArtistCard/ArtistCard';
 import SearchDropdown from '../SearchDropdown/SearchDropdown';
 require('./ArtistMerge.scss');
 
@@ -73,7 +73,7 @@ class ArtistMerge extends React.Component {
 
     return (
       <div className={cardClass}>
-        <Card
+        <ArtistCard
           id={id}
           name={name}
           imgUrl={img_url}
@@ -84,7 +84,7 @@ class ArtistMerge extends React.Component {
           <p className='merge-plus'>+</p>
         }
         {artistToMergeWith &&
-          <Card
+          <ArtistCard
             id={artistToMergeWith.id}
             name={artistToMergeWith.name}
             imgUrl={artistToMergeWith.img_url}
