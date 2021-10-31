@@ -222,8 +222,7 @@ class Album extends React.Component {
     if (this.state.albumData.sources.hasOwnProperty('spotify')) {
       return (
         <p className='album-open-link'>
-          <a href={`https://open.spotify.com/go?uri=spotify:album:${this.state.albumData.sources.spotify}`}
-            target='_blank'
+          <a href={`spotify:album:${this.state.albumData.sources.spotify}`}
             rel='noopener noreferrer'>&#9836; Open in <span className='capitalize'>spotify</span>
           </a>
         </p>

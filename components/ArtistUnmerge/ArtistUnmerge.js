@@ -133,13 +133,13 @@ class ArtistUnmerge extends React.Component {
             Object.keys(this.state.sources).map((key) => {
               let url = '';
               if (key == 'discogs') url = 'https://api.discogs.com/artists/' + this.state.sources[key];
-              if (key == 'spotify') url = 'https://open.spotify.com/go?uri=spotify:artist:' + this.state.sources[key];
+              if (key == 'spotify') url = 'spotify:artist:' + this.state.sources[key];
 
               return (
                 <li key={key} className='sources-list-item'>
                   <div>
                     <span className='capitalize'>{key}: </span>
-                    <a href={url} target='_blank' rel='noopener noreferrer'>{this.state.sources[key]}</a>
+                    <a href={url} rel='noopener noreferrer'>{this.state.sources[key]}</a>
                   </div>
                   { this.renderDeleteButton(key)}
                 </li>
